@@ -1,0 +1,38 @@
+server:
+  port: 8081
+  #servlet:
+  #  context-path: /l2cache-example
+
+logging:
+  level:
+    root: info
+    # 日志级别指定到包或类
+    com.coy.l2cache: debug
+
+spring:
+  application:
+    name: l2cache-example
+  # spring boot redis配置
+  redis:
+    timeout: 3000
+    host: 127.0.0.1
+    port: 6379
+    password:
+  # 缓存
+  cache:
+    multi:
+      # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
+      #instanceId: a1
+      # 一级缓存
+      caffeine:
+        asyncCache: false
+        # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
+        # 默认配置
+        defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s
+        specs:
+          userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
+          userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+      # 二级缓存
+      redis:
+        topic: cache:caffeine:redis:topic
+

@@ -1,14 +1,37 @@
-# Compiled class file
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+build/
+out/
+
 *.class
+
+.gradle/
+*/.gradle/
+
+.idea/
+*/.idea/
+
+.settings/
+*/.settings/
+
+target/
+*/target/
+
+.DS_Store
+*/.DS_Store
+*.cache
+*.lock
+
+.classpath
+.project
+
+*.iml
+*/*.iml
 
 # Log file
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+*.log.*
 
 # Package Files #
 *.jar
