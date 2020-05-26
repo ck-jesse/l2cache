@@ -2,9 +2,9 @@
 
 `l2cache` 是一个基于 `Caffeine`、 `Redis` 、 `Spring Cache` 实现的二级缓存解决方案。
 
-`Caffeine` ：一级缓存，也就是本地缓存。
-
-`Redis` ： 二级缓存，也就是分布式缓存。
+>`Caffeine` ：一级缓存，也就是本地缓存。
+>
+>`Redis` ： 二级缓存，也就是分布式缓存。
 
 
 
