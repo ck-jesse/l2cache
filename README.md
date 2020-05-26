@@ -1,49 +1,126 @@
+# l2cache 二级缓存组件
 
-必知：
-
-若使用缓存，则必然可能出现不一致的情况，也就是说无法保证强一致性。
-
-如果业务要求强一致性，则尽可能不用缓存。
-
-# 二级缓存组件
-
-该组件是基于 `Caffeine`、 `Redis` 、 `Spring Cache` 的扩展实现。
+`l2cache` 是一个基于 `Caffeine`、 `Redis` 、 `Spring Cache` 实现的二级缓存解决方案。
 
 `Caffeine` ：一级缓存，也就是本地缓存。
 
 `Redis` ： 二级缓存，也就是分布式缓存。
 
-写该组件的初衷：
+
+
+ **必知：**
+若使用缓存，则必然可能出现不一致的情况，也就是说无法保证强一致性。
+
+如果业务要求强一致性，则尽可能不用缓存。
+
+
+
+**写该组件的初衷：**
 
 目前所在公司所使用的缓存方案没有统一的标准，以至于不同的团队各自为战，比如Redis/Guava/自研cache组件/Jetcache 等等。
 
 `Redis`缓存: 
+
 > 优点：分布式缓存，且可采用Redis Cluster等方案保证高可用。
 >
 > 缺点：需要在应用端对缓存雪崩、缓存击穿、缓存穿透、热点key访问等问题进行编码实现，难度高。
 
 `Guava`缓存: 
+
 > 优点：Guava是一个线程安全的本地缓存，其定义了一套自己的缓存处理策略，自动回收，自动清除，自动加载等。相对于Redis或数据库，访问内存中的数据更加高效。
 >
 > 缺点：因其是一个本地缓存，所以天然存在分布式不一致的情况。
 
 `自研cache组件`：
+
 > 优点：实现思路值得借鉴。
 >
 > 缺点：扩展性低，使用复杂，代码侵入严重，需client端实现缓存结构。
 
-结合上述分析，可以发现 `Redis` 和 `Guava` 在一定程度上是互补的，所以让我萌生了一个想法：将Redis 和 Guava结合起来实现一个二级缓存；
-既可以利用Redis的分布式缓存特性，也可以利用Guava的线程安全和缓存处理策略的特性，还可以保证并发编程的稳定性和降低并发编码难度，这样岂不美哉。
+结合上述分析，可以发现 `Redis` 和 `Guava` 在一定程度上是互补的，所以让我萌生了一个想法：将Redis 和 Guava结合起来实现一个通用的二级缓存；既可以利用Redis的分布式缓存特性，也可以利用Guava的线程安全和缓存处理策略的特性，还可以保证并发编程的稳定性和降低并发编码难度，这样岂不美哉。
 
 经了解发现，Spring5开始使用Caffeine替代了Guava，所以果断选择抱紧Spring的大腿。
 
 
 
+## 一、如何使用`l2cache`
 
-## 一、使用须知
-因该二级缓存组件需先了解`Caffeine`的基本特性。
+### 启动`l2cache`
 
-下面对`Caffeine`核心概念做一些简单介绍，详细可参见官网：
+- Enable 启动模式
+
+在SpringBoot启动类上标注 `@EnableCaffeineRedisCache`  启动`l2cache`。
+
+```java
+/**
+ * 通过 Spring Enable 注解模式来启用二级缓存组件
+ */
+@EnableCaffeineRedisCache
+@SpringBootApplication
+public class TestApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(TestApplication.class, args);
+    }
+}
+```
+
+- l2cache-spring-boot-starter
+
+```xml
+<dependency>
+    <groupId>com.coy.l2cache</groupId>
+    <artifactId>l2cache-spring-boot-starter</artifactId>
+    <version>1.0</version>
+</dependency>
+```
+
+### 配置`l2cache`
+
+```yaml
+spring:
+  application:
+    name: l2cache-example
+  # spring boot redis配置
+  redis:
+    timeout: 3000
+    host: 127.0.0.1
+    port: 6379
+    password:
+  # 缓存
+  cache:
+    # 多级缓存(自定义扩展实现)
+    multi:
+      # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
+      #instanceId: a1
+      # 一级缓存
+      caffeine:
+        # 是否构建异步Caffeine true 是 false 否
+        asyncCache: false
+        # 是否自动刷新过期缓存 true 是 false 否
+        autoRefreshExpireCache: true
+        # 缓存刷新调度线程池的大小
+        refreshPoolSize: 1
+        # 缓存刷新的频率(秒)
+        refreshPeriod: 5
+        # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
+        # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。        
+        # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
+        defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s
+        # defaultSpec: initialCapacity=10,maximumSize=200,expireAfterWrite=30s,refreshAfterWrite=30s
+        # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
+        specs:
+          userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
+          userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+      # 二级缓存
+      redis:
+        topic: cache:caffeine:redis:topic
+```
+
+
+
+
+## 二、使用须知
+下面对`Caffeine`核心概念做一些简单介绍，若已了解，可忽略该章节。
 ```text
 一、填充策略
 1、手动加载：手动将值放入缓存。
@@ -80,7 +157,7 @@
 
 ```
 
-## 二、关于缓存的几个常见问题分析和处理方案
+## 三、关于缓存的几个常见问题分析和处理方案
 
 ### 分布式缓存同步
 
@@ -97,12 +174,13 @@
 `缓存更新`包含了对`Caffeine` 和 `redis`的操作，同时会通知其他缓存节点进行`缓存更新`操作。
 
 > 1、主动更新
->> 1）获取缓存时，若缓存不存在或缓存已过期，则重新加载缓存。
->>
->> 2）源数据变更后，可调用`CacheManagerController.refresh(cacheName,key)`接口重新加载缓存。
+> > 1）获取缓存时，若缓存不存在或缓存已过期，则重新加载缓存。
+> >
+> > 2）源数据变更后，可调用`CacheManagerController.refresh(cacheName,key)`接口重新加载缓存。
 >
 > 2、自动更新
->> 通过定期刷新过期缓存（只对过期缓存进行重新加载），在一定程度上降低分布式缓存不一致的情况出现。详见`AbstractCaffeineRedisCacheManager`。
+>
+> > 通过定期刷新过期缓存（只对过期缓存进行重新加载），在一定程度上降低分布式缓存不一致的情况出现。详见`AbstractCaffeineRedisCacheManager`。
 
 
 ### 缓存淘汰
@@ -110,23 +188,25 @@
 `缓存淘汰`包含了对`Caffeine` 和 `redis`的操作，同时会通知其他缓存节点进行`缓存淘汰`操作。
 
 > 1、主动淘汰
->> 1）获取缓存时去检查缓存是否过期，若过期则淘汰缓存。
->>
->> 2）源数据变更后，可调用`CacheManagerController.clear(cacheName,key)`接口淘汰缓存。
->>
->> 3）结合`@CacheEvict`在源数据修改前或修改后，淘汰缓存。
+> > 1）获取缓存时去检查缓存是否过期，若过期则淘汰缓存。
+> >
+> > 2）源数据变更后，可调用`CacheManagerController.clear(cacheName,key)`接口淘汰缓存。
+> >
+> > 3）结合`@CacheEvict`在源数据修改前或修改后，淘汰缓存。
 >
 > 2、自动淘汰
->> `redis`中的缓存数据是利用redis的淘汰策略来管理的。具体可参考redis的6种淘汰策略。
+>
+> > `redis`中的缓存数据是利用redis的淘汰策略来管理的。具体可参考redis的6种淘汰策略。
 
 
 ### 缓存预热
 
 > 1、手动预热
->> 可通过缓存刷新页面，手动对缓存进行上下线操作。详见`CacheManagerController.load(cacheName,key)`接口加载缓存。
+> > 可通过缓存刷新页面，手动对缓存进行上下线操作。详见`CacheManagerController.load(cacheName,key)`接口加载缓存。
 >
 > 2、自动预热 
->> 系统启动完毕后，自动将相关数据加载到缓存。
+>
+> > 系统启动完毕后，自动将相关数据加载到缓存。
 
 
 
@@ -152,13 +232,14 @@
 
 预防：
 > 缓存高可用
->> 缓存层设计成高可用，防止缓存大面积故障。例如 Redis Sentinel 和 Redis Cluster 都实现了高可用。
+> > 缓存层设计成高可用，防止缓存大面积故障。例如 Redis Sentinel 和 Redis Cluster 都实现了高可用。
 >
 > 缓存降级
->> 利用本地缓存，一定程度上保证服务的可用性(即使是有损的)。但主要还是通过对源服务的访问进行限流、熔断、降级等手段。
+> > 利用本地缓存，一定程度上保证服务的可用性(即使是有损的)。但主要还是通过对源服务的访问进行限流、熔断、降级等手段。
 >
 > 提前演练
->> 建议项目上线前，演练缓存层宕机后，应用以及后端的负载情况以及可能出现的问题，对高可用提前预演，提前发现问题。
+>
+> > 建议项目上线前，演练缓存层宕机后，应用以及后端的负载情况以及可能出现的问题，对高可用提前预演，提前发现问题。
 
 
 ### 缓存击穿

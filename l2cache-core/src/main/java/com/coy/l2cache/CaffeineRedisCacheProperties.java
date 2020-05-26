@@ -53,7 +53,7 @@ public class CaffeineRedisCacheProperties {
         private final Logger logger = LoggerFactory.getLogger(Caffeine.class);
 
         /**
-         * true 表示构建异步缓存Caffeine false 表示构建同步缓存Caffeine
+         * true 是 false 否
          */
         private boolean asyncCache = false;
 
