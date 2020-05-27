@@ -7,7 +7,7 @@
 >`Redis` ： 二级缓存，也就是分布式缓存。
 
 
-> 说明：`l2cache` 在满足高并发的同时也引入了一些新的问题，比如怎么保证分布式场景下，各个节点中本地缓存的一致性问题，具体分析见下文。
+> 说明：`l2cache` 在满足高并发的同时也引入了一些新的问题，比如怎么保证分布式场景下，各个节点中本地缓存的一致性问题，具体处理方案见下文中的 `分布式缓存同步` 和 `缓存一致性是怎么保证的` 两个章节。
 
 
 
@@ -71,6 +71,7 @@ public class TestApplication {
 
 - l2cache-spring-boot-starter
 
+引入starter
 ```xml
 <dependency>
     <groupId>com.coy.l2cache</groupId>
