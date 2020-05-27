@@ -124,47 +124,7 @@ spring:
 ```
 
 
-
-
-## 二、使用须知
-下面对`Caffeine`核心概念做一些简单介绍，若已了解，可忽略该章节。
-```text
-一、填充策略
-1、手动加载：手动将值放入缓存。
-2、同步加载：LoadingCache同步，Caffeine.build(LoadingCache)。
-3、异步加载：AsyncLoadingCache异步，Caffeine.buildAsync(AsyncLoadingCache)。
-
-二、驱逐策略
-基于容量：当缓存大小超过配置的大小限制时会发生回收。
-> 使用 Caffeine..maximumSize(10) 来启用。
-
-基于权重：
-> 使用 Caffeine..maximumWeight(10).weigher() 来启用。
-
-基于时间：
-> 1、Caffeine.expireAfterWrite：写入后到期策略。
-> 2、Caffeine.expireAfterAccess: 访问后过期策略。
-> 3、Caffeine.expireAfter：到期时间由 Expiry 实现独自计算。
-
-基于引用：启用基于缓存键值的垃圾回收。
-> 使用 Caffeine.weakKeys()、Caffeine.weakValues() 和 Caffeine.softValues() 来启用。 
-> Java种有四种引用：强引用，软引用，弱引用和虚引用，caffeine可以将值封装成弱引用或软引用。
-> 软引用：如果一个对象只具有软引用，则内存空间足够，垃圾回收器就不会回收它；如果内存空间不足了，就会回收这些对象的内存。
-> 弱引用：在垃圾回收器线程扫描它所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存。
-
-三、自动刷新
-1、Caffeine.refreshAfterWrite：自动刷新缓存。
-> 结合CacheLoader来进行自动刷新，默认是同步进行的，可以通过buildAsync()方法进行异步构建。
-> 注意：这里的刷新并不是到期就刷新，而是对这个数据再次访问时，才会刷新。
-> 如果缓存项不存在，则阻塞至加载完成；如果缓存项可以刷新，则将返回一个旧值，并异步重新加载该值。
-
-四、统计
-> 使用 Caffeine.recordStats() 来启用。 
-> 可以实时监控缓存当前的状态，以评估缓存的健康程度以及缓存命中率等，方便后续调整参数。
-
-```
-
-## 三、关于缓存的几个常见问题分析和处理方案
+## 二、关于缓存的几个常见问题分析和处理方案
 
 ### 分布式缓存同步
 
