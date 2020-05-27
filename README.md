@@ -1,6 +1,6 @@
 # l2cache 二级缓存组件
 
-`l2cache` 是一个基于 `Caffeine`、 `Redis` 、 `Spring Cache` 实现的高并发场景下的二级缓存解决方案。
+`l2cache` 是一个基于 `Caffeine`、 `Redis` 、 `Spring Cache` 实现的满足高并发场景下的二级缓存解决方案。
 
 >`Caffeine` ：一级缓存，也就是本地缓存。
 >
