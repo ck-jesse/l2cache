@@ -1,4 +1,6 @@
 # Caffeine 简介
+> 官方wiki: https://github.com/ben-manes/caffeine/wiki
+
 下面对`Caffeine`核心概念做一些简单介绍，若已了解，可忽略该章节。
 ```text
 一、填充策略
