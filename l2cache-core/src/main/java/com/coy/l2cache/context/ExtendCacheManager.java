@@ -26,12 +26,7 @@ public interface ExtendCacheManager extends CacheManager {
     void clearLocalCache(String cacheName, Object key);
 
     /**
-     * 加载缓存
-     */
-    void load(String cacheName, Object key);
-
-    /**
-     * 刷新缓存
+     * 刷新缓存（重新加载缓存）
      */
     void refresh(String cacheName, Object key);
 

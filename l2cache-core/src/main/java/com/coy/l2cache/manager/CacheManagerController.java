@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
  * 缓存管理，提供缓存管理API便于管理缓存。
  * 注：该缓存管理类本不应该放到此处，但因为是通用功能暂时放在此处。
  * <p>
- * TODO 对于缓存管理，需要根据缓存名字找到对应的业务加载方法，这样才可以进行缓存管理，后续再实现通用的方案
  *
  * @author chenck
  * @date 2020/5/26 11:43
@@ -46,17 +45,7 @@ public class CacheManagerController {
     }
 
     /**
-     * 加载缓存
-     * 如：手动预热商品信息等
-     */
-    @RequestMapping(value = "/load")
-    public ServiceResult load(String cacheName, String key) {
-        extendCacheManager.load(cacheName, key);
-        return ServiceResult.succ();
-    }
-
-    /**
-     * 刷新缓存
+     * 重新加载缓存
      * 异步加载{@code key}的新值，如果新值加载成功，则替换缓存中的前一个值，并且会发送refresh消息，其他节点接收到refresh消息，刷新缓存
      */
     @RequestMapping(value = "/refresh")

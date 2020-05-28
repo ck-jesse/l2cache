@@ -118,11 +118,6 @@ public abstract class AbstractCaffeineRedisCacheManager implements ExtendCacheMa
     }
 
     @Override
-    public void load(String cacheName, Object key) {
-        this.getCache0(cacheName).get(key);
-    }
-
-    @Override
     public void refresh(String cacheName, Object key) {
         ((ExtendCache) this.getCache0(cacheName)).refresh(key);
     }

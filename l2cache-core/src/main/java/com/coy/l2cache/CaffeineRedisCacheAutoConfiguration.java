@@ -88,7 +88,7 @@ public class CaffeineRedisCacheAutoConfiguration {
     }
 
     /**
-     * 移除监听器
+     * 缓存项移除监听器
      */
     @Bean
     public RemovalListener<Object, Object> removalListener() {

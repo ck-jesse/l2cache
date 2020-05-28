@@ -158,7 +158,7 @@ spring:
 > 1、主动更新
 > > 1）获取缓存时，若缓存不存在或缓存已过期，则重新加载缓存。
 > >
-> > 2）源数据变更后，可调用`CacheManagerController.refresh(cacheName,key)`接口重新加载缓存。
+> > 2）源数据变更后，可调用`CacheManagerController.refresh(cacheName,key)`接口重新加载缓存（只对已存在的key重新加载）。
 >
 > 2、自动更新
 >
@@ -184,11 +184,13 @@ spring:
 ### 缓存预热
 
 > 1、手动预热
-> > 可通过缓存刷新页面，手动对缓存进行上下线操作。详见`CacheManagerController.load(cacheName,key)`接口加载缓存。
+> > 通过业务数据管理页面，直接调用标记了 `@Cacheable` 或 `CachePut` 注解的业务接口进行缓存的预热即可。
 >
 > 2、自动预热 
 >
-> > 系统启动完毕后，自动将相关数据加载到缓存。
+> > 系统启动完毕后，自动调用业务接口将相关数据加载到缓存。
+>
+> 注：`缓存预热` 逻辑需要使用该组价的系统自行实现。
 
 
 
