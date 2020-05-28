@@ -23,7 +23,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
 
-    private final Logger logger = LoggerFactory.getLogger(AsyncCaffeineRedisCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncCaffeineRedisCache.class);
 
     /**
      * Caffeine Cache

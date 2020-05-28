@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractCaffeineRedisCacheManager implements ExtendCacheManager {
 
-    private final Logger logger = LoggerFactory.getLogger(AbstractCaffeineRedisCacheManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCaffeineRedisCacheManager.class);
 
     // 缓存Map<cacheName, Cache>
     private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);

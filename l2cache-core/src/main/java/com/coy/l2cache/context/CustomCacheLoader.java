@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
  */
 public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
-    private final Logger logger = LoggerFactory.getLogger(CustomCacheLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(CustomCacheLoader.class);
 
     /**
      * <key, Callable>

@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
  */
 public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
 
-    private final Logger logger = LoggerFactory.getLogger(CaffeineRedisCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaffeineRedisCache.class);
 
     /**
      * Caffeine Cache

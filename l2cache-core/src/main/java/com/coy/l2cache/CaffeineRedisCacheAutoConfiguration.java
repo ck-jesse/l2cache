@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties(CaffeineRedisCacheProperties.class)
 public class CaffeineRedisCacheAutoConfiguration {
 
+    private static final Logger logger = LoggerFactory.getLogger(CaffeineRedisCacheAutoConfiguration.class);
+
     @Autowired
     CaffeineRedisCacheProperties caffeineRedisCacheProperties;
 
@@ -91,8 +93,6 @@ public class CaffeineRedisCacheAutoConfiguration {
     @Bean
     public RemovalListener<Object, Object> removalListener() {
         return new RemovalListener<Object, Object>() {
-            private final Logger logger = LoggerFactory.getLogger(RemovalListener.class);
-
             @Override
             public void onRemoval(@Nullable Object key, @Nullable Object value, @NonNull RemovalCause cause) {
                 logger.debug("[RemovalListener] key={}, value={}", key, value);

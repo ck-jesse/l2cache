@@ -15,7 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
  */
 public class CaffeineRedisCacheManager extends AbstractCaffeineRedisCacheManager {
 
-    private final Logger logger = LoggerFactory.getLogger(CaffeineRedisCacheManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaffeineRedisCacheManager.class);
 
     private boolean asyncCache;
 

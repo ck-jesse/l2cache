@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCache implements ExtendCache {
 
-    private final Logger logger = LoggerFactory.getLogger(AbstractCaffeineRedisCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractCaffeineRedisCache.class);
 
     /**
      * 缓存实例id

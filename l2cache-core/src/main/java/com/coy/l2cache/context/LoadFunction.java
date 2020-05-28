@@ -16,7 +16,7 @@ import java.util.function.Function;
  */
 public class LoadFunction implements Function<Object, Object> {
 
-    private final Logger logger = LoggerFactory.getLogger(LoadFunction.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoadFunction.class);
 
     private final ExtendCache extendCache;
     private final Callable<?> valueLoader;
