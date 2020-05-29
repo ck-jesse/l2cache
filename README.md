@@ -296,3 +296,18 @@ spring:
 >
 > 期望是只加载过期缓存，那么该怎么实现呢？ 经分析发现可以通过LoadingCache.get(key)来达到只对过期缓存重新加载的目的。
 
+
+## 后记
+> 经过一些途径发现市面上已经存在一些二级缓存的解决方案的实现，如：
+>
+> 1、Redisson PRO 支持的Spring缓存功能，其中 RedissonSpringLocalCachedCacheManager 支持本地缓存。
+> 
+> https://github.com/redisson/redisson/wiki/14.-Integration-with-frameworks#142-spring-cache
+>
+> 2、J2Cache 也是一个二级缓存的实现，经研究发现本组件与J2Cache的实现原理非常的类似。 
+>
+> https://gitee.com/ld/J2Cache
+>
+
+若提前知道有这两种二级缓存实现，很大可能会偷懒不去实现本组件，毕竟没必要重复造轮子嘛；
+从另一方面来看，自己实现该二级缓存组件也是有很多好处的，一个是验证了自己的思路是对的，另一个是对二级缓存的本质和在研发过程中碰到问题的思考和解决，不是直接拿来使用所能比的。
