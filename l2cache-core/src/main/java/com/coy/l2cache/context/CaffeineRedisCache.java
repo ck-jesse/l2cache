@@ -25,6 +25,7 @@ public class CaffeineRedisCache extends AbstractCaffeineRedisCache {
     /**
      * Caffeine Cache
      */
+    // L1
     private final Cache<Object, Object> caffeineCache;
 
     public CaffeineRedisCache(String name, RedisTemplate<Object, Object> redisTemplate,

@@ -40,6 +40,7 @@ public abstract class AbstractCaffeineRedisCache extends AbstractValueAdaptingCa
     /**
      * RedisTemplate
      */
+    // L2
     private final RedisTemplate<Object, Object> redisTemplate;
 
     /**

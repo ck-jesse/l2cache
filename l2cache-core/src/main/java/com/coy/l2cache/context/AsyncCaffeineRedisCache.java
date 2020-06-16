@@ -28,6 +28,7 @@ public class AsyncCaffeineRedisCache extends AbstractCaffeineRedisCache {
     /**
      * Caffeine Cache
      */
+    // L1
     private final AsyncCache<Object, Object> caffeineCache;
 
     /**
