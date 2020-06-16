@@ -1,7 +1,6 @@
 package com.coy.l2cache;
 
 import com.coy.l2cache.context.LoadFunction;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.concurrent.Callable;
 
@@ -86,7 +85,7 @@ public interface Cache {
      * @param key
      * @param optType 操作类型 refresh/clear
      */
-    void cacheChangePush(@NonNull Object key, String optType);
+    void cacheChangePush(Object key, String optType);
 
     /**
      * 清理本地缓存
@@ -99,7 +98,7 @@ public interface Cache {
      *
      * @see LoadFunction#apply(Object)
      */
-    void refresh(@NonNull Object key);
+    void refresh(Object key);
 
     /**
      * 异步加载所有新值
@@ -113,7 +112,7 @@ public interface Cache {
      * 刷新过期缓存
      * 注：通过LoadingCache.get(key)来刷新过期缓存，若缓存未到过期时间则不刷新
      */
-    void refreshExpireCache(@NonNull Object key);
+    void refreshExpireCache(Object key);
 
     /**
      * 刷新所有过期的缓存
