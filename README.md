@@ -51,9 +51,9 @@ public class TestApplication {
 }
 ```
 
-- l2cache-spring-boot-starter
+- starter 自动装载
 
-引入starter
+引入l2cache-spring-boot-starter
 ```xml
 <dependency>
     <groupId>com.coy.l2cache</groupId>
