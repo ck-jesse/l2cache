@@ -19,7 +19,7 @@ import java.util.UUID;
  * @author chenck
  * @date 2020/4/26 20:44
  */
-@ConfigurationProperties(prefix = "spring.cache.multi")
+@ConfigurationProperties(prefix = "l2cache")
 @Getter
 @Setter
 public class CaffeineRedisCacheProperties {

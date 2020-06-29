@@ -1,81 +1,81 @@
 {
   "properties": [
     {
-      "name": "spring.cache.multi.instanceId",
+      "name": "l2cache.instanceId",
       "type": "java.lang.String",
       "description": "缓存实例id，默认值为UUID.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties"
     },
     {
-      "name": "spring.cache.multi.allowNullValues",
+      "name": "l2cache.allowNullValues",
       "type": "java.lang.Boolean",
       "description": "是否存储空值，默认true，防止缓存穿透.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties",
       "defaultValue": true
     },
     {
-      "name": "spring.cache.multi.dynamic",
+      "name": "l2cache.dynamic",
       "type": "java.lang.Boolean",
       "description": "是否动态根据cacheName创建Cache的实现，默认true.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties",
       "defaultValue": true
     },
     {
-      "name": "spring.cache.multi.caffeine.asyncCache",
+      "name": "l2cache.caffeine.asyncCache",
       "type": "java.lang.Boolean",
       "description": "是否异步缓存，true 表示是，false 表示否.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Caffeine",
       "defaultValue": false
     },
     {
-      "name": "spring.cache.multi.caffeine.autoRefreshExpireCache",
+      "name": "l2cache.caffeine.autoRefreshExpireCache",
       "type": "java.lang.Boolean",
       "description": "是否自动刷新过期缓存，true 表示是，false 表示否.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Caffeine",
       "defaultValue": true
     },
     {
-      "name": "spring.cache.multi.caffeine.refreshPoolSize",
+      "name": "l2cache.caffeine.refreshPoolSize",
       "type": "java.lang.Integer",
       "description": "缓存刷新调度线程池的大小.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Caffeine",
       "defaultValue": 1
     },
     {
-      "name": "spring.cache.multi.caffeine.refreshPeriod",
+      "name": "l2cache.caffeine.refreshPeriod",
       "type": "java.lang.Long",
       "description": "缓存刷新的频率(秒).",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Caffeine",
       "defaultValue": 5
     },
     {
-      "name": "spring.cache.multi.caffeine.defaultSpec",
+      "name": "l2cache.caffeine.defaultSpec",
       "type": "java.lang.String",
       "description": "创建缓存的默认配置. See CaffeineSpec for more details on the spec format.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Caffeine",
       "defaultValue": "initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats"
     },
     {
-      "name": "spring.cache.multi.caffeine.specs",
+      "name": "l2cache.caffeine.specs",
       "type": "java.util.Map<java.lang.String, java.lang.String>",
       "description": "创建缓存的配置集合，可以设置某个缓存名称的缓存配置. Map<缓存名称，缓存配置>.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Caffeine"
     },
     {
-      "name": "spring.cache.multi.redis.keyPrefix",
+      "name": "l2cache.redis.keyPrefix",
       "type": "java.lang.String",
       "description": "缓存Key prefix.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Redis"
     },
     {
-      "name": "spring.cache.multi.redis.useKeyPrefix",
+      "name": "l2cache.redis.useKeyPrefix",
       "type": "java.lang.Boolean",
       "description": "是否使用缓存Key prefix.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Redis",
       "defaultValue": true
     },
     {
-      "name": "spring.cache.multi.redis.topic",
+      "name": "l2cache.redis.topic",
       "type": "java.lang.String",
       "description": "缓存更新时通知其他节点的topic名称.",
       "sourceType": "com.coy.l2cache.CaffeineRedisCacheProperties$Redis",
