@@ -1,6 +1,7 @@
-package com.coy.l2cache.context;
+package com.coy.l2cache.context.spring;
 
 import com.coy.l2cache.CaffeineRedisCacheProperties;
+import com.coy.l2cache.context.LoadFunction;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.LoadingCache;

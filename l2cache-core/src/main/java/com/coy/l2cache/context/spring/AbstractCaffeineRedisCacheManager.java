@@ -1,6 +1,8 @@
-package com.coy.l2cache.context;
+package com.coy.l2cache.context.spring;
 
 import com.coy.l2cache.CaffeineRedisCacheProperties;
+import com.coy.l2cache.context.ExtendCache;
+import com.coy.l2cache.context.ExtendCacheManager;
 import com.coy.l2cache.util.DaemonThreadFactory;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalListener;

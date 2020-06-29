@@ -1,6 +1,6 @@
 package com.coy.l2cache;
 
-import com.coy.l2cache.context.CaffeineRedisCacheManager;
+import com.coy.l2cache.context.spring.CaffeineRedisCacheManager;
 import com.coy.l2cache.context.ExtendCacheManager;
 import com.coy.l2cache.listener.CacheMessageListener;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

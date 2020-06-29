@@ -1,6 +1,8 @@
-package com.coy.l2cache.context;
+package com.coy.l2cache.context.spring;
 
 import com.coy.l2cache.CaffeineRedisCacheProperties;
+import com.coy.l2cache.context.CustomCacheLoader;
+import com.coy.l2cache.context.CustomCaffeineSpec;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

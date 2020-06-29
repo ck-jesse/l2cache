@@ -53,12 +53,12 @@ public class CaffeineRedisCacheProperties {
         private final Logger logger = LoggerFactory.getLogger(Caffeine.class);
 
         /**
-         * true 是 false 否
+         * 是否异步缓存，true 表示是，false 表示否
          */
         private boolean asyncCache = false;
 
         /**
-         * 是否自动刷新过期缓存 true 是 false 否
+         * 是否自动刷新过期缓存 true 表示是，false 表示否
          */
         private boolean autoRefreshExpireCache = true;
 

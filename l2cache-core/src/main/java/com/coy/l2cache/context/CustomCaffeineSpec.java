@@ -53,7 +53,7 @@ public class CustomCaffeineSpec {
      *
      * @return a builder configured to the specification
      */
-    Caffeine<Object, Object> toBuilder() {
+    public Caffeine<Object, Object> toBuilder() {
         Caffeine<Object, Object> builder = Caffeine.newBuilder();
         if (initialCapacity != UNSET_INT) {
             builder.initialCapacity(initialCapacity);
