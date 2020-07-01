@@ -1,9 +1,11 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.cache.config.CacheConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -28,19 +30,36 @@ public class RedisCache implements L2Cache {
      */
     private final RedisTemplate<Object, Object> redisTemplate;
 
-    public RedisCache(String name, RedisTemplate<Object, Object> redisTemplate) {
+    /**
+     * redis config
+     */
+    private final CacheConfig.Redis redis;
+
+    protected RedisCache(String name, RedisTemplate<Object, Object> redisTemplate, CacheConfig.Redis redis) {
         this.name = name;
         this.redisTemplate = redisTemplate;
+        this.redis = redis;
+    }
+
+    @Override
+    public boolean isAllowNullValues() {
+        return redis.isAllowNullValues();
     }
 
     @Override
     public long getExpireTime() {
-        return 0;
+        return redis.getExpireTime();
     }
 
     @Override
     public Object buildKey(Object key) {
-        return null;
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.name).append(":");
+        if (redis.isUseKeyPrefix() && !StringUtils.isEmpty(redis.getKeyPrefix())) {
+            sb.append(redis.getKeyPrefix()).append(":");
+        }
+        sb.append(key.toString());
+        return sb.toString();
     }
 
     @Override
@@ -76,17 +95,26 @@ public class RedisCache implements L2Cache {
 
     @Override
     public void put(Object key, Object value) {
-        redisTemplate.opsForValue().set(buildKey(key), value, getExpireTime(), TimeUnit.MILLISECONDS);
+        Object cacheValue = preProcessCacheValue(value);
+
+        if (!isAllowNullValues() && cacheValue == null) {
+            throw new IllegalArgumentException(String.format("Cache '%s' does not allow 'null' values. ", name));
+        }
+        redisTemplate.opsForValue().set(buildKey(key), cacheValue, this.getExpireTime(), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public Object putIfAbsent(Object key, Object value) {
-        // 如果不存在，则设置，设置失败false表示已经存在
-        boolean flag = this.redisTemplate.opsForValue().setIfAbsent(buildKey(key), value, getExpireTime(), TimeUnit.MILLISECONDS);
+        Object cacheValue = preProcessCacheValue(value);
 
+        if (!isAllowNullValues() && cacheValue == null) {
+            return get(key);// 不允许为null，且cacheValue为null，则直接获取缓存并返回
+        }
+
+        // 如果不存在，则设置，设置失败false表示已经存在
+        boolean flag = this.redisTemplate.opsForValue().setIfAbsent(buildKey(key), cacheValue, this.getExpireTime(), TimeUnit.MILLISECONDS);
         if (!flag) {
-            // key存在，则取原值并返回
-            return this.get(key);
+            return this.get(key);// key存在，则取原值并返回
         }
         return null;
     }
@@ -106,6 +134,19 @@ public class RedisCache implements L2Cache {
         }
     }
 
+    /**
+     * 预处理value
+     */
+    protected Object preProcessCacheValue(Object value) {
+        if (value != null) {
+            return value;
+        }
+        return isAllowNullValues() ? NullValue.INSTANCE : null;
+    }
+
+    /**
+     *
+     */
     private static <T> T valueFromLoader(Object key, Callable<T> valueLoader) {
         try {
             return valueLoader.call();

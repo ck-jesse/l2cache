@@ -2,7 +2,6 @@ package com.coy.l2cache.cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.util.concurrent.Callable;
 
@@ -13,6 +12,8 @@ import java.util.concurrent.Callable;
 public class CacheComposite implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CacheComposite.class);
+
+    private final String name;
     /**
      * 一级缓存
      */
@@ -23,7 +24,8 @@ public class CacheComposite implements Cache {
      */
     private final L2Cache level2Cache;
 
-    public CacheComposite(L1Cache level1Cache, L2Cache level2Cache) {
+    protected CacheComposite(String name, L1Cache level1Cache, L2Cache level2Cache) {
+        this.name = name;
         this.level1Cache = level1Cache;
         this.level2Cache = level2Cache;
         //TODO 设置level2Cache到CustomCacheLoader中
@@ -31,13 +33,7 @@ public class CacheComposite implements Cache {
 
     @Override
     public String getName() {
-        if (!StringUtils.isEmpty(level1Cache.getName())) {
-            return level1Cache.getName();
-        }
-        if (!StringUtils.isEmpty(level2Cache.getName())) {
-            return level2Cache.getName();
-        }
-        throw new IllegalArgumentException("Cache name cannot be empty.");
+        return this.name;
     }
 
     @Override

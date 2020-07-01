@@ -109,6 +109,16 @@ public class CacheConfig {
     public static class Redis {
 
         /**
+         * 是否存储空值，默认true，防止缓存穿透
+         */
+        private boolean allowNullValues = true;
+
+        /**
+         * 过期时间(ms)
+         */
+        private long expireTime;
+
+        /**
          * 缓存Key prefix.
          */
         private String keyPrefix;
@@ -122,19 +132,6 @@ public class CacheConfig {
          * 缓存更新时通知其他节点的topic名称
          */
         private String topic = "l2cache:sync:topic";
-
-        /**
-         * 获取redis key
-         */
-        public Object getRedisKey(String name, Object key) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(name).append(":");
-            if (this.isUseKeyPrefix() && !StringUtils.isEmpty(this.getKeyPrefix())) {
-                sb.append(this.getKeyPrefix()).append(":");
-            }
-            sb.append(key.toString());
-            return sb.toString();
-        }
 
     }
 }

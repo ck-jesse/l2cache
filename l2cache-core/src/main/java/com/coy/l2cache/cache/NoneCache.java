@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/29 16:57
  */
-public class NoneCache implements L1Cache {
+public class NoneCache implements L1Cache, L2Cache {
 
     private final String name;
 
@@ -96,5 +96,20 @@ public class NoneCache implements L1Cache {
     @Override
     public void refreshAllExpireCache() {
 
+    }
+
+    @Override
+    public boolean isAllowNullValues() {
+        return false;
+    }
+
+    @Override
+    public long getExpireTime() {
+        return -1;
+    }
+
+    @Override
+    public Object buildKey(Object key) {
+        return null;
     }
 }

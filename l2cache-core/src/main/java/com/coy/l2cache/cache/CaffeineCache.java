@@ -24,14 +24,20 @@ public class CaffeineCache implements L1Cache {
      * 缓存名字
      */
     private final String name;
+    /**
+     * caffeine 缓存加载器，用于异步加载缓存
+     */
     private final CacheLoader cacheLoader;
+    /**
+     * 缓存同步策略
+     */
     private final CacheSyncPolicy cacheSyncPolicy;
     /**
      * L1 Caffeine
      */
     private final Cache<Object, Object> caffeineCache;
 
-    public CaffeineCache(String name, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
+    protected CaffeineCache(String name, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
         this.name = name;
         this.cacheLoader = cacheLoader;
         this.cacheSyncPolicy = cacheSyncPolicy;
@@ -49,7 +55,7 @@ public class CaffeineCache implements L1Cache {
     }
 
     @Override
-    public Object getActualCache() {
+    public Cache<Object, Object> getActualCache() {
         return this.caffeineCache;
     }
 
@@ -60,7 +66,7 @@ public class CaffeineCache implements L1Cache {
 
     @Override
     public boolean isLoadingCache() {
-        return this.caffeineCache instanceof LoadingCache;
+        return this.caffeineCache instanceof LoadingCache && null != this.cacheLoader;
     }
 
     @Override
@@ -77,16 +83,14 @@ public class CaffeineCache implements L1Cache {
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
         if (isLoadingCache()) {
-            if (null != this.cacheLoader) {
-                if (this.cacheLoader instanceof CustomCacheLoader) {
-                    // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
-                    ((CustomCacheLoader) this.cacheLoader).addValueLoader(key, valueLoader);
-                }
-
-                Object value = get(key);
-                logger.debug("level1Cache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
-                return (T) value;
+            if (this.cacheLoader instanceof CustomCacheLoader) {
+                // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
+                ((CustomCacheLoader) this.cacheLoader).addValueLoader(key, valueLoader);
             }
+
+            Object value = get(key);
+            logger.debug("level1Cache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+            return (T) value;
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
