@@ -10,15 +10,15 @@ import java.util.concurrent.Callable;
  */
 public class GuavaCache implements L1Cache {
 
-    private final String name;
+    private final String cacheName;
 
-    public GuavaCache(String name) {
-        this.name = name;
+    public GuavaCache(String cacheName) {
+        this.cacheName = cacheName;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public String getCacheName() {
+        return this.cacheName;
     }
 
     @Override

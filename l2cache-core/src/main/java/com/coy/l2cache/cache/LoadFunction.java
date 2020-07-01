@@ -39,22 +39,22 @@ public class LoadFunction implements Function<Object, Object> {
             Object value = null;
             if (null == level2Cache) {
                 value = valueLoader.call();
-                logger.debug("[LoadFunction] load data from method, level2Cache is null, cacheName={}, key={}, value={}", level2Cache.getName(),
+                logger.debug("[LoadFunction] load data from method, level2Cache is null, cacheName={}, key={}, value={}", level2Cache.getCacheName(),
                         key, value);
             } else {
-                logger.debug("[LoadFunction] load cache, cacheName={}, key={}", level2Cache.getName(), key);
+                logger.debug("[LoadFunction] load cache, cacheName={}, key={}", level2Cache.getCacheName(), key);
                 // 走到此处，表明已经从L1中没有获取到数据，所以先从L2中获取数据
                 value = level2Cache.get(key);
 
                 if (value != null) {
-                    logger.debug("[LoadFunction] get cache from redis, cacheName={}, key={}, value={}", level2Cache.getName(), key, value);
+                    logger.debug("[LoadFunction] get cache from redis, cacheName={}, key={}, value={}", level2Cache.getCacheName(), key, value);
                     // 从L2中获取到数据后不需要显示设置到L1，利用L1本身的机制进行设置
                     return value;
                 }
 
                 // 执行业务方法获取数据
                 value = valueLoader.call();
-                logger.debug("[LoadFunction] load data from method, cacheName={}, key={}, value={}", level2Cache.getName(), key, value);
+                logger.debug("[LoadFunction] load data from method, cacheName={}, key={}, value={}", level2Cache.getCacheName(), key, value);
 
                 level2Cache.put(key, value);
             }

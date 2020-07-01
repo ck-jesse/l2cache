@@ -12,15 +12,15 @@ import java.util.concurrent.Callable;
  */
 public class NoneCache implements L1Cache, L2Cache {
 
-    private final String name;
+    private final String cacheName;
 
-    public NoneCache(String name) {
-        this.name = name;
+    public NoneCache(String cacheName) {
+        this.cacheName = cacheName;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public String getCacheName() {
+        return this.cacheName;
     }
 
     @Override

@@ -23,7 +23,7 @@ public class RedisCache implements L2Cache {
     /**
      * 缓存名字
      */
-    private final String name;
+    private final String cacheName;
 
     /**
      * L2 Redis
@@ -35,8 +35,8 @@ public class RedisCache implements L2Cache {
      */
     private final CacheConfig.Redis redis;
 
-    protected RedisCache(String name, RedisTemplate<Object, Object> redisTemplate, CacheConfig.Redis redis) {
-        this.name = name;
+    protected RedisCache(String cacheName, RedisTemplate<Object, Object> redisTemplate, CacheConfig.Redis redis) {
+        this.cacheName = cacheName;
         this.redisTemplate = redisTemplate;
         this.redis = redis;
     }
@@ -54,7 +54,7 @@ public class RedisCache implements L2Cache {
     @Override
     public Object buildKey(Object key) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.name).append(":");
+        sb.append(this.cacheName).append(":");
         if (redis.isUseKeyPrefix() && !StringUtils.isEmpty(redis.getKeyPrefix())) {
             sb.append(redis.getKeyPrefix()).append(":");
         }
@@ -63,8 +63,8 @@ public class RedisCache implements L2Cache {
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public String getCacheName() {
+        return this.cacheName;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class RedisCache implements L2Cache {
         Object cacheValue = preProcessCacheValue(value);
 
         if (!isAllowNullValues() && cacheValue == null) {
-            throw new IllegalArgumentException(String.format("Cache '%s' does not allow 'null' values. ", name));
+            throw new IllegalArgumentException(String.format("Cache '%s' does not allow 'null' values. ", cacheName));
         }
         redisTemplate.opsForValue().set(buildKey(key), cacheValue, this.getExpireTime(), TimeUnit.MILLISECONDS);
     }
@@ -121,14 +121,14 @@ public class RedisCache implements L2Cache {
 
     @Override
     public void evict(Object key) {
-        logger.debug("evict cache, cacheName={}, key={}", this.getName(), key);
+        logger.debug("evict cache, cacheName={}, key={}", this.getCacheName(), key);
         this.redisTemplate.delete(buildKey(key));
     }
 
     @Override
     public void clear() {
-        logger.debug("clear all cache, cacheName={}", this.getName());
-        Set<Object> keys = redisTemplate.keys(this.name.concat(":"));
+        logger.debug("clear all cache, cacheName={}", this.getCacheName());
+        Set<Object> keys = redisTemplate.keys(this.cacheName.concat(":"));
         for (Object key : keys) {
             redisTemplate.delete(key);
         }

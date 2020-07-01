@@ -13,7 +13,7 @@ public class CacheComposite implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CacheComposite.class);
 
-    private final String name;
+    private final String cacheName;
     /**
      * 一级缓存
      */
@@ -24,16 +24,16 @@ public class CacheComposite implements Cache {
      */
     private final L2Cache level2Cache;
 
-    protected CacheComposite(String name, L1Cache level1Cache, L2Cache level2Cache) {
-        this.name = name;
+    protected CacheComposite(String cacheName, L1Cache level1Cache, L2Cache level2Cache) {
+        this.cacheName = cacheName;
         this.level1Cache = level1Cache;
         this.level2Cache = level2Cache;
         //TODO 设置level2Cache到CustomCacheLoader中
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public String getCacheName() {
+        return this.cacheName;
     }
 
     @Override
@@ -56,14 +56,14 @@ public class CacheComposite implements Cache {
         // 从L1获取缓存
         Object value = level1Cache.get(key);
         if (value != null) {
-            logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+            logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return value;
         }
 
         // 从L2获取缓存
         value = level2Cache.get(key);
         if (value != null) {
-            logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+            logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             level1Cache.put(key, value);
         }
         return value;
@@ -83,7 +83,7 @@ public class CacheComposite implements Cache {
 
     @Override
     public void evict(Object key) {
-        logger.debug("evict cache, cacheName={}, key={}", this.getName(), key);
+        logger.debug("evict cache, cacheName={}, key={}", this.getCacheName(), key);
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         level2Cache.evict(key);
         level1Cache.evict(key);
@@ -91,7 +91,7 @@ public class CacheComposite implements Cache {
 
     @Override
     public void clear() {
-        logger.debug("clear all cache, cacheName={}", this.getName());
+        logger.debug("clear all cache, cacheName={}", this.getCacheName());
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         level2Cache.clear();
         level1Cache.clear();

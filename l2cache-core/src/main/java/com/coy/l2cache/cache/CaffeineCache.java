@@ -23,7 +23,7 @@ public class CaffeineCache implements L1Cache {
     /**
      * 缓存名字
      */
-    private final String name;
+    private final String cacheName;
     /**
      * caffeine 缓存加载器，用于异步加载缓存
      */
@@ -37,16 +37,16 @@ public class CaffeineCache implements L1Cache {
      */
     private final Cache<Object, Object> caffeineCache;
 
-    protected CaffeineCache(String name, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
-        this.name = name;
+    protected CaffeineCache(String cacheName, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
+        this.cacheName = cacheName;
         this.cacheLoader = cacheLoader;
         this.cacheSyncPolicy = cacheSyncPolicy;
         this.caffeineCache = caffeineCache;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public String getCacheName() {
+        return this.cacheName;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class CaffeineCache implements L1Cache {
         if (isLoadingCache()) {
             // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
             Object value = ((LoadingCache) this.caffeineCache).get(key);
-            logger.debug("level1Cache LoadingCache.get cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+            logger.debug("level1Cache LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return value;
         }
         return this.caffeineCache.getIfPresent(key);
@@ -89,13 +89,13 @@ public class CaffeineCache implements L1Cache {
             }
 
             Object value = get(key);
-            logger.debug("level1Cache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+            logger.debug("level1Cache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return (T) value;
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
         Object value = this.caffeineCache.get(key, new LoadFunction(null, getCacheSyncPolicy(), valueLoader));
-        logger.debug("level1Cache get(key, callable) cache, cacheName={}, key={}, value={}", this.getName(), key, value);
+        logger.debug("level1Cache get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) value;
     }
 
@@ -119,7 +119,7 @@ public class CaffeineCache implements L1Cache {
 
     @Override
     public void clearLocalCache(Object key) {
-        logger.info("clear local cache, name={}, key={}", this.getName(), key);
+        logger.info("clear local cache, name={}, key={}", this.getCacheName(), key);
         if (key == null) {
             caffeineCache.invalidateAll();
         } else {
@@ -130,7 +130,7 @@ public class CaffeineCache implements L1Cache {
     @Override
     public void refresh(Object key) {
         if (isLoadingCache()) {
-            logger.debug("refresh cache, name={}, key={}", this.getName(), key);
+            logger.debug("refresh cache, name={}, key={}", this.getCacheName(), key);
             ((LoadingCache) caffeineCache).refresh(key);
         }
     }
@@ -140,7 +140,7 @@ public class CaffeineCache implements L1Cache {
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("refreshAll cache, name={}, key={}", this.getName(), key);
+                logger.debug("refreshAll cache, name={}, key={}", this.getCacheName(), key);
                 loadingCache.refresh(key);
             }
         }
@@ -149,7 +149,7 @@ public class CaffeineCache implements L1Cache {
     @Override
     public void refreshExpireCache(Object key) {
         if (isLoadingCache()) {
-            logger.debug("refreshExpireCache cache, name={}, key={}", this.getName(), key);
+            logger.debug("refreshExpireCache cache, name={}, key={}", this.getCacheName(), key);
             // 通过LoadingCache.get(key)来刷新过期缓存
             ((LoadingCache) caffeineCache).get(key);
         }
@@ -160,7 +160,7 @@ public class CaffeineCache implements L1Cache {
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("refreshAllExpireCache cache, name={}, key={}", this.getName(), key);
+                logger.debug("refreshAllExpireCache cache, name={}, key={}", this.getCacheName(), key);
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 loadingCache.get(key);
             }

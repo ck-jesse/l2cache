@@ -15,7 +15,7 @@ public interface Cache {
     /**
      * 获取缓存名称
      */
-    String getName();
+    String getCacheName();
 
     /**
      * 缓存等级
