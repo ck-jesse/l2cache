@@ -1,56 +1,80 @@
 package com.coy.l2cache.cache.config;
 
-import com.coy.l2cache.context.CustomCaffeineSpec;
-import lombok.Data;
+import com.coy.l2cache.cache.CacheType;
+import com.coy.l2cache.util.RandomUtil;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author chenck
  * @date 2020/6/30 17:19
  */
-@Data
+@Getter
+@Setter
+@Accessors(chain = true)
 public class CacheConfig {
 
     /**
      * 缓存实例id（默认为UUID）
      */
-    private String instanceId = UUID.randomUUID().toString().replaceAll("-", "");
-
-    /**
-     * 是否存储空值，默认true，防止缓存穿透
-     */
-    private boolean allowNullValues = true;
+    private String instanceId = RandomUtil.getUUID();
 
     /**
      * 是否动态根据cacheName创建Cache的实现，默认true
      */
     private boolean dynamic = true;
 
-    private final Caffeine caffeine = new Caffeine();
+    /**
+     * 缓存类型，默认 COMPOSITE 组合缓存
+     *
+     * @see CacheType
+     */
+    private String cacheType = CacheType.CAFFEINE.name();
 
+    private final Composite composite = new Composite();
+    private final Caffeine caffeine = new Caffeine();
     private final Redis redis = new Redis();
+
+    public static interface Config {
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class Composite implements Config {
+        /**
+         * 一级缓存类型
+         */
+        private String l1CacheType;
+        /**
+         * 二级缓存类型
+         */
+        private String l2CacheType;
+    }
 
     /**
      * Caffeine specific cache properties.
      */
-    @Data
-    public static class Caffeine {
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class Caffeine implements Config {
 
         private final Logger logger = LoggerFactory.getLogger(CacheConfig.Caffeine.class);
 
         /**
-         * 是否异步缓存，true 表示是，false 表示否
+         * 是否异步缓存，true 表示是，false 表示否(默认)
          */
         private boolean asyncCache = false;
 
         /**
-         * 是否自动刷新过期缓存 true 表示是，false 表示否
+         * 是否自动刷新过期缓存 true 表示是(默认)，false 表示否
          */
         private boolean autoRefreshExpireCache = true;
 
@@ -75,38 +99,15 @@ public class CacheConfig {
          */
         private Map<String, String> specs = new HashMap<>();
 
-        /**
-         * 获取 spec
-         */
-        public String getSpec(String cacheName) {
-            if (!StringUtils.hasText(cacheName)) {
-                return defaultSpec;
-            }
-            String spec = specs.get(cacheName);
-            if (!StringUtils.hasText(spec)) {
-                return defaultSpec;
-            }
-            return spec;
-        }
-
-        /**
-         * 获取自定义的CaffeineSpec
-         */
-        public CustomCaffeineSpec getCaffeineSpec(String name) {
-            String spec = this.getSpec(name);
-            logger.info("create a native Caffeine Cache, name={}, spec={}", name, spec);
-            if (!StringUtils.hasText(spec)) {
-                return null;
-            }
-            return CustomCaffeineSpec.parse(spec);
-        }
     }
 
     /**
      * Redis-specific cache properties.
      */
-    @Data
-    public static class Redis {
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class Redis implements Config {
 
         /**
          * 是否存储空值，默认true，防止缓存穿透

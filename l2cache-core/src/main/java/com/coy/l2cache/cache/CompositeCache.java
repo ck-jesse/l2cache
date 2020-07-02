@@ -11,22 +11,22 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/29 17:32
  */
-public class CacheComposite implements Cache {
+public class CompositeCache implements Cache {
 
-    private static final Logger logger = LoggerFactory.getLogger(CacheComposite.class);
+    private static final Logger logger = LoggerFactory.getLogger(CompositeCache.class);
 
     private final String cacheName;
     /**
      * 一级缓存
      */
-    private final L1Cache level1Cache;
+    private final Cache level1Cache;
 
     /**
      * 二级缓存
      */
-    private final L2Cache level2Cache;
+    private final Cache level2Cache;
 
-    protected CacheComposite(String cacheName, L1Cache level1Cache, L2Cache level2Cache) {
+    public CompositeCache(String cacheName, Cache level1Cache, Cache level2Cache) {
         this.cacheName = cacheName;
         this.level1Cache = level1Cache;
         this.level2Cache = level2Cache;
@@ -50,10 +50,10 @@ public class CacheComposite implements Cache {
 
     @Override
     public Object get(Object key) {
-        // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
+        /*// L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
         if (level1Cache.isLoadingCache()) {
             return level1Cache.get(key);
-        }
+        }*/
 
         // 从L1获取缓存
         Object value = level1Cache.get(key);

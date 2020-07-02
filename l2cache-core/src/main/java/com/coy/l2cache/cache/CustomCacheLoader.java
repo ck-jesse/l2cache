@@ -1,9 +1,6 @@
 package com.coy.l2cache.cache;
 
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -29,26 +26,19 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      * 用户保证并发场景下对于不同的key找到对应的Callable进行数据加载
      */
     private static final Map<Object, Callable<?>> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
-
-    private Cache level2Cache;
+    private String cacheName;
+    private L2Cache level2Cache;
     private CacheSyncPolicy cacheSyncPolicy;
 
-    /**
-     * 设置加载数据的处理器
-     * 注：在获取缓存时动态设置valueLoader，来达到实现不同缓存调用不同的加载数据逻辑的目的。
-     */
-    public void addValueLoader(Object key, Callable<?> valueLoader) {
-        Callable<?> oldCallable = VALUE_LOADER_CACHE.get(key);
-        if (null == oldCallable) {
-            VALUE_LOADER_CACHE.put(key, valueLoader);
-        }
+    private CustomCacheLoader(String cacheName) {
+        this.cacheName = cacheName;
     }
 
-    public void setLevel2Cache(Cache level2Cache) {
-        this.level2Cache = level2Cache;
+    public static CustomCacheLoader newInstance(String cacheName) {
+        return new CustomCacheLoader(cacheName);
     }
 
-    public Cache getLevel2Cache() {
+    public L2Cache getLevel2Cache() {
         return level2Cache;
     }
 
@@ -56,17 +46,27 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         return cacheSyncPolicy;
     }
 
+    @Override
+    public void setLevel2Cache(L2Cache level2Cache) {
+        this.level2Cache = level2Cache;
+    }
+
+
+    @Override
     public void setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy) {
         this.cacheSyncPolicy = cacheSyncPolicy;
     }
 
-    public LoadFunction newLoadFunction(Callable<?> valueLoader) {
-        return new LoadFunction(level2Cache, cacheSyncPolicy, valueLoader);
+    @Override
+    public void addValueLoader(Object key, Callable<?> valueLoader) {
+        Callable<?> oldCallable = VALUE_LOADER_CACHE.get(key);
+        if (null == oldCallable) {
+            VALUE_LOADER_CACHE.put(key, valueLoader);
+        }
     }
 
-    @Nullable
     @Override
-    public Object load(@NonNull Object key) throws Exception {
+    public Object load(Object key) throws Exception {
         // 直接返回null，目的是使后续逻辑去执行具体的加载数据方法，然后put到缓存
         Callable<?> valueLoader = VALUE_LOADER_CACHE.get(key);
         if (null == valueLoader) {

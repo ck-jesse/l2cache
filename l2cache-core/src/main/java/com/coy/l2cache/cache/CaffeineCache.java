@@ -3,7 +3,6 @@ package com.coy.l2cache.cache;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class CaffeineCache implements L1Cache {
      */
     private final String cacheName;
     /**
-     * caffeine 缓存加载器，用于异步加载缓存
+     * 缓存加载器，用于异步加载缓存
      */
     private final CacheLoader cacheLoader;
     /**
@@ -37,7 +36,11 @@ public class CaffeineCache implements L1Cache {
      */
     private final Cache<Object, Object> caffeineCache;
 
-    protected CaffeineCache(String cacheName, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
+    public CaffeineCache(String cacheName, CacheLoader cacheLoader, Cache<Object, Object> caffeineCache) {
+        this(cacheName, cacheLoader, null, caffeineCache);
+    }
+
+    public CaffeineCache(String cacheName, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
         this.cacheName = cacheName;
         this.cacheLoader = cacheLoader;
         this.cacheSyncPolicy = cacheSyncPolicy;
@@ -74,7 +77,7 @@ public class CaffeineCache implements L1Cache {
         if (isLoadingCache()) {
             // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
             Object value = ((LoadingCache) this.caffeineCache).get(key);
-            logger.debug("level1Cache LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            logger.debug("CaffeineCache LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return value;
         }
         return this.caffeineCache.getIfPresent(key);
@@ -89,32 +92,38 @@ public class CaffeineCache implements L1Cache {
             }
 
             Object value = get(key);
-            logger.debug("level1Cache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            logger.debug("CaffeineCache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return (T) value;
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
         Object value = this.caffeineCache.get(key, new LoadFunction(null, getCacheSyncPolicy(), valueLoader));
-        logger.debug("level1Cache get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+        logger.debug("CaffeineCache get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) value;
     }
 
     @Override
     public void put(Object key, Object value) {
         caffeineCache.put(key, value);
-        cacheSyncPolicy.publish(key, CacheConsts.CACHE_REFRESH);
+        if (null != cacheSyncPolicy) {
+            cacheSyncPolicy.publish(key, CacheConsts.CACHE_REFRESH);
+        }
     }
 
     @Override
     public void evict(Object key) {
         caffeineCache.invalidate(key);
-        cacheSyncPolicy.publish(key, CacheConsts.CACHE_CLEAR);
+        if (null != cacheSyncPolicy) {
+            cacheSyncPolicy.publish(key, CacheConsts.CACHE_CLEAR);
+        }
     }
 
     @Override
     public void clear() {
         caffeineCache.invalidateAll();
-        cacheSyncPolicy.publish(null, CacheConsts.CACHE_CLEAR);
+        if (null != cacheSyncPolicy) {
+            cacheSyncPolicy.publish(null, CacheConsts.CACHE_CLEAR);
+        }
     }
 
     @Override

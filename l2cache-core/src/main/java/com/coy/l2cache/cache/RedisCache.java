@@ -35,7 +35,7 @@ public class RedisCache implements L2Cache {
      */
     private final CacheConfig.Redis redis;
 
-    protected RedisCache(String cacheName, RedisTemplate<Object, Object> redisTemplate, CacheConfig.Redis redis) {
+    public RedisCache(String cacheName, RedisTemplate<Object, Object> redisTemplate, CacheConfig.Redis redis) {
         this.cacheName = cacheName;
         this.redisTemplate = redisTemplate;
         this.redis = redis;
@@ -121,13 +121,13 @@ public class RedisCache implements L2Cache {
 
     @Override
     public void evict(Object key) {
-        logger.debug("evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.debug("RedisCache evict cache, cacheName={}, key={}", this.getCacheName(), key);
         this.redisTemplate.delete(buildKey(key));
     }
 
     @Override
     public void clear() {
-        logger.debug("clear all cache, cacheName={}", this.getCacheName());
+        logger.debug("RedisCache clear all cache, cacheName={}", this.getCacheName());
         Set<Object> keys = redisTemplate.keys(this.cacheName.concat(":"));
         for (Object key : keys) {
             redisTemplate.delete(key);

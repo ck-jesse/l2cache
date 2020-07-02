@@ -2,22 +2,71 @@ package com.coy.l2cache.cache.builder;
 
 import com.coy.l2cache.cache.Cache;
 import com.coy.l2cache.cache.CacheExpiredListener;
+import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.cache.spi.SPI;
+import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 
 /**
- * 用于构建cache对象
+ * cache构建器
  *
  * @author chenck
  * @date 2020/7/1 20:43
  */
-public interface CacheBuilder {
+@SPI
+public interface CacheBuilder<T extends Cache> {
 
     /**
      * 构建cache对象
      */
-    Cache buildCache(String name);
+    T build();
 
     /**
-     * 构建cache对象
+     * 构建指定名称的cache对象
      */
-    Cache buildCache(String name, CacheExpiredListener listener);
+    T build(String cacheName);
+
+    /**
+     * 复制属性
+     */
+    void copyFrom(CacheBuilder sourceBuilder);
+
+    /**
+     * 设置缓存名称
+     */
+    CacheBuilder cacheName(String cacheName);
+
+    /**
+     * 设置缓存配置
+     */
+    CacheBuilder cacheConfig(CacheConfig cacheConfig);
+
+    /**
+     * 设置缓存过期监听器
+     */
+    CacheBuilder expiredListener(CacheExpiredListener expiredListener);
+
+    /**
+     * 设置缓存同步策略
+     */
+    CacheBuilder cacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy);
+
+    /**
+     * 获取缓存名称
+     */
+    String getCacheName();
+
+    /**
+     * 获取缓存配置
+     */
+    CacheConfig getCacheConfig();
+
+    /**
+     * 获取缓存过期监听器
+     */
+    CacheExpiredListener getExpiredListener();
+
+    /**
+     * 获取缓存同步策略
+     */
+    CacheSyncPolicy getCacheSyncPolicy();
 }

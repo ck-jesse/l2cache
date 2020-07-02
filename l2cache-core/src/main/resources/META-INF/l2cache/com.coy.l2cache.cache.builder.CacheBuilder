@@ -1,0 +1,4 @@
+none=com.coy.l2cache.cache.builder.NoneCacheBuilder
+composite=com.coy.l2cache.cache.builder.CompositeCacheBuilder
+caffeine=com.coy.l2cache.cache.builder.CaffeineCacheBuilder
+redis=com.coy.l2cache.cache.builder.RedisCacheBuilder

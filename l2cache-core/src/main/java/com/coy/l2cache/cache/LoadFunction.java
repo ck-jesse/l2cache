@@ -23,11 +23,11 @@ public class LoadFunction implements Function<Object, Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadFunction.class);
 
-    private final Cache level2Cache;
+    private final L2Cache level2Cache;
     private final CacheSyncPolicy cacheSyncPolicy;
     private final Callable<?> valueLoader;
 
-    public LoadFunction(Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader) {
+    public LoadFunction(L2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader) {
         this.level2Cache = level2Cache;
         this.cacheSyncPolicy = cacheSyncPolicy;
         this.valueLoader = valueLoader;
