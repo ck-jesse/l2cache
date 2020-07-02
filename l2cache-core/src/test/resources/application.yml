@@ -1,0 +1,49 @@
+server:
+  port: 8081
+  #servlet:
+  #  context-path: /l2cache-example
+
+logging:
+  level:
+    root: info
+    # 日志级别指定到包或类
+    com.coy.l2cache: debug
+
+spring:
+  application:
+    name: l2cache-example
+  # spring boot redis配置
+  redis:
+    timeout: 3000
+    host: 127.0.0.1
+    port: 6379
+    password:
+
+# 二级缓存配置
+l2cache:
+  # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
+  #instanceId: a1
+  # 一级缓存
+  caffeine:
+    # 是否构建异步Caffeine true 是 false 否
+    asyncCache: false
+    # 是否自动刷新过期缓存 true 是 false 否
+    autoRefreshExpireCache: true
+    # 缓存刷新调度线程池的大小
+    refreshPoolSize: 1
+    # 缓存刷新的频率(秒)
+    refreshPeriod: 5
+    # 高并发场景下建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
+    # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
+    # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
+    # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
+    # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
+    defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+    # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
+    specs:
+      userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
+      userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+  # 二级缓存
+  redis:
+    topic: cache:caffeine:redis:topic
+
