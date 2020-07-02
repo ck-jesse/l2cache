@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.Callable;
 
 /**
+ * 组合缓存器
+ *
  * @author chenck
  * @date 2020/6/29 17:32
  */

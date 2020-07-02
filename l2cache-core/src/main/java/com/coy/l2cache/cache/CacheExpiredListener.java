@@ -9,7 +9,7 @@ package com.coy.l2cache.cache;
 public interface CacheExpiredListener<K, V> {
 
     /**
-     * 监听器通知缓存已过期，可以发送消息通知，记录日志等
+     * 缓存过期后触发
      */
-    void notifyElementExpired(K key, V value);
+    void onExpired(K key, V value);
 }

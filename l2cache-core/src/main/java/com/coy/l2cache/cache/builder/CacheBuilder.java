@@ -14,5 +14,10 @@ public interface CacheBuilder {
     /**
      * 构建cache对象
      */
+    Cache buildCache(String name);
+
+    /**
+     * 构建cache对象
+     */
     Cache buildCache(String name, CacheExpiredListener listener);
 }
