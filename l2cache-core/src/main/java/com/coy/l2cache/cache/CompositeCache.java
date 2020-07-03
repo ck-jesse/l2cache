@@ -19,18 +19,21 @@ public class CompositeCache implements Cache {
     /**
      * 一级缓存
      */
-    private final Cache level1Cache;
+    private final L1Cache level1Cache;
 
     /**
      * 二级缓存
      */
-    private final Cache level2Cache;
+    private final L2Cache level2Cache;
 
-    public CompositeCache(String cacheName, Cache level1Cache, Cache level2Cache) {
+    public CompositeCache(String cacheName, L1Cache level1Cache, L2Cache level2Cache) {
         this.cacheName = cacheName;
         this.level1Cache = level1Cache;
         this.level2Cache = level2Cache;
-        //TODO 设置level2Cache到CustomCacheLoader中
+        if (level1Cache.isLoadingCache()) {
+            // 设置level2Cache到CustomCacheLoader中，以便CacheLoader中直接操作level2Cache
+            level1Cache.getCacheLoader().setLevel2Cache(level2Cache);
+        }
     }
 
     @Override
@@ -50,10 +53,10 @@ public class CompositeCache implements Cache {
 
     @Override
     public Object get(Object key) {
-        /*// L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
+        // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
         if (level1Cache.isLoadingCache()) {
             return level1Cache.get(key);
-        }*/
+        }
 
         // 从L1获取缓存
         Object value = level1Cache.get(key);

@@ -15,7 +15,12 @@ public interface L1Cache extends Cache {
      * 缓存同步策略
      * 注：因为一级缓存为本地缓存，所以需要进行不同节点间的缓存数据同步
      */
-    public CacheSyncPolicy getCacheSyncPolicy();
+    CacheSyncPolicy getCacheSyncPolicy();
+
+    /**
+     * 缓存加载器
+     */
+    CacheLoader getCacheLoader();
 
     /**
      * 是否为 LoadingCache

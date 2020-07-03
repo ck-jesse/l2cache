@@ -1,8 +1,10 @@
 package com.coy.l2cache.cache.builder;
 
 import com.coy.l2cache.cache.Cache;
-import com.coy.l2cache.cache.CompositeCache;
 import com.coy.l2cache.cache.CacheType;
+import com.coy.l2cache.cache.CompositeCache;
+import com.coy.l2cache.cache.L1Cache;
+import com.coy.l2cache.cache.L2Cache;
 import com.coy.l2cache.cache.provider.CacheSupport;
 import com.coy.l2cache.cache.spi.ServiceLoader;
 import org.springframework.util.StringUtils;
@@ -28,22 +30,33 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
             l2CacheType = CacheType.NONE.name();
         }
         if (l1CacheType.equalsIgnoreCase(l2CacheType)) {
-            throw new IllegalArgumentException("l1CacheType and l2CacheType can't be the same, l1CacheType=" + l1CacheType);
+            throw new IllegalArgumentException("l1CacheType and l2CacheType can't be the same value " + l1CacheType);
+        }
+        // 限制不能为自己，否则会出现循环构建CompositeCache的情况
+        if (l1CacheType.equalsIgnoreCase(CacheType.COMPOSITE.name()) || l2CacheType.equalsIgnoreCase(CacheType.COMPOSITE.name())) {
+            throw new IllegalArgumentException("l1CacheType and l2CacheType can't be the CompositeCache, " +
+                    "Otherwise, loop building CompositeCache causes java.lang.StackOverflowError");
         }
 
         // 构建L1
         Cache level1Cache = this.getCacheInstance(l1CacheType, cacheName);
+        if (!(level1Cache instanceof L1Cache)) {
+            throw new IllegalArgumentException("l1Cache must be implements L1Cache, l1CacheType=" + l1CacheType);
+        }
 
         // 构建L2
         Cache level2Cache = this.getCacheInstance(l2CacheType, cacheName);
+        if (!(level2Cache instanceof L2Cache)) {
+            throw new IllegalArgumentException("l2Cache must be implements L2Cache, l2CacheType=" + l2CacheType);
+        }
 
-        return this.build(cacheName, level1Cache, level2Cache);
+        return this.build(cacheName, (L1Cache) level1Cache, (L2Cache) level2Cache);
     }
 
     /**
-     * 根据传入的L1和L2构建组合缓存
+     * 构建组合缓存，传入L1和L2是为了与应用中已经存在的L1和L2进行集成
      */
-    public CompositeCache build(String cacheName, Cache level1Cache, Cache level2Cache) {
+    public CompositeCache build(String cacheName, L1Cache level1Cache, L2Cache level2Cache) {
         return new CompositeCache(cacheName, level1Cache, level2Cache);
     }
 

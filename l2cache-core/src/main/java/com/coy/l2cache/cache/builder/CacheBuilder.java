@@ -16,11 +16,6 @@ import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 public interface CacheBuilder<T extends Cache> {
 
     /**
-     * 构建cache对象
-     */
-    T build();
-
-    /**
      * 构建指定名称的cache对象
      */
     T build(String cacheName);
@@ -29,11 +24,6 @@ public interface CacheBuilder<T extends Cache> {
      * 复制属性
      */
     void copyFrom(CacheBuilder sourceBuilder);
-
-    /**
-     * 设置缓存名称
-     */
-    CacheBuilder cacheName(String cacheName);
 
     /**
      * 设置缓存配置
@@ -49,11 +39,6 @@ public interface CacheBuilder<T extends Cache> {
      * 设置缓存同步策略
      */
     CacheBuilder cacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy);
-
-    /**
-     * 获取缓存名称
-     */
-    String getCacheName();
 
     /**
      * 获取缓存配置

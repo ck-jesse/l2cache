@@ -1,5 +1,6 @@
 package com.coy.l2cache.cache;
 
+
 import java.util.concurrent.Callable;
 
 /**
@@ -38,9 +39,14 @@ public interface Cache {
      */
     default <T> T get(Object key, Class<T> type) {
         Object value = get(key);
+        if (null == value) {
+            return null;
+        }
+        if (value.getClass().getName().equals(NullValue.class.getName())) {
+            return null;
+        }
         if (value != null && type != null && !type.isInstance(value)) {
-            throw new IllegalStateException(
-                    "Cached value is not of required type [" + type.getName() + "]: " + value);
+            throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
         }
         return (T) value;
     }

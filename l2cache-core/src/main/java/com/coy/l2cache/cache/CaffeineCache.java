@@ -68,6 +68,11 @@ public class CaffeineCache implements L1Cache {
     }
 
     @Override
+    public CacheLoader getCacheLoader() {
+        return this.cacheLoader;
+    }
+
+    @Override
     public boolean isLoadingCache() {
         return this.caffeineCache instanceof LoadingCache && null != this.cacheLoader;
     }

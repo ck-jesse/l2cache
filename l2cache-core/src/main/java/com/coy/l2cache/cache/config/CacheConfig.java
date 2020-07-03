@@ -8,6 +8,8 @@ import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +37,7 @@ public class CacheConfig {
      *
      * @see CacheType
      */
-    private String cacheType = CacheType.CAFFEINE.name();
+    private String cacheType = CacheType.COMPOSITE.name();
 
     private final Composite composite = new Composite();
     private final Caffeine caffeine = new Caffeine();
@@ -44,6 +46,9 @@ public class CacheConfig {
     public static interface Config {
     }
 
+    /**
+     * 组合缓存配置
+     */
     @Getter
     @Setter
     @Accessors(chain = true)
@@ -51,11 +56,11 @@ public class CacheConfig {
         /**
          * 一级缓存类型
          */
-        private String l1CacheType;
+        private String l1CacheType = CacheType.CAFFEINE.name();
         /**
          * 二级缓存类型
          */
-        private String l2CacheType;
+        private String l2CacheType = CacheType.REDIS.name();
     }
 
     /**
@@ -102,7 +107,7 @@ public class CacheConfig {
     }
 
     /**
-     * Redis-specific cache properties.
+     * Redis specific cache properties.
      */
     @Getter
     @Setter
@@ -115,11 +120,6 @@ public class CacheConfig {
         private boolean allowNullValues = true;
 
         /**
-         * 过期时间(ms)
-         */
-        private long expireTime;
-
-        /**
          * 缓存Key prefix.
          */
         private String keyPrefix;
@@ -130,9 +130,67 @@ public class CacheConfig {
         private boolean useKeyPrefix = true;
 
         /**
+         * 缓存过期时间(ms)
+         */
+        private long expireTime;
+
+        /**
+         * 缓存最大空闲时间(ms)
+         * 注：在 Redisson 中 缓存过期被淘汰的时间 取符合条件的 expireTime 和 maxIdleTime 中间小的值。
+         * 如：expireTime=10s, maxIdleTime=5s, 那么当缓存空闲5s时，会被 Redisson 淘汰掉。
+         */
+        private long maxIdleTime;
+
+        /**
+         * 设置最大值，以便剔除多余元素
+         */
+        private int maxSize;
+
+        /**
+         * Redisson 的yaml配置文件
+         */
+        private String redissonYamlConfig;
+
+        /**
+         * Redisson Config
+         */
+        private org.redisson.config.Config redissonConfig;
+
+        /**
+         * 解析Redisson yaml文件
+         */
+        public org.redisson.config.Config getRedissonConfig() {
+            if (null != redissonConfig) {
+                return redissonConfig;
+            }
+            try {
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                URL url = classLoader.getResource(this.redissonYamlConfig);
+                redissonConfig = org.redisson.config.Config.fromYAML(url);
+                return redissonConfig;
+            } catch (IOException e) {
+                throw new IllegalStateException("parse redisson yaml config error", e);
+            }
+        }
+
+    }
+
+    /**
+     * 缓存同步策略配置
+     */
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class CacheSyncPolicy implements Config {
+
+        /**
+         * 策略类型
+         */
+        private String type;
+
+        /**
          * 缓存更新时通知其他节点的topic名称
          */
         private String topic = "l2cache:sync:topic";
-
     }
 }

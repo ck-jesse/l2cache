@@ -1,7 +1,5 @@
 package com.coy.l2cache.cache;
 
-import org.springframework.lang.Nullable;
-
 import java.io.Serializable;
 
 /**
@@ -22,15 +20,14 @@ public final class NullValue implements Serializable {
         return INSTANCE;
     }
 
-
     @Override
-    public boolean equals(@Nullable Object obj) {
+    public boolean equals(Object obj) {
         return (this == obj || obj == null);
     }
 
     @Override
     public int hashCode() {
-        return org.springframework.cache.support.NullValue.class.hashCode();
+        return NullValue.class.hashCode();
     }
 
     @Override

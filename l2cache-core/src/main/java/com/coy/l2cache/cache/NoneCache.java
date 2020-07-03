@@ -39,6 +39,11 @@ public class NoneCache implements L1Cache, L2Cache {
     }
 
     @Override
+    public CacheLoader getCacheLoader() {
+        return null;
+    }
+
+    @Override
     public boolean isLoadingCache() {
         return false;
     }

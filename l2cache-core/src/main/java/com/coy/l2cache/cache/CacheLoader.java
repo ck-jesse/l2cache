@@ -6,7 +6,7 @@ import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import java.util.concurrent.Callable;
 
 /**
- * 缓存加载
+ * 缓存加载器
  *
  * @author chenck
  * @date 2020/7/2 10:21

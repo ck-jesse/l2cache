@@ -9,11 +9,17 @@ package com.coy.l2cache.cache.sync;
 public interface CacheSyncPolicy {
 
     /**
-     * 缓存变更时通知其他节点清理本地缓存
+     * 发布，缓存变更时通知其他节点清理本地缓存
      *
      * @param key
      * @param optType 操作类型 refresh/clear
      */
     void publish(Object key, String optType);
 
+    /**
+     * 订阅，
+     * 
+     * @param
+     */
+    void subscribe();
 }

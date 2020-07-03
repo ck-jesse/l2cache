@@ -37,6 +37,11 @@ public class GuavaCache implements L1Cache {
     }
 
     @Override
+    public CacheLoader getCacheLoader() {
+        return null;
+    }
+
+    @Override
     public boolean isLoadingCache() {
         return true;
     }

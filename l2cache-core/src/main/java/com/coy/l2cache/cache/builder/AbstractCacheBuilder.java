@@ -11,8 +11,6 @@ import com.coy.l2cache.cache.sync.CacheSyncPolicy;
  */
 public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuilder {
 
-    private String cacheName;
-
     private CacheConfig cacheConfig;
 
     private CacheExpiredListener expiredListener;
@@ -23,23 +21,11 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
     //private CacheLoader cacheLoader;
 
     @Override
-    public T build() {
-        return (T) this.build(this.getCacheName());
-    }
-
-    @Override
     public void copyFrom(CacheBuilder sourceBuilder) {
-        this.cacheName(sourceBuilder.getCacheName());
         this.cacheConfig(sourceBuilder.getCacheConfig());
         this.expiredListener(sourceBuilder.getExpiredListener());
         this.cacheSyncPolicy(sourceBuilder.getCacheSyncPolicy());
         //this.cacheLoader(sourceBuilder.getCacheLoader());
-    }
-
-    @Override
-    public CacheBuilder cacheName(String cacheName) {
-        this.cacheName = cacheName;
-        return this;
     }
 
     @Override
@@ -61,11 +47,6 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
     }
 
     @Override
-    public String getCacheName() {
-        return this.cacheName;
-    }
-
-    @Override
     public CacheConfig getCacheConfig() {
         return this.cacheConfig;
     }
@@ -79,12 +60,15 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
     public CacheSyncPolicy getCacheSyncPolicy() {
         return this.cacheSyncPolicy;
     }
-/*public CacheLoader getCacheLoader() {
+
+    /*
+    public CacheLoader getCacheLoader() {
         return cacheLoader;
     }
 
-    public AbstractCacheBuilder cacheLoader(CacheLoader cacheLoader) {
+    public CacheBuilder cacheLoader(CacheLoader cacheLoader) {
         this.cacheLoader = cacheLoader;
         return this;
-    }*/
+    }
+    */
 }

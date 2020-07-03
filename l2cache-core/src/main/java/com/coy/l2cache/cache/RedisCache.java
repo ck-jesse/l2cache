@@ -35,10 +35,10 @@ public class RedisCache implements L2Cache {
      */
     private final CacheConfig.Redis redis;
 
-    public RedisCache(String cacheName, RedisTemplate<Object, Object> redisTemplate, CacheConfig.Redis redis) {
+    public RedisCache(String cacheName, CacheConfig.Redis redis, RedisTemplate<Object, Object> redisTemplate) {
         this.cacheName = cacheName;
-        this.redisTemplate = redisTemplate;
         this.redis = redis;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -73,7 +73,7 @@ public class RedisCache implements L2Cache {
     }
 
     @Override
-    public Object getActualCache() {
+    public RedisTemplate<Object, Object> getActualCache() {
         return this.redisTemplate;
     }
 
