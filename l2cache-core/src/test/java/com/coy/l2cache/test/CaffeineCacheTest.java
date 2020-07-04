@@ -12,6 +12,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * CaffeineCache 中各个方法的单元测试
+ */
 public class CaffeineCacheTest {
 
     CacheConfig cacheConfig = new CacheConfig();

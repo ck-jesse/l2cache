@@ -7,6 +7,9 @@ import com.coy.l2cache.cache.builder.RedisCacheBuilder;
 import com.coy.l2cache.cache.config.CacheConfig;
 import org.junit.Before;
 
+/**
+ * RedissonCache 中各个方法的单元测试
+ */
 public class RedisCacheTest {
 
     CacheConfig cacheConfig = new CacheConfig();
