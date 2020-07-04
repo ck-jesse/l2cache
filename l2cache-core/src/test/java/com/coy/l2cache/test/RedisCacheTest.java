@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * RedissonCache 中各个方法的单元测试
@@ -17,6 +19,7 @@ public class RedisCacheTest {
 
     CacheConfig cacheConfig = new CacheConfig();
     RedissonCache cache;
+    Callable<String> callable;
 
     @Before
     public void before() {
@@ -33,6 +36,17 @@ public class RedisCacheTest {
                 .setCacheConfig(cacheConfig)
                 .build("redisCache");
 
+        callable = new Callable<String>() {
+            AtomicInteger count = new AtomicInteger(1);
+
+            @Override
+            public String call() throws Exception {
+                String result = "loader_value" + count.getAndAdd(1);
+                System.out.println("loader value from valueLoader, return " + result);
+                return result;
+            }
+        };
+
         System.out.println("cacheName: " + cache.getCacheName());
         System.out.println("level: " + cache.getCacheName());
         System.out.println("actualCache: " + cache.getActualCache().getClass().getName());
@@ -41,6 +55,7 @@ public class RedisCacheTest {
 
     // 因为get()可能会触发load操作，所以打印数据时使用该方法
     private void printAllCache() {
+        System.out.println("L2 所有的缓存值");
         Map map1 = cache.getActualCache().readAllMap();
         map1.forEach((o1, o2) -> {
             System.out.println(String.format("key=%s, value=%s", o1, o2));
@@ -50,7 +65,7 @@ public class RedisCacheTest {
 
     private void printCache(Object key) {
         Object value = cache.get(key);
-        System.out.println(String.format("key=%s, value=%s", key, value));
+        System.out.println(String.format("L2 缓存值 key=%s, value=%s", key, value));
         System.out.println();
     }
 
@@ -89,11 +104,7 @@ public class RedisCacheTest {
     public void getAndLoadTest() throws InterruptedException {
         // 3 get and load from Callable
         String key = "key_loader";
-        String value = cache.get(key, () -> {
-            String result = "loader_value";
-            System.out.println("loader value from valueLoader, return " + result);
-            return result;
-        });
+        String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
     }
 
@@ -125,9 +136,9 @@ public class RedisCacheTest {
         String value = "value1";
         cache.put(key, value);
         System.out.println(String.format("put key=%s, value=%s", key, value));
-        System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, String.class)));
         System.out.println();
 
+        printCache(key);
         // 删除指定的缓存项
         cache.evict(key);
         printCache(key);

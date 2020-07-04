@@ -100,4 +100,11 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         level1Cache.clear();
     }
 
+    public L1Cache getLevel1Cache() {
+        return level1Cache;
+    }
+
+    public L2Cache getLevel2Cache() {
+        return level2Cache;
+    }
 }

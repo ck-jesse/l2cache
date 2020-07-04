@@ -145,6 +145,7 @@ public class CacheConfig {
 
         /**
          * 最大缓存数，以便剔除多余元素
+         * 注：注意如果与一级缓存（如：caffeine）中最大数量大小不一致，会出现一级缓存和二级缓存中缓存数量不一致，所以建议设置为一致减少不必要的歧义。
          */
         private int maxSize;
 

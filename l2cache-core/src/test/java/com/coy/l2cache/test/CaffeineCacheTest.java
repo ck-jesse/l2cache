@@ -58,6 +58,7 @@ public class CaffeineCacheTest {
 
     // 因为get()可能会触发load操作，所以打印数据时使用该方法
     private void printAllCache() {
+        System.out.println("L1 所有的缓存值");
         ConcurrentMap map1 = cache.getActualCache().asMap();
         map1.forEach((o1, o2) -> {
             System.out.println(String.format("key=%s, value=%s", o1, o2));
@@ -68,7 +69,7 @@ public class CaffeineCacheTest {
     private void printCache(Object key) {
         ConcurrentMap map1 = cache.getActualCache().asMap();
         Object value = map1.get(key);
-        System.out.println(String.format("key=%s, value=%s", key, value));
+        System.out.println(String.format("L1 缓存值 key=%s, value=%s", key, value));
         System.out.println();
     }
 
@@ -106,11 +107,7 @@ public class CaffeineCacheTest {
     public void getAndLoadTest() throws InterruptedException {
         // 3 get and load from Callable
         String key = "key_loader";
-        String value = cache.get(key, () -> {
-            String result = "loader_value";
-            System.out.println("loader value from valueLoader, return " + result);
-            return result;
-        });
+        String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
     }
 
@@ -142,9 +139,9 @@ public class CaffeineCacheTest {
         String value = "value1";
         cache.put(key, value);
         System.out.println(String.format("put key=%s, value=%s", key, value));
-        System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, String.class)));
         System.out.println();
 
+        printCache(key);
         // 删除指定的缓存项
         cache.evict(key);
         printCache(key);

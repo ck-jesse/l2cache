@@ -128,10 +128,10 @@ public class RedissonCache extends AbstractAdaptingCache implements L2Cache {
 
     @Override
     public void put(Object key, Object value) {
-        if (!isAllowNullValues() && value == null) {
+        /*if (!isAllowNullValues() && value == null) {
             map.remove(buildKey(key));
             return;
-        }
+        }*/
 
         value = toStoreValue(value);
         if (mapCache != null) {
