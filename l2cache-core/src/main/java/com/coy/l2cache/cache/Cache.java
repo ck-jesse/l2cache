@@ -28,7 +28,6 @@ public interface Cache {
      */
     Object getActualCache();
 
-
     /**
      * 获取指定key的缓存项
      */
@@ -66,7 +65,7 @@ public interface Cache {
     void put(Object key, Object value);
 
     /**
-     * 如果指定的key不存在，则设置缓存项
+     * 如果指定的key不存在，则设置缓存项，如果存在，则返回存在的值
      *
      * @see #put(Object, Object)
      */

@@ -33,9 +33,9 @@ public class CompositeCacheBuilderTest {
                 .setAutoRefreshExpireCache(true);
 
         Cache cache = new CompositeCacheBuilder()
-                .cacheConfig(cacheConfig)
-                .expiredListener(new DefaultCacheExpiredListener())
-                .cacheSyncPolicy(null)
+                .setCacheConfig(cacheConfig)
+                .setExpiredListener(new DefaultCacheExpiredListener())
+                .setCacheSyncPolicy(null)
                 .build("test");
 
         String key = "key1";
@@ -71,9 +71,9 @@ public class CompositeCacheBuilderTest {
                 .setRedissonYamlConfig("redisson.yaml");
 
         Cache cache = new CompositeCacheBuilder()
-                .cacheConfig(cacheConfig)
-                .expiredListener(new DefaultCacheExpiredListener())
-                .cacheSyncPolicy(null)
+                .setCacheConfig(cacheConfig)
+                .setExpiredListener(new DefaultCacheExpiredListener())
+                .setCacheSyncPolicy(null)
                 .build("composite");
 
         String key = "key";
@@ -113,9 +113,9 @@ public class CompositeCacheBuilderTest {
                 .setRedissonYamlConfig("redisson.yaml");
 
         Cache cache = new CompositeCacheBuilder()
-                .cacheConfig(cacheConfig)
-                .expiredListener(new DefaultCacheExpiredListener())
-                .cacheSyncPolicy(null)
+                .setCacheConfig(cacheConfig)
+                .setExpiredListener(new DefaultCacheExpiredListener())
+                .setCacheSyncPolicy(null)
                 .build("composite");
 
         // 请注意redis中key的值的变化

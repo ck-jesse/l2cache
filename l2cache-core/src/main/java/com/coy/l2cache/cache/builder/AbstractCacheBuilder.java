@@ -22,26 +22,26 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
 
     @Override
     public void copyFrom(CacheBuilder sourceBuilder) {
-        this.cacheConfig(sourceBuilder.getCacheConfig());
-        this.expiredListener(sourceBuilder.getExpiredListener());
-        this.cacheSyncPolicy(sourceBuilder.getCacheSyncPolicy());
+        this.setCacheConfig(sourceBuilder.getCacheConfig());
+        this.setExpiredListener(sourceBuilder.getExpiredListener());
+        this.setCacheSyncPolicy(sourceBuilder.getCacheSyncPolicy());
         //this.cacheLoader(sourceBuilder.getCacheLoader());
     }
 
     @Override
-    public CacheBuilder cacheConfig(CacheConfig cacheConfig) {
+    public CacheBuilder setCacheConfig(CacheConfig cacheConfig) {
         this.cacheConfig = cacheConfig;
         return this;
     }
 
     @Override
-    public CacheBuilder expiredListener(CacheExpiredListener expiredListener) {
+    public CacheBuilder setExpiredListener(CacheExpiredListener expiredListener) {
         this.expiredListener = expiredListener;
         return this;
     }
 
     @Override
-    public CacheBuilder cacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy) {
+    public CacheBuilder setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy) {
         this.cacheSyncPolicy = cacheSyncPolicy;
         return this;
     }

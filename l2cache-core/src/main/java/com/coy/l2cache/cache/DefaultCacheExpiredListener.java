@@ -15,6 +15,6 @@ public class DefaultCacheExpiredListener implements CacheExpiredListener {
 
     @Override
     public void onExpired(Object key, Object value) {
-        logger.debug("[ExpiredListener] cache is expired, key={}, value={}", key, value);
+        logger.debug("[ExpiredListener] clear expired cache, key={}, value={}", key, value);
     }
 }

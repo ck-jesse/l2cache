@@ -96,14 +96,13 @@ public class CaffeineCache implements L1Cache {
                 ((CustomCacheLoader) this.cacheLoader).addValueLoader(key, valueLoader);
             }
 
-            Object value = get(key);
-            logger.debug("CaffeineCache LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            Object value = this.get(key);
             return (T) value;
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
-        Object value = this.caffeineCache.get(key, new LoadFunction(null, getCacheSyncPolicy(), valueLoader));
-        logger.debug("CaffeineCache get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+        Object value = this.caffeineCache.get(key, new LoadFunction(this.cacheName, null, this.getCacheSyncPolicy(), valueLoader));
+        logger.debug("CaffeineCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) value;
     }
 
@@ -117,6 +116,7 @@ public class CaffeineCache implements L1Cache {
 
     @Override
     public void evict(Object key) {
+        logger.debug("evict cache, name={}, key={}", this.getCacheName(), key);
         caffeineCache.invalidate(key);
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(key, CacheConsts.CACHE_CLEAR);
@@ -125,6 +125,7 @@ public class CaffeineCache implements L1Cache {
 
     @Override
     public void clear() {
+        logger.debug("clear cache, name={}", this.getCacheName());
         caffeineCache.invalidateAll();
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(null, CacheConsts.CACHE_CLEAR);

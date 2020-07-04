@@ -24,6 +24,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     /**
      * <key, Callable>
      * 用户保证并发场景下对于不同的key找到对应的Callable进行数据加载
+     * 注：ConcurrentReferenceHashMap是一个实现软/弱引用的map，防止OOM出现
      */
     private static final Map<Object, Callable<?>> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
     private String cacheName;
@@ -74,11 +75,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
             return null;
         }
 
-        if (null == level2Cache) {
-            logger.info("[CustomCacheLoader] level2Cache is null direct return null, key={}", key);
-            return null;
-        }
-        LoadFunction loadFunction = new LoadFunction(level2Cache, cacheSyncPolicy, valueLoader);
+        LoadFunction loadFunction = new LoadFunction(cacheName, level2Cache, cacheSyncPolicy, valueLoader);
         return loadFunction.apply(key);
     }
 

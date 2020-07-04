@@ -26,9 +26,9 @@ public class CacheBuilderTest {
                 .setAutoRefreshExpireCache(true);
 
         Cache cache = new CaffeineCacheBuilder()
-                .cacheConfig(cacheConfig)
-                .expiredListener(new DefaultCacheExpiredListener())
-                .cacheSyncPolicy(null)
+                .setCacheConfig(cacheConfig)
+                .setExpiredListener(new DefaultCacheExpiredListener())
+                .setCacheSyncPolicy(null)
                 .build("test");
 
         String key = "key1";
@@ -55,9 +55,9 @@ public class CacheBuilderTest {
                 .setAutoRefreshExpireCache(true);
 
         Cache cache = new CompositeCacheBuilder()
-                .cacheConfig(cacheConfig)
-                .expiredListener(new DefaultCacheExpiredListener())
-                .cacheSyncPolicy(null)
+                .setCacheConfig(cacheConfig)
+                .setExpiredListener(new DefaultCacheExpiredListener())
+                .setCacheSyncPolicy(null)
                 .build("test");
 
         String key = "key1";
@@ -85,7 +85,7 @@ public class CacheBuilderTest {
                 .setMaxSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
-        CacheBuilder builder = new RedisCacheBuilder().cacheConfig(cacheConfig);
+        CacheBuilder builder = new RedisCacheBuilder().setCacheConfig(cacheConfig);
         Cache cache1 = builder.build("test3");
         Cache cache2 = builder.build("test4");
 
@@ -120,7 +120,7 @@ public class CacheBuilderTest {
                 .setMaxSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
-        CacheBuilder builder = new RedisCacheBuilder().cacheConfig(cacheConfig);
+        CacheBuilder builder = new RedisCacheBuilder().setCacheConfig(cacheConfig);
         Cache cache1 = builder.build("test1");
 
         String key = "key3";

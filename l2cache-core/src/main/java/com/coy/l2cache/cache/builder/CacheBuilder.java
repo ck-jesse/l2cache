@@ -26,24 +26,14 @@ public interface CacheBuilder<T extends Cache> {
     void copyFrom(CacheBuilder sourceBuilder);
 
     /**
-     * 设置缓存配置
-     */
-    CacheBuilder cacheConfig(CacheConfig cacheConfig);
-
-    /**
-     * 设置缓存过期监听器
-     */
-    CacheBuilder expiredListener(CacheExpiredListener expiredListener);
-
-    /**
-     * 设置缓存同步策略
-     */
-    CacheBuilder cacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy);
-
-    /**
      * 获取缓存配置
      */
     CacheConfig getCacheConfig();
+
+    /**
+     * 设置缓存配置
+     */
+    CacheBuilder setCacheConfig(CacheConfig cacheConfig);
 
     /**
      * 获取缓存过期监听器
@@ -51,7 +41,17 @@ public interface CacheBuilder<T extends Cache> {
     CacheExpiredListener getExpiredListener();
 
     /**
+     * 设置缓存过期监听器
+     */
+    CacheBuilder setExpiredListener(CacheExpiredListener expiredListener);
+
+    /**
      * 获取缓存同步策略
      */
     CacheSyncPolicy getCacheSyncPolicy();
+
+    /**
+     * 设置缓存同步策略
+     */
+    CacheBuilder setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy);
 }
