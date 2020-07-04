@@ -8,17 +8,10 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/29 16:55
  */
-public class GuavaCache implements L1Cache {
+public class GuavaCache extends AbstractAdaptingCache implements L1Cache {
 
-    private final String cacheName;
-
-    public GuavaCache(String cacheName) {
-        this.cacheName = cacheName;
-    }
-
-    @Override
-    public String getCacheName() {
-        return this.cacheName;
+    public GuavaCache(String cacheName, boolean allowNullValues) {
+        super(cacheName, allowNullValues);
     }
 
     @Override

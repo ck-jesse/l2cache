@@ -12,6 +12,10 @@ import java.util.concurrent.Callable;
  * @date 2020/6/16 19:49
  */
 public interface Cache {
+    /**
+     * 缓存中是否允许null值
+     */
+    boolean isAllowNullValues();
 
     /**
      * 获取缓存名称
@@ -39,9 +43,6 @@ public interface Cache {
     default <T> T get(Object key, Class<T> type) {
         Object value = get(key);
         if (null == value) {
-            return null;
-        }
-        if (value.getClass().getName().equals(NullValue.class.getName())) {
             return null;
         }
         if (value != null && type != null && !type.isInstance(value)) {
@@ -75,6 +76,30 @@ public interface Cache {
             put(key, value);
         }
         return existingValue;
+    }
+
+    /**
+     * 从存储值解析为具体值
+     */
+    default Object fromStoreValue(Object storeValue) {
+        if (this.isAllowNullValues() && storeValue == NullValue.INSTANCE) {
+            return null;
+        }
+        return storeValue;
+    }
+
+    /**
+     * 转换为存储值
+     */
+    default Object toStoreValue(Object userValue) {
+        if (userValue == null) {
+            if (this.isAllowNullValues()) {
+                return NullValue.INSTANCE;
+            }
+            throw new IllegalArgumentException(
+                    "Cache '" + getCacheName() + "' is configured to not allow null values but null was provided");
+        }
+        return userValue;
     }
 
     /**

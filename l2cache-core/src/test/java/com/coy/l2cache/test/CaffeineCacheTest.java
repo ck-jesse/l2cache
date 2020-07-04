@@ -3,6 +3,7 @@ package com.coy.l2cache.test;
 import com.coy.l2cache.cache.CacheType;
 import com.coy.l2cache.cache.CaffeineCache;
 import com.coy.l2cache.cache.DefaultCacheExpiredListener;
+import com.coy.l2cache.cache.NullValue;
 import com.coy.l2cache.cache.builder.CaffeineCacheBuilder;
 import com.coy.l2cache.cache.config.CacheConfig;
 import org.junit.Before;
@@ -25,6 +26,7 @@ public class CaffeineCacheTest {
     public void before() {
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.CAFFEINE.name())
+                .setAllowNullValues(false)
                 .getCaffeine()
                 //.setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=2s,recordStats")
@@ -35,7 +37,7 @@ public class CaffeineCacheTest {
                 .setCacheConfig(cacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
                 .setCacheSyncPolicy(null)
-                .build("test");
+                .build("localCache");
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
@@ -71,6 +73,14 @@ public class CaffeineCacheTest {
     }
 
     @Test
+    public void putNullTest() throws InterruptedException {
+        String key = "key_null";
+        cache.put(key, null);
+        printCache(key);
+        System.out.println(cache.get(key));
+    }
+
+    @Test
     public void putAndGetTest() throws InterruptedException {
         String key = "key1";
         String value = "value1";
@@ -84,24 +94,24 @@ public class CaffeineCacheTest {
         System.out.println();
 
         // 2 put and get(key, type)
-        cache.put(key, cacheConfig);
+        cache.put(key, NullValue.INSTANCE);
         printCache(key);
 
-        CacheConfig value2 = cache.get(key, CacheConfig.class);
-        System.out.println(String.format("get key=%s, value=%s", key, value));
+        NullValue value2 = cache.get(key, NullValue.class);
+        System.out.println(String.format("get key=%s, value=%s", key, value2));
         System.out.println();
     }
 
     @Test
     public void getAndLoadTest() throws InterruptedException {
         // 3 get and load from Callable
-        String key3 = "key_loader";
-        String value3 = cache.get(key3, () -> {
+        String key = "key_loader";
+        String value = cache.get(key, () -> {
             String result = "loader_value";
             System.out.println("loader value from valueLoader, return " + result);
             return result;
         });
-        System.out.println(String.format("get key=%s, value=%s", key3, value3));
+        System.out.println(String.format("get key=%s, value=%s", key, value));
     }
 
     @Test
@@ -117,8 +127,9 @@ public class CaffeineCacheTest {
         System.out.println();
 
         // newkey1 不存在，putIfAbsent成功，并返回null
-        oldValue = cache.putIfAbsent("newkey1", "newvalue1");
-        System.out.println(String.format("putIfAbsent key=%s, oldValue=%s", "newkey1", oldValue));
+        String newkey1 = "newkey1";
+        oldValue = cache.putIfAbsent(newkey1, "newvalue1");
+        System.out.println(String.format("putIfAbsent key=%s, oldValue=%s, value=%s", newkey1, oldValue, cache.get(newkey1)));
         System.out.println();
 
         System.out.println("缓存中所有的元素");

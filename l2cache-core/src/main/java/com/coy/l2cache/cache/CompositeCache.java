@@ -11,11 +11,10 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/29 17:32
  */
-public class CompositeCache implements Cache {
+public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CompositeCache.class);
 
-    private final String cacheName;
     /**
      * 一级缓存
      */
@@ -27,7 +26,11 @@ public class CompositeCache implements Cache {
     private final L2Cache level2Cache;
 
     public CompositeCache(String cacheName, L1Cache level1Cache, L2Cache level2Cache) {
-        this.cacheName = cacheName;
+        this(cacheName, false, level1Cache, level2Cache);
+    }
+
+    public CompositeCache(String cacheName, boolean allowNullValues, L1Cache level1Cache, L2Cache level2Cache) {
+        super(cacheName, allowNullValues);
         this.level1Cache = level1Cache;
         this.level2Cache = level2Cache;
         if (level1Cache.isLoadingCache()) {
@@ -37,17 +40,12 @@ public class CompositeCache implements Cache {
     }
 
     @Override
-    public String getCacheName() {
-        return this.cacheName;
-    }
-
-    @Override
     public String getLevel() {
         return "composite";
     }
 
     @Override
-    public Object getActualCache() {
+    public CompositeCache getActualCache() {
         return this;
     }
 

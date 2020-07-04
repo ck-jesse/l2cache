@@ -7,7 +7,15 @@ package com.coy.l2cache.cache;
  * @date 2020/7/2 12:06
  */
 public enum CacheType {
-    NONE, COMPOSITE, CAFFEINE, GUAVA, REDIS,
+    // L1 or L2
+    NONE,
+    // 组合
+    COMPOSITE,
+    // L1
+    CAFFEINE,
+    GUAVA,
+    // L2
+    REDIS,
     ;
 
     public static CacheType getCacheType(String type) {

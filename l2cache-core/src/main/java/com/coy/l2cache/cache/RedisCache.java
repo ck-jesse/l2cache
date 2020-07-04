@@ -17,13 +17,9 @@ import java.util.concurrent.TimeUnit;
  * @author chenck
  * @date 2020/6/29 16:37
  */
-public class RedisCache implements L2Cache {
+public class RedisCache extends AbstractAdaptingCache implements L2Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
-    /**
-     * 缓存名字
-     */
-    private final String cacheName;
 
     /**
      * L2 Redis
@@ -35,15 +31,10 @@ public class RedisCache implements L2Cache {
      */
     private final CacheConfig.Redis redis;
 
-    public RedisCache(String cacheName, CacheConfig.Redis redis, RedisTemplate<Object, Object> redisTemplate) {
-        this.cacheName = cacheName;
+    public RedisCache(String cacheName, boolean allowNullValues, CacheConfig.Redis redis, RedisTemplate<Object, Object> redisTemplate) {
+        super(cacheName, allowNullValues);
         this.redis = redis;
         this.redisTemplate = redisTemplate;
-    }
-
-    @Override
-    public boolean isAllowNullValues() {
-        return redis.isAllowNullValues();
     }
 
     @Override
@@ -54,17 +45,12 @@ public class RedisCache implements L2Cache {
     @Override
     public Object buildKey(Object key) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.cacheName).append(":");
+        sb.append(this.getCacheName()).append(":");
         if (redis.isUseKeyPrefix() && !StringUtils.isEmpty(redis.getKeyPrefix())) {
             sb.append(redis.getKeyPrefix()).append(":");
         }
         sb.append(key.toString());
         return sb.toString();
-    }
-
-    @Override
-    public String getCacheName() {
-        return this.cacheName;
     }
 
     @Override
@@ -98,7 +84,7 @@ public class RedisCache implements L2Cache {
         Object cacheValue = preProcessCacheValue(value);
 
         if (!isAllowNullValues() && cacheValue == null) {
-            throw new IllegalArgumentException(String.format("Cache '%s' does not allow 'null' values. ", cacheName));
+            throw new IllegalArgumentException(String.format("Cache '%s' does not allow 'null' values. ", getCacheName()));
         }
         redisTemplate.opsForValue().set(buildKey(key), cacheValue, this.getExpireTime(), TimeUnit.MILLISECONDS);
     }
@@ -128,7 +114,7 @@ public class RedisCache implements L2Cache {
     @Override
     public void clear() {
         logger.debug("RedisCache clear all cache, cacheName={}", this.getCacheName());
-        Set<Object> keys = redisTemplate.keys(this.cacheName.concat(":"));
+        Set<Object> keys = redisTemplate.keys(this.getCacheName().concat(":"));
         for (Object key : keys) {
             redisTemplate.delete(key);
         }

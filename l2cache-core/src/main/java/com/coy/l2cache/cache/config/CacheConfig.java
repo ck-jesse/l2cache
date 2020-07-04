@@ -28,6 +28,11 @@ public class CacheConfig {
     private String instanceId = RandomUtil.getUUID();
 
     /**
+     * 是否存储空值，默认true，防止缓存穿透
+     */
+    private boolean allowNullValues = true;
+
+    /**
      * 是否动态根据cacheName创建Cache的实现，默认true
      */
     private boolean dynamic = true;
@@ -42,6 +47,7 @@ public class CacheConfig {
     private final Composite composite = new Composite();
     private final Caffeine caffeine = new Caffeine();
     private final Redis redis = new Redis();
+    private final CacheSyncPolicy cacheSyncPolicy = new CacheSyncPolicy();
 
     public static interface Config {
     }
@@ -115,19 +121,15 @@ public class CacheConfig {
     public static class Redis implements Config {
 
         /**
-         * 是否存储空值，默认true，防止缓存穿透
+         * Whether to use the key prefix when writing to Redis.
          */
-        private boolean allowNullValues = true;
+        private boolean useKeyPrefix = true;
 
         /**
          * 缓存Key prefix.
          */
         private String keyPrefix;
 
-        /**
-         * Whether to use the key prefix when writing to Redis.
-         */
-        private boolean useKeyPrefix = true;
 
         /**
          * 缓存过期时间(ms)
@@ -142,7 +144,7 @@ public class CacheConfig {
         private long maxIdleTime;
 
         /**
-         * 设置最大值，以便剔除多余元素
+         * 最大缓存数，以便剔除多余元素
          */
         private int maxSize;
 

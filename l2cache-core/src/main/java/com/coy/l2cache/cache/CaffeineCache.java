@@ -15,14 +15,10 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/29 16:37
  */
-public class CaffeineCache implements L1Cache {
+public class CaffeineCache extends AbstractAdaptingCache implements L1Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CaffeineCache.class);
 
-    /**
-     * 缓存名字
-     */
-    private final String cacheName;
     /**
      * 缓存加载器，用于异步加载缓存
      */
@@ -41,15 +37,14 @@ public class CaffeineCache implements L1Cache {
     }
 
     public CaffeineCache(String cacheName, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
-        this.cacheName = cacheName;
+        this(cacheName, false, cacheLoader, cacheSyncPolicy, caffeineCache);
+    }
+
+    public CaffeineCache(String cacheName, boolean allowNullValues, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
+        super(cacheName, allowNullValues);
         this.cacheLoader = cacheLoader;
         this.cacheSyncPolicy = cacheSyncPolicy;
         this.caffeineCache = caffeineCache;
-    }
-
-    @Override
-    public String getCacheName() {
-        return this.cacheName;
     }
 
     @Override
@@ -83,9 +78,9 @@ public class CaffeineCache implements L1Cache {
             // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
             Object value = ((LoadingCache) this.caffeineCache).get(key);
             logger.debug("CaffeineCache LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
-            return value;
+            return fromStoreValue(value);
         }
-        return this.caffeineCache.getIfPresent(key);
+        return fromStoreValue(this.caffeineCache.getIfPresent(key));
     }
 
     @Override
@@ -97,18 +92,18 @@ public class CaffeineCache implements L1Cache {
             }
 
             Object value = this.get(key);
-            return (T) value;
+            return (T) fromStoreValue(value);
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
-        Object value = this.caffeineCache.get(key, new LoadFunction(this.cacheName, null, this.getCacheSyncPolicy(), valueLoader));
+        Object value = this.caffeineCache.get(key, new LoadFunction(this.getCacheName(), null, this.getCacheSyncPolicy(), valueLoader));
         logger.debug("CaffeineCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
-        return (T) value;
+        return (T) fromStoreValue(value);
     }
 
     @Override
     public void put(Object key, Object value) {
-        caffeineCache.put(key, value);
+        caffeineCache.put(key, toStoreValue(value));
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(key, CacheConsts.CACHE_REFRESH);
         }

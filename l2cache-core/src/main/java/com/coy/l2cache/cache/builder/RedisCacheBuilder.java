@@ -28,19 +28,20 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
             redissonClient = Redisson.create(redis.getRedissonConfig());
         }
 
-        return this.build(cacheName, redis, redissonClient);
+        return this.build(cacheName, this.getCacheConfig(), redissonClient);
     }
 
-    protected RedissonCache build(String cacheName, CacheConfig.Redis redis, RedissonClient redissonClient) {
+    protected RedissonCache build(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
+        CacheConfig.Redis redis = this.getCacheConfig().getRedis();
         if (redis.getMaxIdleTime() == 0 && redis.getExpireTime() == 0 && redis.getMaxSize() == 0) {
             RMap<Object, Object> map = redissonClient.getMap(cacheName);
             logger.info("create a Redisson RMap instance, cacheName={}", cacheName);
-            return new RedissonCache(cacheName, redis, map);
+            return new RedissonCache(cacheName, cacheConfig.isAllowNullValues(), redis, map);
         }
 
         RMapCache<Object, Object> mapCache = redissonClient.getMapCache(cacheName);
         mapCache.setMaxSize(redis.getMaxSize());
         logger.info("create a Redisson RMapCache instance, cacheName={}", cacheName);
-        return new RedissonCache(cacheName, redis, mapCache);
+        return new RedissonCache(cacheName, cacheConfig.isAllowNullValues(), redis, mapCache);
     }
 }

@@ -21,6 +21,7 @@ public class CacheBuilderTest {
         CacheConfig cacheConfig = new CacheConfig();
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.CAFFEINE.name())
+                .setAllowNullValues(true)
                 .getCaffeine()
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=2s,recordStats")
                 .setAutoRefreshExpireCache(true);

@@ -27,13 +27,9 @@ import java.util.concurrent.TimeUnit;
  * @author chenck
  * @date 2020/7/3 13:59
  */
-public class RedissonCache implements L2Cache {
+public class RedissonCache extends AbstractAdaptingCache implements L2Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(RedissonCache.class);
-    /**
-     * 缓存名字
-     */
-    private final String cacheName;
 
     /**
      * redis config
@@ -53,17 +49,16 @@ public class RedissonCache implements L2Cache {
     private final RMap<Object, Object> map;
 
     public RedissonCache(String cacheName, CacheConfig.Redis redis, RMap<Object, Object> map) {
-        this.cacheName = cacheName;
+        this(cacheName, false, redis, map);
+    }
+
+    public RedissonCache(String cacheName, boolean allowNullValues, CacheConfig.Redis redis, RMap<Object, Object> map) {
+        super(cacheName, allowNullValues);
         this.redis = redis;
         this.map = map;
         if (map instanceof RMapCache) {
             this.mapCache = (RMapCache<Object, Object>) map;
         }
-    }
-
-    @Override
-    public boolean isAllowNullValues() {
-        return redis.isAllowNullValues();
     }
 
     @Override
@@ -84,11 +79,6 @@ public class RedissonCache implements L2Cache {
     }
 
     @Override
-    public String getCacheName() {
-        return this.cacheName;
-    }
-
-    @Override
     public String getLevel() {
         return "2";
     }
@@ -106,24 +96,21 @@ public class RedissonCache implements L2Cache {
 
     @Override
     public <T> T get(Object key, Class<T> type) {
-        Object value = get(key);
+        Object value = this.get(key);
         if (null == value) {
-            return null;
-        }
-        if (value.getClass().getName().equals(NullValue.class.getName())) {
             return null;
         }
         if (value != null && type != null && !type.isInstance(value)) {
             throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
         }
-        return (T) fromStoreValue(value);
+        return (T) value;
     }
 
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
         Object value = this.get(key);
         if (value != null) {
-            return (T) fromStoreValue(value);
+            return (T) value;
         }
         RLock lock = map.getLock(key);
         lock.lock();
@@ -157,7 +144,7 @@ public class RedissonCache implements L2Cache {
     @Override
     public Object putIfAbsent(Object key, Object value) {
         if (!isAllowNullValues() && value == null) {
-            return get(key);// 不允许为null，且cacheValue为null，则直接获取缓存并返回
+            return this.get(key);// 不允许为null，且cacheValue为null，则直接获取缓存并返回
         }
         Object prevValue = null;
         if (mapCache != null) {
@@ -179,31 +166,6 @@ public class RedissonCache implements L2Cache {
     public void clear() {
         logger.debug("RedisCache clear all cache, cacheName={}", this.getCacheName());
         map.clear();
-    }
-
-
-    protected Object fromStoreValue(Object storeValue) {
-        if (storeValue instanceof NullValue) {
-            return null;
-        }
-        return storeValue;
-    }
-
-    protected Object toStoreValue(Object userValue) {
-        if (userValue == null) {
-            return NullValue.INSTANCE;
-        }
-        return userValue;
-    }
-
-    /**
-     * 预处理value
-     */
-    protected Object preProcessCacheValue(Object value) {
-        if (value != null) {
-            return value;
-        }
-        return isAllowNullValues() ? NullValue.INSTANCE : null;
     }
 
     /**

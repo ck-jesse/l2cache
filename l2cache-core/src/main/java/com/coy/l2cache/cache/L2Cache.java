@@ -9,11 +9,6 @@ package com.coy.l2cache.cache;
 public interface L2Cache extends Cache {
 
     /**
-     * 缓存中是否允许null值
-     */
-    boolean isAllowNullValues();
-
-    /**
      * 获取redis过期时间(ms)
      */
     long getExpireTime();

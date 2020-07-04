@@ -23,6 +23,16 @@ spring:
 l2cache:
   # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
   #instanceId: a1
+  # 是否存储空值，默认true，防止缓存穿透
+  allowNullValues: true
+  # 缓存类型
+  cacheType: composite
+  # 组合缓存配置
+  composite:
+    # 一级缓存类型
+    l1CacheType: caffeine
+    # 二级缓存类型
+    l2CacheType: redis
   # 一级缓存
   caffeine:
     # 是否构建异步Caffeine true 是 false 否
@@ -45,5 +55,23 @@ l2cache:
       userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
   # 二级缓存
   redis:
-    topic: cache:caffeine:redis:topic
+    # 是否启用缓存Key prefix
+    useKeyPrefix: true
+    # 缓存Key prefix
+    keyPrefix: ""
+    # 缓存过期时间(ms)
+    expireTime: 30000
+    # 缓存最大空闲时间(ms)
+    maxIdleTime: 30000
+    # 最大缓存数
+    maxSize: 200
+    # Redisson 的yaml配置文件
+    redissonYamlConfig: redisson.yaml
+    # 缓存同步策略配置
+  cacheSyncPolicy:
+    # 策略类型
+    type: redis
+    # 缓存更新时通知其他节点的topic名称
+    topic: l2cache:sync:topic
+
 

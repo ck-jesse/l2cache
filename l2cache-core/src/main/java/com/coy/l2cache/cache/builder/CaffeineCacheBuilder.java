@@ -32,7 +32,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig().getCaffeine(), customCacheLoader,
                 this.getExpiredListener());
 
-        return new CaffeineCache(cacheName, customCacheLoader, this.getCacheSyncPolicy(), cache);
+        return new CaffeineCache(cacheName, this.getCacheConfig().isAllowNullValues(), customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
 
     /**
