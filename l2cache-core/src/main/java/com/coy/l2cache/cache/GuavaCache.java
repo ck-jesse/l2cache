@@ -1,5 +1,7 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.cache.load.CacheLoader;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 
 import java.util.concurrent.Callable;
@@ -10,8 +12,8 @@ import java.util.concurrent.Callable;
  */
 public class GuavaCache extends AbstractAdaptingCache implements L1Cache {
 
-    public GuavaCache(String cacheName, boolean allowNullValues) {
-        super(cacheName, allowNullValues);
+    public GuavaCache(String cacheName, CacheConfig cacheConfig) {
+        super(cacheName, cacheConfig);
     }
 
     @Override

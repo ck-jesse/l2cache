@@ -1,5 +1,7 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.cache.config.CacheConfig;
+
 public abstract class AbstractAdaptingCache implements Cache {
 
     /**
@@ -11,9 +13,9 @@ public abstract class AbstractAdaptingCache implements Cache {
      */
     private final boolean allowNullValues;
 
-    public AbstractAdaptingCache(String cacheName, boolean allowNullValues) {
+    public AbstractAdaptingCache(String cacheName, CacheConfig cacheConfig) {
         this.cacheName = cacheName;
-        this.allowNullValues = allowNullValues;
+        this.allowNullValues = cacheConfig.isAllowNullValues();
     }
 
     @Override

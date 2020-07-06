@@ -51,14 +51,14 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
             throw new IllegalArgumentException("l2Cache must be implements L2Cache, l2CacheType=" + l2CacheType);
         }
 
-        return this.build(cacheName, this.getCacheConfig(), (L1Cache) level1Cache, (L2Cache) level2Cache);
+        return this.buildActualCache(cacheName, this.getCacheConfig(), (L1Cache) level1Cache, (L2Cache) level2Cache);
     }
 
     /**
      * 构建组合缓存，传入L1和L2是为了与应用中已经存在的L1和L2进行集成
      */
-    public CompositeCache build(String cacheName, CacheConfig cacheConfig, L1Cache level1Cache, L2Cache level2Cache) {
-        return new CompositeCache(cacheName, cacheConfig.isAllowNullValues(), level1Cache, level2Cache);
+    protected CompositeCache buildActualCache(String cacheName, CacheConfig cacheConfig, L1Cache level1Cache, L2Cache level2Cache) {
+        return new CompositeCache(cacheName, cacheConfig, level1Cache, level2Cache);
     }
 
     /**

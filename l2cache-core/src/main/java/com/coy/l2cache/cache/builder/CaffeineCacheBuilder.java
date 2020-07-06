@@ -1,9 +1,9 @@
 package com.coy.l2cache.cache.builder;
 
 import com.coy.l2cache.cache.CacheExpiredListener;
-import com.coy.l2cache.cache.CacheLoader;
+import com.coy.l2cache.cache.load.CacheLoader;
 import com.coy.l2cache.cache.CaffeineCache;
-import com.coy.l2cache.cache.CustomCacheLoader;
+import com.coy.l2cache.cache.load.CustomCacheLoader;
 import com.coy.l2cache.cache.config.CacheConfig;
 import com.coy.l2cache.context.CustomCaffeineSpec;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -29,19 +29,19 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         CacheLoader customCacheLoader = CustomCacheLoader.newInstance(cacheName);
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
 
-        Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig().getCaffeine(), customCacheLoader,
+        Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig(), customCacheLoader,
                 this.getExpiredListener());
 
-        return new CaffeineCache(cacheName, this.getCacheConfig().isAllowNullValues(), customCacheLoader, this.getCacheSyncPolicy(), cache);
+        return new CaffeineCache(cacheName, this.getCacheConfig(), customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
 
     /**
      * 构建实际缓存对象
      */
-    protected Cache<Object, Object> buildActualCache(String cacheName, CacheConfig.Caffeine caffeine, CacheLoader cacheLoader,
+    protected Cache<Object, Object> buildActualCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader,
                                                      CacheExpiredListener listener) {
         // 解析spec
-        CustomCaffeineSpec customCaffeineSpec = this.getCaffeineSpec(cacheName, caffeine);
+        CustomCaffeineSpec customCaffeineSpec = this.getCaffeineSpec(cacheName, cacheConfig.getCaffeine());
 
         Caffeine<Object, Object> cacheBuilder = defaultCacheBuilder;
         if (null != customCaffeineSpec) {

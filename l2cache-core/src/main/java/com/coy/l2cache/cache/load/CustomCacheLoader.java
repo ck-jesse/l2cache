@@ -1,5 +1,6 @@
-package com.coy.l2cache.cache;
+package com.coy.l2cache.cache.load;
 
+import com.coy.l2cache.cache.L2Cache;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     /**
      * <key, Callable>
-     * 用户保证并发场景下对于不同的key找到对应的Callable进行数据加载
+     * 用于保证并发场景下对于不同的key找到对应的Callable进行数据加载
      * 注：ConcurrentReferenceHashMap是一个实现软/弱引用的map，防止OOM出现
      */
     private static final Map<Object, Callable<?>> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
@@ -39,19 +40,10 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         return new CustomCacheLoader(cacheName);
     }
 
-    public L2Cache getLevel2Cache() {
-        return level2Cache;
-    }
-
-    public CacheSyncPolicy getCacheSyncPolicy() {
-        return cacheSyncPolicy;
-    }
-
     @Override
     public void setLevel2Cache(L2Cache level2Cache) {
         this.level2Cache = level2Cache;
     }
-
 
     @Override
     public void setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy) {
@@ -60,8 +52,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
-        Callable<?> oldCallable = VALUE_LOADER_CACHE.get(key);
-        if (null == oldCallable) {
+        if (!VALUE_LOADER_CACHE.containsKey(key)) {
             VALUE_LOADER_CACHE.put(key, valueLoader);
         }
     }

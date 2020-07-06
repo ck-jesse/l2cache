@@ -92,7 +92,7 @@ public class CacheConfig {
         /**
          * 缓存刷新调度线程池的大小
          */
-        private Integer refreshPoolSize = 1;
+        private Integer refreshPoolSize = 3;
 
         /**
          * 缓存刷新的频率(秒)

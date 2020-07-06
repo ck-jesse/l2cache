@@ -31,9 +31,9 @@ public class RedisCache extends AbstractAdaptingCache implements L2Cache {
      */
     private final CacheConfig.Redis redis;
 
-    public RedisCache(String cacheName, boolean allowNullValues, CacheConfig.Redis redis, RedisTemplate<Object, Object> redisTemplate) {
-        super(cacheName, allowNullValues);
-        this.redis = redis;
+    public RedisCache(String cacheName, CacheConfig cacheConfig, RedisTemplate<Object, Object> redisTemplate) {
+        super(cacheName, cacheConfig);
+        this.redis = cacheConfig.getRedis();
         this.redisTemplate = redisTemplate;
     }
 

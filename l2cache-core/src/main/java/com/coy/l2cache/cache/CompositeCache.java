@@ -1,5 +1,6 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.cache.config.CacheConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CompositeCache.class);
 
+    private final CacheConfig.Composite composite;
     /**
      * 一级缓存
      */
@@ -25,12 +27,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
      */
     private final L2Cache level2Cache;
 
-    public CompositeCache(String cacheName, L1Cache level1Cache, L2Cache level2Cache) {
-        this(cacheName, false, level1Cache, level2Cache);
-    }
-
-    public CompositeCache(String cacheName, boolean allowNullValues, L1Cache level1Cache, L2Cache level2Cache) {
-        super(cacheName, allowNullValues);
+    public CompositeCache(String cacheName, CacheConfig cacheConfig, L1Cache level1Cache, L2Cache level2Cache) {
+        super(cacheName, cacheConfig);
+        this.composite = cacheConfig.getComposite();
         this.level1Cache = level1Cache;
         this.level2Cache = level2Cache;
         if (level1Cache.isLoadingCache()) {

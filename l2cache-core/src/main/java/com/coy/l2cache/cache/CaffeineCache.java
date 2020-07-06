@@ -1,5 +1,11 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.cache.load.CacheLoader;
+import com.coy.l2cache.cache.load.CustomCacheLoader;
+import com.coy.l2cache.cache.load.LoadFunction;
+import com.coy.l2cache.cache.schedule.RefreshExpiredCacheTask;
+import com.coy.l2cache.cache.schedule.RefreshSupport;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -8,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Caffeine Cache
@@ -19,6 +26,10 @@ public class CaffeineCache extends AbstractAdaptingCache implements L1Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CaffeineCache.class);
 
+    /**
+     * caffeine config
+     */
+    private final CacheConfig.Caffeine caffeine;
     /**
      * 缓存加载器，用于异步加载缓存
      */
@@ -32,19 +43,20 @@ public class CaffeineCache extends AbstractAdaptingCache implements L1Cache {
      */
     private final Cache<Object, Object> caffeineCache;
 
-    public CaffeineCache(String cacheName, CacheLoader cacheLoader, Cache<Object, Object> caffeineCache) {
-        this(cacheName, cacheLoader, null, caffeineCache);
-    }
-
-    public CaffeineCache(String cacheName, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
-        this(cacheName, false, cacheLoader, cacheSyncPolicy, caffeineCache);
-    }
-
-    public CaffeineCache(String cacheName, boolean allowNullValues, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy, Cache<Object, Object> caffeineCache) {
-        super(cacheName, allowNullValues);
+    public CaffeineCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy,
+                         Cache<Object, Object> caffeineCache) {
+        super(cacheName, cacheConfig);
+        this.caffeine = cacheConfig.getCaffeine();
         this.cacheLoader = cacheLoader;
         this.cacheSyncPolicy = cacheSyncPolicy;
         this.caffeineCache = caffeineCache;
+
+        if (this.caffeine.isAutoRefreshExpireCache()) {
+            // 定期刷新过期的缓存
+            RefreshSupport.getInstance(this.caffeine.getRefreshPoolSize())
+                    .scheduleWithFixedDelay(new RefreshExpiredCacheTask(this), 3,
+                            this.caffeine.getRefreshPeriod(), TimeUnit.SECONDS);
+        }
     }
 
     @Override

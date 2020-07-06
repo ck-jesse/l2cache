@@ -48,13 +48,9 @@ public class RedissonCache extends AbstractAdaptingCache implements L2Cache {
      */
     private final RMap<Object, Object> map;
 
-    public RedissonCache(String cacheName, CacheConfig.Redis redis, RMap<Object, Object> map) {
-        this(cacheName, false, redis, map);
-    }
-
-    public RedissonCache(String cacheName, boolean allowNullValues, CacheConfig.Redis redis, RMap<Object, Object> map) {
-        super(cacheName, allowNullValues);
-        this.redis = redis;
+    public RedissonCache(String cacheName, CacheConfig cacheConfig, RMap<Object, Object> map) {
+        super(cacheName, cacheConfig);
+        this.redis = cacheConfig.getRedis();
         this.map = map;
         if (map instanceof RMapCache) {
             this.mapCache = (RMapCache<Object, Object>) map;

@@ -1,5 +1,6 @@
-package com.coy.l2cache.cache;
+package com.coy.l2cache.cache.load;
 
+import com.coy.l2cache.cache.L2Cache;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import org.slf4j.Logger;

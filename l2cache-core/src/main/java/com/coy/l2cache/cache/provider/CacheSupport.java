@@ -5,7 +5,7 @@ import com.coy.l2cache.cache.builder.CacheBuilder;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 缓存容器
@@ -19,7 +19,7 @@ public class CacheSupport {
      * 缓存容器
      * <key,value>=<cacheType_cacheName, Cache>
      */
-    private static final Map<String, Cache> CACHE_MAP = new TreeMap<>();
+    private static final Map<String, Cache> CACHE_MAP = new ConcurrentHashMap<>(16);
 
     private static final Object lock = new Object();
 

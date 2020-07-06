@@ -30,7 +30,9 @@ public class CaffeineCacheTest {
                 .getCaffeine()
                 //.setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=2s,recordStats")
-                .setAutoRefreshExpireCache(true);
+                .setAutoRefreshExpireCache(true)
+                .setRefreshPoolSize(3)
+                .setRefreshPeriod(5L);
 
         // 构建cache
         cache = (CaffeineCache) new CaffeineCacheBuilder()
@@ -109,6 +111,10 @@ public class CaffeineCacheTest {
         String key = "key_loader";
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
+        while(true){
+            Thread.sleep(2000);
+            System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, callable)));
+        }
     }
 
     @Test

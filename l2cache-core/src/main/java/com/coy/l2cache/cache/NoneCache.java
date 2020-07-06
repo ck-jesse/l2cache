@@ -1,5 +1,6 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.cache.load.CacheLoader;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 
 import java.util.concurrent.Callable;

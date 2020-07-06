@@ -1,11 +1,7 @@
 # cluster sentinel with high availability
 singleServerConfig:
-  #address: "redis://10.0.4.132:6379"
-  #password: touna123
   address: "redis://127.0.0.1:6379"
   password:
-  #address: "redis://r-j5ec5cff11dbc124.redis.rds.aliyuncs.com:6379"
-  #password: Antfin01
   idleConnectionTimeout: 10000
   connectTimeout: 10000
   timeout: 3000
