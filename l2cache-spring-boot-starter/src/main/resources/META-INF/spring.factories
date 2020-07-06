@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.coy.l2cache.CaffeineRedisCacheAutoConfiguration
+com.coy.l2cache.spring.L2CacheConfiguration

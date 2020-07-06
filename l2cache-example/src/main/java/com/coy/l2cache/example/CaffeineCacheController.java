@@ -1,9 +1,10 @@
 package com.coy.l2cache.example;
 
 import com.coy.l2cache.consts.CacheConsts;
-import com.coy.l2cache.context.ExtendCacheManager;
+import com.coy.l2cache.spring.L2CacheCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +22,7 @@ public class CaffeineCacheController {
     CaffeineCacheService caffeineCacheService;
 
     @Autowired
-    ExtendCacheManager extendCacheManager;
+    L2CacheCacheManager cacheManager;
 
     @RequestMapping(value = "/queryUser")
     public User queryUser(String userId) {
@@ -43,10 +44,14 @@ public class CaffeineCacheController {
      */
     @RequestMapping(value = "/evictCache")
     public String evictCache(String cacheName, String key, String optType) {
+        Cache cache = cacheManager.getCache(cacheName);
+        if (null == cache) {
+            return "fail cache is not exists: " + cacheName;
+        }
         if (CacheConsts.CACHE_REFRESH.equals(optType)) {
-            extendCacheManager.refresh(cacheName, key);
+            cache.evict(key);
         } else {
-            extendCacheManager.clear(cacheName, key);
+            cache.clear();
         }
         return "success";
     }

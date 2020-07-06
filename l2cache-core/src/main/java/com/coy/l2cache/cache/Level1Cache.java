@@ -1,8 +1,8 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.load.CacheLoader;
-import com.coy.l2cache.cache.sync.CacheSyncPolicy;
-import com.coy.l2cache.context.LoadFunction;
+import com.coy.l2cache.load.CacheLoader;
+import com.coy.l2cache.load.LoadFunction;
+import com.coy.l2cache.sync.CacheSyncPolicy;
 
 /**
  * 一级缓存

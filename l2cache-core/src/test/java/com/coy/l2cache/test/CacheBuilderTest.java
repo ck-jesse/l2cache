@@ -1,13 +1,13 @@
 package com.coy.l2cache.test;
 
 import com.coy.l2cache.cache.Cache;
-import com.coy.l2cache.cache.CacheType;
+import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.cache.DefaultCacheExpiredListener;
-import com.coy.l2cache.cache.builder.CacheBuilder;
-import com.coy.l2cache.cache.builder.CaffeineCacheBuilder;
-import com.coy.l2cache.cache.builder.CompositeCacheBuilder;
-import com.coy.l2cache.cache.builder.RedisCacheBuilder;
-import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.builder.CacheBuilder;
+import com.coy.l2cache.builder.CaffeineCacheBuilder;
+import com.coy.l2cache.builder.CompositeCacheBuilder;
+import com.coy.l2cache.builder.RedisCacheBuilder;
+import com.coy.l2cache.config.CacheConfig;
 import org.junit.Test;
 
 /**

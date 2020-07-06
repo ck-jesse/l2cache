@@ -1,7 +1,9 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.load.CacheLoader;
-import com.coy.l2cache.cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.load.CacheLoader;
+import com.coy.l2cache.sync.CacheSyncPolicy;
 
 import java.util.concurrent.Callable;
 
@@ -14,9 +16,11 @@ import java.util.concurrent.Callable;
 public class NoneCache implements Level1Cache, Level2Cache {
 
     private final String cacheName;
+    private final CacheConfig cacheConfig;
 
-    public NoneCache(String cacheName) {
+    public NoneCache(String cacheName, CacheConfig cacheConfig) {
         this.cacheName = cacheName;
+        this.cacheConfig = cacheConfig;
     }
 
     @Override
@@ -106,7 +110,17 @@ public class NoneCache implements Level1Cache, Level2Cache {
 
     @Override
     public boolean isAllowNullValues() {
-        return false;
+        return cacheConfig.isAllowNullValues();
+    }
+
+    @Override
+    public String getInstanceId() {
+        return cacheConfig.getInstanceId();
+    }
+
+    @Override
+    public String getCacheType() {
+        return CacheType.NONE.name().toLowerCase();
     }
 
     @Override

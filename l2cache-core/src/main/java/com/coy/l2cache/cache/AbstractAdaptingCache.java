@@ -1,9 +1,13 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.config.CacheConfig;
 
 public abstract class AbstractAdaptingCache implements Cache {
 
+    /**
+     * 缓存实例id
+     */
+    private String instanceId;
     /**
      * 缓存名字
      */
@@ -14,6 +18,7 @@ public abstract class AbstractAdaptingCache implements Cache {
     private final boolean allowNullValues;
 
     public AbstractAdaptingCache(String cacheName, CacheConfig cacheConfig) {
+        this.instanceId = cacheConfig.getInstanceId();
         this.cacheName = cacheName;
         this.allowNullValues = cacheConfig.isAllowNullValues();
     }
@@ -21,6 +26,11 @@ public abstract class AbstractAdaptingCache implements Cache {
     @Override
     public boolean isAllowNullValues() {
         return this.allowNullValues;
+    }
+
+    @Override
+    public String getInstanceId() {
+        return this.instanceId;
     }
 
     @Override

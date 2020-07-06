@@ -1,7 +1,7 @@
 package com.coy.l2cache.test;
 
-import com.coy.l2cache.cache.builder.CacheBuilder;
-import com.coy.l2cache.cache.spi.ServiceLoader;
+import com.coy.l2cache.builder.CacheBuilder;
+import com.coy.l2cache.spi.ServiceLoader;
 
 /**
  * @author chenck

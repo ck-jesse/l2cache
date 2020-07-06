@@ -1,6 +1,7 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.consts.CacheType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,11 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             // 设置level2Cache到CustomCacheLoader中，以便CacheLoader中直接操作level2Cache
             level1Cache.getCacheLoader().setLevel2Cache(level2Cache);
         }
+    }
+
+    @Override
+    public String getCacheType() {
+        return CacheType.COMPOSITE.name().toLowerCase();
     }
 
     @Override

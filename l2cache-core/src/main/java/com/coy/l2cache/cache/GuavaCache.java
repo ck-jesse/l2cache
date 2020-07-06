@@ -1,8 +1,9 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.config.CacheConfig;
-import com.coy.l2cache.cache.load.CacheLoader;
-import com.coy.l2cache.cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.load.CacheLoader;
+import com.coy.l2cache.sync.CacheSyncPolicy;
 
 import java.util.concurrent.Callable;
 
@@ -14,6 +15,11 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
 
     public GuavaCache(String cacheName, CacheConfig cacheConfig) {
         super(cacheName, cacheConfig);
+    }
+
+    @Override
+    public String getCacheType() {
+        return CacheType.GUAVA.name().toLowerCase();
     }
 
     @Override

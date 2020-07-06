@@ -1,7 +1,8 @@
 package com.coy.l2cache.cache;
 
 
-import com.coy.l2cache.cache.load.LoadFunction;
+import com.coy.l2cache.load.LoadFunction;
+import com.coy.l2cache.NullValue;
 
 import java.util.concurrent.Callable;
 
@@ -18,6 +19,16 @@ public interface Cache {
      * 缓存中是否允许null值
      */
     boolean isAllowNullValues();
+
+    /**
+     * 获取缓存实例id
+     */
+    String getInstanceId();
+
+    /**
+     * 获取缓存类型
+     */
+    String getCacheType();
 
     /**
      * 获取缓存名称

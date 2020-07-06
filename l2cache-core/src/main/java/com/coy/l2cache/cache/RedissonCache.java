@@ -1,6 +1,7 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.consts.CacheType;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
@@ -72,6 +73,11 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 //        }
 //        sb.append(key.toString());
 //        return sb.toString();
+    }
+
+    @Override
+    public String getCacheType() {
+        return CacheType.REDIS.name().toLowerCase();
     }
 
     @Override

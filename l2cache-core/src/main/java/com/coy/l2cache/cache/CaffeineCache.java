@@ -1,13 +1,15 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.cache.config.CacheConfig;
-import com.coy.l2cache.cache.load.CacheLoader;
-import com.coy.l2cache.cache.load.CustomCacheLoader;
-import com.coy.l2cache.cache.load.LoadFunction;
-import com.coy.l2cache.cache.schedule.RefreshExpiredCacheTask;
-import com.coy.l2cache.cache.schedule.RefreshSupport;
-import com.coy.l2cache.cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.config.CacheConfig;
 import com.coy.l2cache.consts.CacheConsts;
+import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.load.CacheLoader;
+import com.coy.l2cache.load.CustomCacheLoader;
+import com.coy.l2cache.load.LoadFunction;
+import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
+import com.coy.l2cache.schedule.RefreshSupport;
+import com.coy.l2cache.sync.CacheMessage;
+import com.coy.l2cache.sync.CacheSyncPolicy;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.slf4j.Logger;
@@ -54,9 +56,14 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         if (this.caffeine.isAutoRefreshExpireCache()) {
             // 定期刷新过期的缓存
             RefreshSupport.getInstance(this.caffeine.getRefreshPoolSize())
-                    .scheduleWithFixedDelay(new RefreshExpiredCacheTask(this), 3,
+                    .scheduleWithFixedDelay(new RefreshExpiredCacheTask(this), 5,
                             this.caffeine.getRefreshPeriod(), TimeUnit.SECONDS);
         }
+    }
+
+    @Override
+    public String getCacheType() {
+        return CacheType.CAFFEINE.name().toLowerCase();
     }
 
     @Override
@@ -108,7 +115,8 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
-        Object value = this.caffeineCache.get(key, new LoadFunction(this.getCacheName(), null, this.getCacheSyncPolicy(), valueLoader));
+        Object value = this.caffeineCache.get(key, new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
+                null, this.getCacheSyncPolicy(), valueLoader));
         logger.debug("CaffeineCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) fromStoreValue(value);
     }
@@ -117,7 +125,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public void put(Object key, Object value) {
         caffeineCache.put(key, toStoreValue(value));
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(key, CacheConsts.CACHE_REFRESH);
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
         }
     }
 
@@ -126,7 +134,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         logger.debug("CaffeineCache evict cache, cacheName={}, key={}", this.getCacheName(), key);
         caffeineCache.invalidate(key);
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(key, CacheConsts.CACHE_CLEAR);
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
         }
     }
 
@@ -135,7 +143,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         logger.debug("CaffeineCache clear cache, cacheName={}", this.getCacheName());
         caffeineCache.invalidateAll();
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(null, CacheConsts.CACHE_CLEAR);
+            cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
         }
     }
 
@@ -187,5 +195,14 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 loadingCache.get(key);
             }
         }
+    }
+
+    private CacheMessage createMessage(Object key, String optType) {
+        return new CacheMessage()
+                .setInstanceId(this.getInstanceId())
+                .setCacheType(this.getCacheType())
+                .setCacheName(this.getCacheName())
+                .setKey(key)
+                .setOptType(optType);
     }
 }

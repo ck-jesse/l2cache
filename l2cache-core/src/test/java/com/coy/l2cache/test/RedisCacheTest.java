@@ -1,12 +1,14 @@
 package com.coy.l2cache.test;
 
-import com.coy.l2cache.cache.CacheType;
-import com.coy.l2cache.cache.NullValue;
+import com.coy.l2cache.NullValue;
+import com.coy.l2cache.builder.RedisCacheBuilder;
 import com.coy.l2cache.cache.RedissonCache;
-import com.coy.l2cache.cache.builder.RedisCacheBuilder;
-import com.coy.l2cache.cache.config.CacheConfig;
+import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.consts.CacheType;
 import org.junit.Before;
 import org.junit.Test;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -31,10 +33,16 @@ public class RedisCacheTest {
                 .setMaxSize(20)
                 .setRedissonYamlConfig("redisson.yaml");
 
-        // 构建cache
-        cache = (RedissonCache) new RedisCacheBuilder()
+        // 模拟应用中已经存在 RedissonClient
+        RedissonClient redissonClient = Redisson.create(cacheConfig.getRedis().getRedissonConfig());
+
+        RedisCacheBuilder builder = (RedisCacheBuilder) new RedisCacheBuilder()
                 .setCacheConfig(cacheConfig)
-                .build("redisCache");
+                .setActualCacheClient(redissonClient);
+
+        // 构建cache
+        cache = builder.build("redisCache");
+        cache = builder.build("redisCache2");
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
