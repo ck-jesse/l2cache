@@ -133,6 +133,10 @@ public class CompositeCacheTest {
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
         System.out.println(String.format("get key=%s, value=%s", key, cache.get(key)));
+        while(true){
+            Thread.sleep(2000);
+            System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, callable)));
+        }
     }
 
     @Test

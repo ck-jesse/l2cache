@@ -49,7 +49,7 @@ public class CacheConfig {
     private final Redis redis = new Redis();
     private final CacheSyncPolicy cacheSyncPolicy = new CacheSyncPolicy();
 
-    public static interface Config {
+    public interface Config {
     }
 
     /**

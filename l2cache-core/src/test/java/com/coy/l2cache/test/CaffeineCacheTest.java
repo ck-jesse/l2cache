@@ -111,7 +111,7 @@ public class CaffeineCacheTest {
         String key = "key_loader";
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
-        while(true){
+        while (true) {
             Thread.sleep(2000);
             System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, callable)));
         }

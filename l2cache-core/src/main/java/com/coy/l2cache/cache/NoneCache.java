@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/6/29 16:57
  */
-public class NoneCache implements L1Cache, L2Cache {
+public class NoneCache implements Level1Cache, Level2Cache {
 
     private final String cacheName;
 

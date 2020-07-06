@@ -1,6 +1,6 @@
 package com.coy.l2cache.cache.load;
 
-import com.coy.l2cache.cache.L2Cache;
+import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import org.slf4j.Logger;
@@ -24,11 +24,11 @@ public class LoadFunction implements Function<Object, Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(LoadFunction.class);
     private final String cacheName;
-    private final L2Cache level2Cache;
+    private final Level2Cache level2Cache;
     private final CacheSyncPolicy cacheSyncPolicy;
     private final Callable<?> valueLoader;
 
-    public LoadFunction(String cacheName, L2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader) {
+    public LoadFunction(String cacheName, Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader) {
         this.cacheName = cacheName;
         this.level2Cache = level2Cache;
         this.cacheSyncPolicy = cacheSyncPolicy;

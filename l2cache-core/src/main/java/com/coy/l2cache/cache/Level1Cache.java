@@ -10,7 +10,7 @@ import com.coy.l2cache.context.LoadFunction;
  * @author chenck
  * @date 2020/6/30 10:54
  */
-public interface L1Cache extends Cache {
+public interface Level1Cache extends Cache {
 
     /**
      * 缓存同步策略
@@ -42,7 +42,7 @@ public interface L1Cache extends Cache {
      * 异步加载{@code key}的新值
      * 当新值加载时，get操作将继续返回原值（如果有），除非将其删除;如果新值加载成功，则替换缓存中的前一个值。
      *
-     * @see L1Cache#isLoadingCache() 为true才能执行refresh方法
+     * @see Level1Cache#isLoadingCache() 为true才能执行refresh方法
      * @see LoadFunction#apply(Object)
      */
     void refresh(Object key);
@@ -51,7 +51,7 @@ public interface L1Cache extends Cache {
      * 异步加载所有新值
      * 当新值加载时，get操作将继续返回原值（如果有），除非将其删除;如果新值加载成功，则替换缓存中的前一个值。
      *
-     * @see L1Cache#isLoadingCache() 为true才能执行该方法
+     * @see Level1Cache#isLoadingCache() 为true才能执行该方法
      * @see LoadFunction#apply(Object)
      */
     void refreshAll();
@@ -60,7 +60,7 @@ public interface L1Cache extends Cache {
      * 刷新过期缓存
      * 注：通过LoadingCache.get(key)来刷新过期缓存，若缓存未到过期时间则不刷新
      *
-     * @see L1Cache#isLoadingCache() 为true才能执行该方法
+     * @see Level1Cache#isLoadingCache() 为true才能执行该方法
      */
     void refreshExpireCache(Object key);
 
@@ -68,7 +68,7 @@ public interface L1Cache extends Cache {
      * 刷新所有过期的缓存
      * 注：通过LoadingCache.get(key)来刷新过期缓存，若缓存未到过期时间则不刷新
      *
-     * @see L1Cache#isLoadingCache() 为true才能执行该方法
+     * @see Level1Cache#isLoadingCache() 为true才能执行该方法
      */
     void refreshAllExpireCache();
 }

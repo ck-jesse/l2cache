@@ -26,14 +26,14 @@ public class CacheSupport {
     /**
      * 获取缓存实例
      */
-    public static Cache getInstance(String cacheType, String cacheName) {
+    public static Cache getCache(String cacheType, String cacheName) {
         return CACHE_MAP.get(buildKey(cacheType, cacheName));
     }
 
     /**
      * 获取或创建缓存实例
      */
-    public static Cache getInstance(String cacheType, String cacheName, CacheBuilder cacheBuilder) {
+    public static Cache getCache(String cacheType, String cacheName, CacheBuilder cacheBuilder) {
         if (StringUtils.isEmpty(cacheType)) {
             throw new IllegalArgumentException("缓存类型不能为空");
         }

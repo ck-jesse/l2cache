@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenck
  * @date 2020/6/29 16:37
  */
-public class RedisCache extends AbstractAdaptingCache implements L2Cache {
+public class RedisCache extends AbstractAdaptingCache implements Level2Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCache.class);
 

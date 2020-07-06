@@ -20,14 +20,14 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     /**
      * 一级缓存
      */
-    private final L1Cache level1Cache;
+    private final Level1Cache level1Cache;
 
     /**
      * 二级缓存
      */
-    private final L2Cache level2Cache;
+    private final Level2Cache level2Cache;
 
-    public CompositeCache(String cacheName, CacheConfig cacheConfig, L1Cache level1Cache, L2Cache level2Cache) {
+    public CompositeCache(String cacheName, CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache) {
         super(cacheName, cacheConfig);
         this.composite = cacheConfig.getComposite();
         this.level1Cache = level1Cache;
@@ -85,7 +85,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void evict(Object key) {
-        logger.debug("evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.debug("CompositeCache evict cache, cacheName={}, key={}", this.getCacheName(), key);
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         level2Cache.evict(key);
         level1Cache.evict(key);
@@ -93,17 +93,17 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void clear() {
-        logger.debug("clear all cache, cacheName={}", this.getCacheName());
+        logger.debug("CompositeCache clear all cache, cacheName={}", this.getCacheName());
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         level2Cache.clear();
         level1Cache.clear();
     }
 
-    public L1Cache getLevel1Cache() {
+    public Level1Cache getLevel1Cache() {
         return level1Cache;
     }
 
-    public L2Cache getLevel2Cache() {
+    public Level2Cache getLevel2Cache() {
         return level2Cache;
     }
 }

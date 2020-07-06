@@ -3,8 +3,8 @@ package com.coy.l2cache.cache.builder;
 import com.coy.l2cache.cache.Cache;
 import com.coy.l2cache.cache.CacheType;
 import com.coy.l2cache.cache.CompositeCache;
-import com.coy.l2cache.cache.L1Cache;
-import com.coy.l2cache.cache.L2Cache;
+import com.coy.l2cache.cache.Level1Cache;
+import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.cache.config.CacheConfig;
 import com.coy.l2cache.cache.provider.CacheSupport;
 import com.coy.l2cache.cache.spi.ServiceLoader;
@@ -41,23 +41,23 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
 
         // 构建L1
         Cache level1Cache = this.getCacheInstance(l1CacheType, cacheName);
-        if (!(level1Cache instanceof L1Cache)) {
-            throw new IllegalArgumentException("l1Cache must be implements L1Cache, l1CacheType=" + l1CacheType);
+        if (!(level1Cache instanceof Level1Cache)) {
+            throw new IllegalArgumentException("level1Cache must be implements Level1Cache, l1CacheType=" + l1CacheType);
         }
 
         // 构建L2
         Cache level2Cache = this.getCacheInstance(l2CacheType, cacheName);
-        if (!(level2Cache instanceof L2Cache)) {
-            throw new IllegalArgumentException("l2Cache must be implements L2Cache, l2CacheType=" + l2CacheType);
+        if (!(level2Cache instanceof Level2Cache)) {
+            throw new IllegalArgumentException("level2Cache must be implements Level2Cache, l2CacheType=" + l2CacheType);
         }
 
-        return this.buildActualCache(cacheName, this.getCacheConfig(), (L1Cache) level1Cache, (L2Cache) level2Cache);
+        return this.buildActualCache(cacheName, this.getCacheConfig(), (Level1Cache) level1Cache, (Level2Cache) level2Cache);
     }
 
     /**
      * 构建组合缓存，传入L1和L2是为了与应用中已经存在的L1和L2进行集成
      */
-    protected CompositeCache buildActualCache(String cacheName, CacheConfig cacheConfig, L1Cache level1Cache, L2Cache level2Cache) {
+    protected CompositeCache buildActualCache(String cacheName, CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache) {
         return new CompositeCache(cacheName, cacheConfig, level1Cache, level2Cache);
     }
 
@@ -65,7 +65,7 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
      * 获取缓存实例
      */
     private Cache getCacheInstance(String cacheType, String cacheName) {
-        Cache cache = CacheSupport.getInstance(cacheType, cacheName);
+        Cache cache = CacheSupport.getCache(cacheType, cacheName);
         if (null != cache) {
             return cache;
         }
@@ -73,6 +73,6 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
         CacheBuilder cacheBuilder = ServiceLoader.load(CacheBuilder.class, cacheType);
         cacheBuilder.copyFrom(this);
 
-        return CacheSupport.getInstance(cacheType, cacheName, cacheBuilder);
+        return CacheSupport.getCache(cacheType, cacheName, cacheBuilder);
     }
 }

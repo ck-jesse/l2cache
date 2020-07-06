@@ -1,7 +1,7 @@
 package com.coy.l2cache.cache.load;
 
 
-import com.coy.l2cache.cache.L2Cache;
+import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 
 import java.util.concurrent.Callable;
@@ -22,7 +22,7 @@ public interface CacheLoader<K, V> {
     /**
      * 设置二级缓存
      */
-    void setLevel2Cache(L2Cache level2Cache);
+    void setLevel2Cache(Level2Cache level2Cache);
 
     /**
      * 设置缓存过期策略

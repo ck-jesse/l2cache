@@ -1,6 +1,6 @@
 package com.coy.l2cache.cache.load;
 
-import com.coy.l2cache.cache.L2Cache;
+import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.cache.sync.CacheSyncPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      */
     private static final Map<Object, Callable<?>> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
     private String cacheName;
-    private L2Cache level2Cache;
+    private Level2Cache level2Cache;
     private CacheSyncPolicy cacheSyncPolicy;
 
     private CustomCacheLoader(String cacheName) {
@@ -41,7 +41,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     }
 
     @Override
-    public void setLevel2Cache(L2Cache level2Cache) {
+    public void setLevel2Cache(Level2Cache level2Cache) {
         this.level2Cache = level2Cache;
     }
 

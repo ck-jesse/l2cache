@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @author chenck
  * @date 2020/7/3 13:59
  */
-public class RedissonCache extends AbstractAdaptingCache implements L2Cache {
+public class RedissonCache extends AbstractAdaptingCache implements Level2Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(RedissonCache.class);
 
@@ -97,7 +97,7 @@ public class RedissonCache extends AbstractAdaptingCache implements L2Cache {
             return null;
         }
         if (value != null && type != null && !type.isInstance(value)) {
-            throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+            throw new IllegalStateException("RedisCache Cached value is not of required type [" + type.getName() + "]: " + value);
         }
         return (T) value;
     }

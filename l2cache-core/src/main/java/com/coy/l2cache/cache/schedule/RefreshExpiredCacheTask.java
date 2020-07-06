@@ -1,6 +1,6 @@
 package com.coy.l2cache.cache.schedule;
 
-import com.coy.l2cache.cache.L1Cache;
+import com.coy.l2cache.cache.Level1Cache;
 
 /**
  * 刷新过期缓存Task
@@ -13,14 +13,14 @@ import com.coy.l2cache.cache.L1Cache;
  */
 public class RefreshExpiredCacheTask implements Runnable {
 
-    private final L1Cache l1Cache;
+    private final Level1Cache level1Cache;
 
-    public RefreshExpiredCacheTask(L1Cache l1Cache) {
-        this.l1Cache = l1Cache;
+    public RefreshExpiredCacheTask(Level1Cache level1Cache) {
+        this.level1Cache = level1Cache;
     }
 
     @Override
     public void run() {
-        this.l1Cache.refreshAllExpireCache();
+        this.level1Cache.refreshAllExpireCache();
     }
 }

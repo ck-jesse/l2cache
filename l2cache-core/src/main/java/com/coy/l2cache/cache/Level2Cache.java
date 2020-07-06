@@ -6,7 +6,7 @@ package com.coy.l2cache.cache;
  * @author chenck
  * @date 2020/6/30 11:03
  */
-public interface L2Cache extends Cache {
+public interface Level2Cache extends Cache {
 
     /**
      * 获取redis过期时间(ms)
