@@ -1,13 +1,17 @@
 package com.coy.l2cache.test;
 
-import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.CacheSyncPolicy;
+import com.coy.l2cache.builder.CaffeineCacheBuilder;
 import com.coy.l2cache.cache.CaffeineCache;
 import com.coy.l2cache.cache.expire.DefaultCacheExpiredListener;
+import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
-import com.coy.l2cache.builder.CaffeineCacheBuilder;
-import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.sync.CacheMessageListener;
+import com.coy.l2cache.sync.RedisCacheSyncPolicy;
 import org.junit.Before;
 import org.junit.Test;
+import org.redisson.Redisson;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
@@ -26,7 +30,7 @@ public class CaffeineCacheTest {
     public void before() {
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.CAFFEINE.name())
-                .setAllowNullValues(false)
+                .setAllowNullValues(true)
                 .getCaffeine()
                 //.setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=2s,recordStats")
@@ -34,11 +38,18 @@ public class CaffeineCacheTest {
                 .setRefreshPoolSize(3)
                 .setRefreshPeriod(5L);
 
+        // 缓存同步策略
+        CacheSyncPolicy cacheSyncPolicy = new RedisCacheSyncPolicy()
+                .setCacheConfig(cacheConfig)
+                .setCacheMessageListener(new CacheMessageListener(cacheConfig.getInstanceId()))
+                .setActualClient(Redisson.create());
+        cacheSyncPolicy.connnect();
+
         // 构建cache
         cache = (CaffeineCache) new CaffeineCacheBuilder()
                 .setCacheConfig(cacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
-                .setCacheSyncPolicy(null)
+                .setCacheSyncPolicy(cacheSyncPolicy)
                 .build("localCache");
 
         callable = new Callable<String>() {

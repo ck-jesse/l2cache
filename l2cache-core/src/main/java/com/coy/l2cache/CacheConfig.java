@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -163,6 +164,9 @@ public class CacheConfig {
          * 解析Redisson yaml文件
          */
         public org.redisson.config.Config getRedissonConfig() {
+            if (StringUtils.isEmpty(this.redissonYamlConfig)) {
+                return null;
+            }
             if (null != redissonConfig) {
                 return redissonConfig;
             }

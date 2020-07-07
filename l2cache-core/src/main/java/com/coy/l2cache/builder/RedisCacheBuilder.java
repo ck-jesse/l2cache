@@ -1,8 +1,8 @@
 package com.coy.l2cache.builder;
 
-import com.coy.l2cache.cache.RedissonCache;
 import com.coy.l2cache.CacheConfig;
-import org.redisson.Redisson;
+import com.coy.l2cache.cache.RedissonCache;
+import com.coy.l2cache.content.RedissonSupport;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
@@ -17,44 +17,27 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCacheBuilder.class);
 
-    RedissonClient redissonClient;
-
     @Override
     public RedissonCache build(String cacheName) {
-        CacheConfig.Redis redis = this.getCacheConfig().getRedis();
 
-        RedissonClient redissonClient = this.getRedissonClient(redis);
+        RedissonClient redissonClient = this.getRedissonClient(this.getCacheConfig());
 
         return this.buildActualCache(cacheName, this.getCacheConfig(), redissonClient);
     }
 
     /**
      * 获取 RedissonClient 实例
-     * 注：主要目的是适配基于setActualCacheClient()扩展点设置的缓存Client实例，避免重复创建 RedissonClient
+     * 注：主要目的是适配基于setActualCacheClient()扩展点设置的 RedissonClient，避免重复创建 RedissonClient
      */
-    protected RedissonClient getRedissonClient(CacheConfig.Redis redis) {
-        if (null != redissonClient) {
-            return redissonClient;
-        }
+    protected RedissonClient getRedissonClient(CacheConfig cacheConfig) {
         Object actualCacheClient = this.getActualCacheClient();
-        if (null != actualCacheClient) {
-            logger.info("使用设置的缓存Client实例");
-            redissonClient = (RedissonClient) actualCacheClient;
-            return redissonClient;
+        if (null != actualCacheClient && actualCacheClient instanceof RedissonClient) {
+            logger.info("use setting RedissonClient instance");
+            return (RedissonClient) actualCacheClient;
         }
-        synchronized (this) {
-            actualCacheClient = this.getActualCacheClient();
-            if (null != actualCacheClient) {
-                logger.info("使用设置的缓存Client实例");
-                redissonClient = (RedissonClient) actualCacheClient;
-                return redissonClient;
-            }
 
-            logger.info("使用提供的配置创建Redisson实例");
-            redissonClient = Redisson.create(redis.getRedissonConfig());
-            setActualCacheClient(redissonClient);
-            return redissonClient;
-        }
+        logger.info("get or create RedissonClient instance by cache config");
+        return RedissonSupport.getRedisson(cacheConfig);
     }
 
 

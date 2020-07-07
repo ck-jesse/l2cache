@@ -1,20 +1,36 @@
 # cluster sentinel with high availability
 singleServerConfig:
+  # 节点地址
   address: "redis://127.0.0.1:6379"
+  # 密码
   password:
+  # 连接空闲超时，单位：毫秒，默认10000
   idleConnectionTimeout: 10000
+  # 连接超时，单位：毫秒，默认10000
   connectTimeout: 10000
+  # 命令等待超时，单位：毫秒，默认3000
   timeout: 3000
+  # 命令失败重试次数，默认3
   retryAttempts: 3
+  # 命令重试发送时间间隔，单位：毫秒，默认1500
   retryInterval: 1500
+  # 单个连接最大订阅数量，默认5
   subscriptionsPerConnection: 5
+  # 客户端名称，默认null
   clientName: null
+  # 发布和订阅连接的最小空闲连接数(默认1)
   subscriptionConnectionMinimumIdleSize: 1
+  # 发布和订阅连接池大小(默认50)
   subscriptionConnectionPoolSize: 50
+  # 最小空闲连接数(默认32)
   connectionMinimumIdleSize: 10
+  # 连接池大小(默认64)
   connectionPoolSize: 64
+  # 数据库编号，默认0
   database: 0
-  dnsMonitoringInterval: 5000
-threads: 0
-nettyThreads: 0
-codec: !<org.redisson.codec.SerializationCodec> {}
+# 线程池数量
+threads: 2
+# Netty线程池数量
+nettyThreads: 2
+# 编码，序列化反序列化
+codec: !<org.redisson.codec.JsonJacksonCodec> {}

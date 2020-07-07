@@ -1,9 +1,11 @@
 package com.coy.l2cache.spring;
 
-import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.CacheConfig;
-import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.CacheSyncPolicy;
+import com.coy.l2cache.cache.expire.CacheExpiredListener;
+import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.spi.ServiceLoader;
+import com.coy.l2cache.sync.CacheMessageListener;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,14 @@ public class L2CacheConfiguration {
     }
 
     /**
+     * 定义 CacheMessageListener
+     */
+    @Bean
+    public CacheMessageListener cacheMessageListener() {
+        return new CacheMessageListener(l2CacheProperties.getConfig().getInstanceId());
+    }
+
+    /**
      * 定义 CacheManager
      */
     @Bean
@@ -53,11 +63,12 @@ public class L2CacheConfiguration {
 
         L2CacheCacheManager cacheManager = new L2CacheCacheManager(cacheConfig);
 
-        // TODO 创建缓存同步策略实例
-        CacheSyncPolicy cacheSyncPolicy = null;
+        // 创建缓存同步策略实例
+        CacheSyncPolicy cacheSyncPolicy = createCacheSyncPolicy(cacheConfig);
         if (null != cacheSyncPolicy) {
             cacheManager.setCacheSyncPolicy(cacheSyncPolicy);
         }
+
         if (null != expiredListener) {
             cacheManager.setExpiredListener(expiredListener);
         }
@@ -85,6 +96,24 @@ public class L2CacheConfiguration {
             }
         }
         return false;
+    }
+
+    /**
+     * 创建缓存同步策略实例
+     */
+    private CacheSyncPolicy createCacheSyncPolicy(CacheConfig cacheConfig) {
+        CacheSyncPolicy cacheSyncPolicy = ServiceLoader.load(CacheSyncPolicy.class, cacheConfig.getCacheSyncPolicy().getType());
+        if (null == cacheSyncPolicy) {
+            return null;
+        }
+        cacheSyncPolicy.setCacheConfig(cacheConfig);
+        cacheSyncPolicy.setCacheMessageListener(cacheMessageListener());
+        // redis 处理，以便重用
+        if (null != redissonClient && isUseRedis(cacheConfig)) {
+            cacheSyncPolicy.setActualClient(redissonClient);
+        }
+        cacheSyncPolicy.connnect();// 启动订阅
+        return cacheSyncPolicy;
     }
 
 }

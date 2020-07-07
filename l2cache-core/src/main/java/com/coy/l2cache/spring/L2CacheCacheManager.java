@@ -4,7 +4,7 @@ import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.cache.expire.DefaultCacheExpiredListener;
 import com.coy.l2cache.CacheBuilder;
 import com.coy.l2cache.CacheConfig;
-import com.coy.l2cache.CacheSupport;
+import com.coy.l2cache.content.CacheSupport;
 import com.coy.l2cache.spi.ServiceLoader;
 import com.coy.l2cache.CacheSyncPolicy;
 import org.springframework.cache.Cache;

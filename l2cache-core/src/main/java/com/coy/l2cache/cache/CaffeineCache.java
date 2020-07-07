@@ -179,7 +179,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     @Override
     public void refreshExpireCache(Object key) {
         if (isLoadingCache()) {
-            logger.debug("CaffeineCache refreshExpireCache cache, cacheName={}, key={}", this.getCacheName(), key);
+            logger.debug("CaffeineCache refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
             // 通过LoadingCache.get(key)来刷新过期缓存
             ((LoadingCache) caffeineCache).get(key);
         }
@@ -190,7 +190,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("CaffeineCache refreshAllExpireCache cache, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("CaffeineCache refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 loadingCache.get(key);
             }

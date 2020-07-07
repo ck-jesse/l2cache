@@ -7,7 +7,7 @@ import com.coy.l2cache.cache.CompositeCache;
 import com.coy.l2cache.cache.Level1Cache;
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.CacheConfig;
-import com.coy.l2cache.CacheSupport;
+import com.coy.l2cache.content.CacheSupport;
 import com.coy.l2cache.spi.ServiceLoader;
 import org.springframework.util.StringUtils;
 

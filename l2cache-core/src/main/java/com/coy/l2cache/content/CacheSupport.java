@@ -1,5 +1,7 @@
-package com.coy.l2cache;
+package com.coy.l2cache.content;
 
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.CacheBuilder;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
