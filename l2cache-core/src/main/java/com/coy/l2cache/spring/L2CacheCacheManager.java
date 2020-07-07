@@ -1,12 +1,12 @@
 package com.coy.l2cache.spring;
 
-import com.coy.l2cache.cache.CacheExpiredListener;
-import com.coy.l2cache.cache.DefaultCacheExpiredListener;
-import com.coy.l2cache.builder.CacheBuilder;
-import com.coy.l2cache.config.CacheConfig;
-import com.coy.l2cache.provider.CacheSupport;
+import com.coy.l2cache.cache.expire.CacheExpiredListener;
+import com.coy.l2cache.cache.expire.DefaultCacheExpiredListener;
+import com.coy.l2cache.CacheBuilder;
+import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.CacheSupport;
 import com.coy.l2cache.spi.ServiceLoader;
-import com.coy.l2cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.CacheSyncPolicy;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
@@ -83,15 +83,15 @@ public class L2CacheCacheManager implements CacheManager {
      * @return the Spring L2CacheSpringCache adapter (or a decorator thereof)
      */
     protected Cache createL2CacheSpringCache(String cacheType, String cacheName) {
-        com.coy.l2cache.cache.Cache cache = this.getL2CacheInstance(cacheType, cacheName);
+        com.coy.l2cache.Cache cache = this.getL2CacheInstance(cacheType, cacheName);
         return new L2CacheSpringCache(cacheName, cacheConfig, cache);
     }
 
     /**
      * get or create l2cache
      */
-    private com.coy.l2cache.cache.Cache getL2CacheInstance(String cacheType, String cacheName) {
-        com.coy.l2cache.cache.Cache cache = CacheSupport.getCache(cacheType, cacheName);
+    private com.coy.l2cache.Cache getL2CacheInstance(String cacheType, String cacheName) {
+        com.coy.l2cache.Cache cache = CacheSupport.getCache(cacheType, cacheName);
         if (null != cache) {
             return cache;
         }

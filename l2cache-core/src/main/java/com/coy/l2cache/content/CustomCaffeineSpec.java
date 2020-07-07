@@ -1,4 +1,4 @@
-package com.coy.l2cache;
+package com.coy.l2cache.content;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.errorprone.annotations.FormatMethod;

@@ -1,8 +1,8 @@
-package com.coy.l2cache.cache;
+package com.coy.l2cache;
 
 
 import com.coy.l2cache.load.LoadFunction;
-import com.coy.l2cache.NullValue;
+import com.coy.l2cache.content.NullValue;
 
 import java.util.concurrent.Callable;
 

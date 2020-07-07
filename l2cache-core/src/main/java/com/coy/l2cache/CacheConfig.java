@@ -1,4 +1,4 @@
-package com.coy.l2cache.config;
+package com.coy.l2cache;
 
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.util.RandomUtil;
@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -167,12 +167,12 @@ public class CacheConfig {
                 return redissonConfig;
             }
             try {
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                URL url = classLoader.getResource(this.redissonYamlConfig);
-                if (null == url) {
+                // 此方式可获取到springboot打包以后jar包内的资源文件
+                InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(this.redissonYamlConfig);
+                if (null == is) {
                     throw new IllegalStateException("not found redisson yaml config file:" + redissonYamlConfig);
                 }
-                redissonConfig = org.redisson.config.Config.fromYAML(url);
+                redissonConfig = org.redisson.config.Config.fromYAML(is);
                 return redissonConfig;
             } catch (IOException e) {
                 throw new IllegalStateException("parse redisson yaml config error", e);

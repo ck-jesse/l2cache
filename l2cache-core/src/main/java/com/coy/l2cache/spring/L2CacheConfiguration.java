@@ -1,9 +1,9 @@
 package com.coy.l2cache.spring;
 
-import com.coy.l2cache.cache.CacheExpiredListener;
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.cache.expire.CacheExpiredListener;
+import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
-import com.coy.l2cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.CacheSyncPolicy;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;

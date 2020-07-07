@@ -1,6 +1,7 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

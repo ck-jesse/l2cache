@@ -1,6 +1,7 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.CacheConfig;
 
 public abstract class AbstractAdaptingCache implements Cache {
 

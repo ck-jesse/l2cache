@@ -1,7 +1,7 @@
 package com.coy.l2cache.load;
 
 import com.coy.l2cache.cache.Level2Cache;
-import com.coy.l2cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.CacheSyncPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -69,7 +69,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         // 直接返回null，目的是使后续逻辑去执行具体的加载数据方法，然后put到缓存
         Callable<?> valueLoader = VALUE_LOADER_CACHE.get(key);
         if (null == valueLoader) {
-            logger.info("[CustomCacheLoader] valueLoader is null direct return null, key={}", key);
+            logger.debug("[CustomCacheLoader] valueLoader is null direct return null, key={}", key);
             return null;
         }
 

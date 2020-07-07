@@ -1,5 +1,7 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.Cache;
+
 /**
  * 二级缓存
  *

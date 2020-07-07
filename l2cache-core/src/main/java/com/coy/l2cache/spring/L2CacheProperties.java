@@ -1,6 +1,6 @@
 package com.coy.l2cache.spring;
 
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.CacheConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**

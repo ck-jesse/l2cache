@@ -1,4 +1,4 @@
-package com.coy.l2cache;
+package com.coy.l2cache.content;
 
 import java.io.Serializable;
 

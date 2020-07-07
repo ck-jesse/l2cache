@@ -1,6 +1,6 @@
 package com.coy.l2cache.cache;
 
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.load.CacheLoader;
@@ -9,7 +9,7 @@ import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
 import com.coy.l2cache.schedule.RefreshSupport;
 import com.coy.l2cache.sync.CacheMessage;
-import com.coy.l2cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.CacheSyncPolicy;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.slf4j.Logger;

@@ -1,10 +1,7 @@
-package com.coy.l2cache.builder;
+package com.coy.l2cache;
 
-import com.coy.l2cache.cache.Cache;
-import com.coy.l2cache.cache.CacheExpiredListener;
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.spi.SPI;
-import com.coy.l2cache.sync.CacheSyncPolicy;
 
 /**
  * cache构建器

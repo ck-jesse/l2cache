@@ -1,9 +1,9 @@
 package com.coy.l2cache.test;
 
-import com.coy.l2cache.NullValue;
+import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.builder.RedisCacheBuilder;
 import com.coy.l2cache.cache.RedissonCache;
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
 import org.junit.Before;
 import org.junit.Test;

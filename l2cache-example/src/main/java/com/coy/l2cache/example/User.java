@@ -2,12 +2,14 @@ package com.coy.l2cache.example;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @author chenck
  * @date 2020/5/7 20:27
  */
 @Data
-public class User {
+public class User implements Serializable {
 
     public User() {
 

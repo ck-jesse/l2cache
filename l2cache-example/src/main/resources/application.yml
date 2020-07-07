@@ -7,17 +7,11 @@ logging:
   level:
     root: info
     # 日志级别指定到包或类
-    com.coy.l2cache: debug
+    com.coy.l2cache: info
 
 spring:
   application:
     name: l2cache-example
-  # spring boot redis配置
-  redis:
-    timeout: 3000
-    host: 127.0.0.1
-    port: 6379
-    password:
 
 # 二级缓存配置
 l2cache:

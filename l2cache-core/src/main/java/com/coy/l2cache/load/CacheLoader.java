@@ -2,7 +2,7 @@ package com.coy.l2cache.load;
 
 
 import com.coy.l2cache.cache.Level2Cache;
-import com.coy.l2cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.CacheSyncPolicy;
 
 import java.util.concurrent.Callable;
 

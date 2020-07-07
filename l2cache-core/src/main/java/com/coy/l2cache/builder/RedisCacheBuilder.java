@@ -1,7 +1,7 @@
 package com.coy.l2cache.builder;
 
 import com.coy.l2cache.cache.RedissonCache;
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.CacheConfig;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;

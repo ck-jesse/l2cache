@@ -1,4 +1,6 @@
-package com.coy.l2cache.sync;
+package com.coy.l2cache;
+
+import com.coy.l2cache.sync.CacheMessage;
 
 /**
  * 缓存同步策略

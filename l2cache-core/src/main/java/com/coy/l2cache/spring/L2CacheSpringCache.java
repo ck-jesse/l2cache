@@ -1,7 +1,7 @@
 package com.coy.l2cache.spring;
 
-import com.coy.l2cache.cache.Cache;
-import com.coy.l2cache.config.CacheConfig;
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.CacheConfig;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;

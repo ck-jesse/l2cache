@@ -1,12 +1,13 @@
 package com.coy.l2cache.builder;
 
-import com.coy.l2cache.cache.Cache;
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.CacheBuilder;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.cache.CompositeCache;
 import com.coy.l2cache.cache.Level1Cache;
 import com.coy.l2cache.cache.Level2Cache;
-import com.coy.l2cache.config.CacheConfig;
-import com.coy.l2cache.provider.CacheSupport;
+import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.CacheSupport;
 import com.coy.l2cache.spi.ServiceLoader;
 import org.springframework.util.StringUtils;
 

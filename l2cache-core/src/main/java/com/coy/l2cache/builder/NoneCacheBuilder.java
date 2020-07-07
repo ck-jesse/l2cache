@@ -1,6 +1,6 @@
 package com.coy.l2cache.builder;
 
-import com.coy.l2cache.cache.Cache;
+import com.coy.l2cache.Cache;
 import com.coy.l2cache.cache.NoneCache;
 
 /**

@@ -36,13 +36,13 @@
 
 - Enable 启动模式
 
-在SpringBoot启动类上标注 `@EnableCaffeineRedisCache`  启动`l2cache`。
+在SpringBoot启动类上标注 `@EnableL2Cache`  启动`l2cache`。
 
 ```java
 /**
  * 通过 Spring Enable 注解模式来启用二级缓存组件
  */
-@EnableCaffeineRedisCache
+@EnableL2Cache
 @SpringBootApplication
 public class TestApplication {
     public static void main(String[] args) {
@@ -68,44 +68,66 @@ public class TestApplication {
 spring:
   application:
     name: l2cache-example
-  # spring boot redis配置
-  redis:
-    timeout: 3000
-    host: 127.0.0.1
-    port: 6379
-    password:
 
 # 二级缓存配置
 l2cache:
-  # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
-  #instanceId: a1
-  # 一级缓存
-  caffeine:
-    # 是否构建异步Caffeine true 是 false 否
-    asyncCache: false
-    # 是否自动刷新过期缓存 true 是 false 否
-    autoRefreshExpireCache: true
-    # 缓存刷新调度线程池的大小
-    refreshPoolSize: 1
-    # 缓存刷新的频率(秒)
-    refreshPeriod: 5
-    # 高并发场景下建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
-    # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
-    # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
-    # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
-    # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
-    defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
-    # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
-    specs:
-      userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
-      userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
-  # 二级缓存
-  redis:
-    topic: cache:caffeine:redis:topic
+  config:
+    # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
+    #instanceId: a1
+    # 是否存储空值，默认true，防止缓存穿透
+    allowNullValues: true
+    # 缓存类型
+    cacheType: composite
+    # 组合缓存配置
+    composite:
+      # 一级缓存类型
+      l1CacheType: caffeine
+      # 二级缓存类型
+      l2CacheType: redis
+    # 一级缓存
+    caffeine:
+      # 是否构建异步Caffeine true 是 false 否
+      asyncCache: false
+      # 是否自动刷新过期缓存 true 是 false 否
+      autoRefreshExpireCache: true
+      # 缓存刷新调度线程池的大小
+      refreshPoolSize: 1
+      # 缓存刷新的频率(秒)
+      refreshPeriod: 5
+      # 高并发场景下建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
+      # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
+      # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
+      # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
+      # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
+      defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+      # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
+      specs:
+        userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
+        userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+    # 二级缓存
+    redis:
+      # 是否启用缓存Key prefix
+      useKeyPrefix: true
+      # 缓存Key prefix
+      keyPrefix: ""
+      # 缓存过期时间(ms)
+      expireTime: 30000
+      # 缓存最大空闲时间(ms)
+      maxIdleTime: 30000
+      # 最大缓存数
+      maxSize: 200
+      # Redisson 的yaml配置文件
+      redissonYamlConfig: redisson.yaml
+      # 缓存同步策略配置
+    cacheSyncPolicy:
+      # 策略类型
+      type: redis
+      # 缓存更新时通知其他节点的topic名称
+      topic: l2cache:sync:topic
 ```
 
 
-注：主要使用`Caffeine`的`LoadingCache`来实现数据加载。 
+注：通过自定义CacheLoader结合到`Caffeine`或`Guava`的`LoadingCache`来实现数据加载。 
 
 
 ## 二、关于缓存的几个常见问题分析和处理方案
@@ -126,13 +148,20 @@ l2cache:
 `缓存更新`包含了对`Caffeine` 和 `redis`的操作，同时会通知其他缓存节点进行`缓存更新`操作。
 
 > 1、主动更新
+>
 > > 1）获取缓存时，若缓存不存在或缓存已过期，则重新加载缓存。
 > >
-> > 2）源数据变更后，可调用`CacheManagerController.refresh(cacheName,key)`接口重新加载缓存（只对已存在的key重新加载）。
+> > *2）源数据变更后，可调用`CacheManagerController.refresh(cacheName,key)`接口重新加载缓存（只对已存在的key重新加载）。* - 在重构后的版本中已经去掉CacheManagerController的实现，因为很少会有场景会使用到。
 >
 > 2、自动更新
 >
-> > 通过`定期刷新过期缓存`（只对过期缓存进行重新加载），尽可能的保证分布式缓存的一致性。详见`AbstractCaffeineRedisCacheManager`。
+> > 通过`定期刷新过期缓存`（只对过期缓存进行重新加载），尽可能的保证分布式缓存的一致性。
+> >
+> > 每一个`cacheName`对应一个刷新任务，通过任务调度线程池实现调度。相比第一个版本，粒度更细。
+> >
+> > 如果 L1Cache 是 LoadingCache，并且自定义CuntomCacheLoader中 L2Cache 不为空，则同时刷新L1Cache和L2Cache。
+> >
+> > 详见`CaffeineCache`。
 
 
 ### 缓存淘汰
@@ -140,6 +169,7 @@ l2cache:
 `缓存淘汰`包含了对`Caffeine` 和 `redis`的操作，同时会通知其他缓存节点进行`缓存淘汰`操作。
 
 > 1、主动淘汰
+>
 > > 1）获取缓存时去检查缓存是否过期，若过期则淘汰缓存。
 > >
 > > 2）源数据变更后，可调用`CacheManagerController.clear(cacheName,key)`接口淘汰缓存。
@@ -148,7 +178,9 @@ l2cache:
 >
 > 2、自动淘汰
 >
-> > `redis`中的缓存数据是利用redis的淘汰策略来管理的。具体可参考redis的6种淘汰策略。
+> > *旧实现：`redis`中的缓存数据是利用redis的淘汰策略来管理的。具体可参考redis的6种淘汰策略。*
+> >
+> > 新实现：基于`redisson`实现，其是通过org.redisson.EvictionScheduler实例来实现定期清理的，也就是由应用自身来进行维护。
 
 
 ### 缓存预热

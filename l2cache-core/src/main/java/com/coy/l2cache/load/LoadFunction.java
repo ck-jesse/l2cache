@@ -3,7 +3,7 @@ package com.coy.l2cache.load;
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.sync.CacheMessage;
-import com.coy.l2cache.sync.CacheSyncPolicy;
+import com.coy.l2cache.CacheSyncPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
