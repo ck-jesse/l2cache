@@ -5,6 +5,7 @@ import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.builder.CaffeineCacheBuilder;
 import com.coy.l2cache.cache.CaffeineCache;
 import com.coy.l2cache.cache.expire.DefaultCacheExpiredListener;
+import com.coy.l2cache.consts.CacheSyncPolicyType;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.sync.CacheMessageListener;
@@ -37,6 +38,9 @@ public class CaffeineCacheTest {
                 .setAutoRefreshExpireCache(true)
                 .setRefreshPoolSize(3)
                 .setRefreshPeriod(5L);
+
+        cacheConfig.getCacheSyncPolicy()
+                .setType(CacheSyncPolicyType.REDIS.name());
 
         // 缓存同步策略
         CacheSyncPolicy cacheSyncPolicy = new RedisCacheSyncPolicy()

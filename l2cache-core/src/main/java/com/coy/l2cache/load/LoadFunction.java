@@ -46,6 +46,10 @@ public class LoadFunction implements Function<Object, Object> {
         try {
             Object value = null;
             if (null == level2Cache) {
+                if (null == valueLoader) {
+                    logger.debug("[LoadFunction] level2Cache and valueLoader is null direct return null, key={}", key);
+                    return null;
+                }
                 value = valueLoader.call();
                 logger.debug("[LoadFunction] load data from method, level2Cache is null, cacheName={}, key={}, value={}", cacheName,
                         key, value);
@@ -55,9 +59,15 @@ public class LoadFunction implements Function<Object, Object> {
                 value = level2Cache.get(key);
 
                 if (value != null) {
-                    logger.debug("[LoadFunction] get cache from redis, cacheName={}, key={}, value={}", cacheName, key, value);
+                    logger.debug("[LoadFunction] get cache from {}, cacheName={}, key={}, value={}", level2Cache.getCacheType(), cacheName, key,
+                            value);
                     // 从L2中获取到数据后不需要显示设置到L1，利用L1本身的机制进行设置
                     return value;
+                }
+
+                if (null == valueLoader) {
+                    logger.debug("[LoadFunction] valueLoader is null direct return null, key={}", key);
+                    return null;
                 }
 
                 // 执行业务方法获取数据

@@ -1,5 +1,6 @@
 package com.coy.l2cache;
 
+import com.coy.l2cache.consts.CacheSyncPolicyType;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.util.RandomUtil;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author chenck
@@ -230,6 +232,8 @@ public class CacheConfig {
 
         /**
          * 策略类型
+         *
+         * @see CacheSyncPolicyType
          */
         private String type;
 
@@ -237,5 +241,17 @@ public class CacheConfig {
          * 缓存更新时通知其他节点的topic名称
          */
         private String topic = "l2cache:sync:topic";
+
+        /**
+         * 是否支持异步发送消息
+         */
+        private boolean isAsync;
+
+        /**
+         * 具体的属性配置
+         * 定义一个通用的属性字段，不同的MQ可配置各自的属性即可。
+         * 如:kafka 的属性配置则完全与原生的配置保持一致
+         */
+        private Properties props = new Properties();
     }
 }

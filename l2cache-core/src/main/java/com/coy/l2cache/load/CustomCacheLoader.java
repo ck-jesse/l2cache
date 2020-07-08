@@ -66,12 +66,12 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     @Override
     public Object load(Object key) throws Exception {
-        // 直接返回null，目的是使后续逻辑去执行具体的加载数据方法，然后put到缓存
+        // 直接返回null，目的是使spring cache后续逻辑去执行具体的加载数据方法，然后put到缓存
         Callable<?> valueLoader = VALUE_LOADER_CACHE.get(key);
-        if (null == valueLoader) {
+        /*if (null == valueLoader) {
             logger.debug("[CustomCacheLoader] valueLoader is null direct return null, key={}", key);
             return null;
-        }
+        }*/
 
         LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader);
         return loadFunction.apply(key);

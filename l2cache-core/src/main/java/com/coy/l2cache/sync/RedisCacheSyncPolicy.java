@@ -7,6 +7,8 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * 基于 redis pubsub 的同步策略
  *
@@ -17,10 +19,15 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCacheSyncPolicy.class);
 
+    AtomicBoolean start = new AtomicBoolean(false);
     private RTopic topic;
 
     @Override
     public void connnect() {
+        if (!start.compareAndSet(false, true)) {
+            logger.info("[RedisCacheSyncPolicy] already started");
+            return;
+        }
         RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
         this.topic = redissonClient.getTopic(this.getCacheConfig().getCacheSyncPolicy().getTopic());
 

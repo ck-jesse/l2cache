@@ -37,12 +37,12 @@ public class CacheMessageListener implements MessageListener {
                 return;
             }
             if (CacheConsts.CACHE_REFRESH.equals(message.getOptType())) {
-                level1Cache.refresh(message);
+                level1Cache.refresh(message.getKey());
             } else {
-                level1Cache.clearLocalCache(message);
+                level1Cache.clearLocalCache(message.getKey());
             }
         } catch (Exception e) {
-            logger.error("");
+            logger.error("[CacheMessageListener][SyncCache] error", e);
         }
     }
 
