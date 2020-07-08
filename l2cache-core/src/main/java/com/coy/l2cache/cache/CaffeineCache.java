@@ -1,15 +1,14 @@
 package com.coy.l2cache.cache;
 
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.load.CacheLoader;
-import com.coy.l2cache.load.CustomCacheLoader;
 import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
 import com.coy.l2cache.schedule.RefreshSupport;
 import com.coy.l2cache.sync.CacheMessage;
-import com.coy.l2cache.CacheSyncPolicy;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
      */
     private final CacheSyncPolicy cacheSyncPolicy;
     /**
-     * L1 Caffeine
+     * L1 Caffeine Cache
      */
     private final Cache<Object, Object> caffeineCache;
 
@@ -105,10 +104,8 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
         if (isLoadingCache()) {
-            if (this.cacheLoader instanceof CustomCacheLoader) {
-                // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
-                ((CustomCacheLoader) this.cacheLoader).addValueLoader(key, valueLoader);
-            }
+            // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
+            this.cacheLoader.addValueLoader(key, valueLoader);
 
             Object value = this.get(key);
             return (T) fromStoreValue(value);

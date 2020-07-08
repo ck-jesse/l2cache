@@ -62,7 +62,7 @@ public class LoadFunction implements Function<Object, Object> {
 
                 // 执行业务方法获取数据
                 value = valueLoader.call();
-                logger.debug("[LoadFunction] load data from method, cacheName={}, key={}, value={}", cacheName, key, value);
+                logger.debug("[LoadFunction] load data from target method, cacheName={}, key={}, value={}", cacheName, key, value);
 
                 level2Cache.put(key, value);
             }

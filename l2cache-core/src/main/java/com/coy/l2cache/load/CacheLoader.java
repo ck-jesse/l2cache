@@ -34,4 +34,5 @@ public interface CacheLoader<K, V> {
      * 计算或检索对应的值
      */
     V load(K key) throws Exception;
+
 }

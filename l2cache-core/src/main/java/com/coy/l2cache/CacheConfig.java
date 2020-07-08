@@ -47,6 +47,7 @@ public class CacheConfig {
 
     private final Composite composite = new Composite();
     private final Caffeine caffeine = new Caffeine();
+    private final Guava guava = new Guava();
     private final Redis redis = new Redis();
     private final CacheSyncPolicy cacheSyncPolicy = new CacheSyncPolicy();
 
@@ -111,6 +112,40 @@ public class CacheConfig {
          */
         private Map<String, String> specs = new HashMap<>();
 
+    }
+
+    /**
+     * guava specific cache properties.
+     */
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class Guava implements Config {
+        /**
+         * 是否自动刷新过期缓存 true 表示是(默认)，false 表示否
+         */
+        private boolean autoRefreshExpireCache = true;
+
+        /**
+         * 缓存刷新调度线程池的大小
+         */
+        private Integer refreshPoolSize = 3;
+
+        /**
+         * 缓存刷新的频率(秒)
+         */
+        private Long refreshPeriod = 5L;
+
+        /**
+         * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
+         */
+        private String defaultSpec;
+
+        /**
+         * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
+         * <key,value>=<cacheName, spec>
+         */
+        private Map<String, String> specs = new HashMap<>();
     }
 
     /**

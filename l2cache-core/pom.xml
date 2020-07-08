@@ -27,6 +27,12 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!-- redisson -->
         <dependency>
             <groupId>org.redisson</groupId>

@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
+ * Caffeine Cache Builder
+ *
  * @author chenck
  * @date 2020/7/2 9:37
  */
@@ -21,7 +23,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
     private static final Logger logger = LoggerFactory.getLogger(CaffeineCacheBuilder.class);
 
-    private Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
+    private static Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
 
     @Override
     public CaffeineCache build(String cacheName) {
