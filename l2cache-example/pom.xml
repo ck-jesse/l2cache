@@ -46,6 +46,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.3.1.RELEASE</version>
                 <executions>
                     <execution>
                         <id>repackage</id>
@@ -54,9 +55,9 @@
                         </goals>
                     </execution>
                 </executions>
-                <!--<configuration>
+                <configuration>
                     <mainClass>com.coy.l2cache.example.Application</mainClass>
-                </configuration>-->
+                </configuration>
             </plugin>
         </plugins>
     </build>
