@@ -17,12 +17,23 @@
 
 > `L2cache` 在满足高并发的同时也引入了一些新的问题，比如怎么保证分布式场景下各个节点中本地缓存的一致性问题，本框架采用`数据变更通知`+`定期刷新过期缓存` 的策略来尽可能的保证缓存的一致性。具体见下文中的 `分布式缓存同步` 和 `分布式缓存一致性保证` 两个章节。
 
+**关键点：**
+
+支持根据配置`缓存类型`来灵活的组合使用不同的Cache。
+
+1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
+
+2、支持只使用二级缓存`Redis`。
+
+3、支持同时使用一二级缓存`Composite`。
 
  **必知：**
 
 > 若使用缓存，则必然可能出现不一致的情况，也就是说无法保证强一致性。
 
-## 一、如何使用L2cache
+
+
+# 如何使用L2cache
 
 ### 集成Spring项目
 
@@ -132,6 +143,41 @@ l2cache:
 
 注：通过自定义`CacheLoader`结合到`Caffeine`或`Guava`的`LoadingCache`来实现数据加载。 
 
+
+
+**关键点：**
+
+支持根据配置来灵活的组合使用不同的Cache。
+
+1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
+
+```yaml
+l2cache:
+  config:
+    cacheType: caffeine
+```
+
+2、支持只使用二级缓存`Redis`。
+
+```yaml
+l2cache:
+  config:
+    cacheType: redis
+```
+
+3、支持同时使用一二级缓存。
+
+```yaml
+l2cache:
+  config:
+    cacheType: composite
+    composite:
+      l1CacheType: caffeine
+      l2CacheType: redis
+```
+
+
+
 #### 3、代码中的使用
 
 结合Spring Cache的注解来使用。
@@ -237,7 +283,7 @@ public void caffeineCacheTest() throws InterruptedException {
 
 
 
-## 二、关于缓存的几个常见问题分析和处理方案
+# 关于缓存的几个常见问题分析和处理方案
 
 ### 分布式缓存同步
 
