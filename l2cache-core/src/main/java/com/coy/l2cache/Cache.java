@@ -36,11 +36,6 @@ public interface Cache {
     String getCacheName();
 
     /**
-     * 缓存等级
-     */
-    String getLevel();
-
-    /**
      * 获取实际缓存对象
      */
     Object getActualCache();

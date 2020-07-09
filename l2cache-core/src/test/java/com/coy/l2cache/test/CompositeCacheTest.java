@@ -62,8 +62,8 @@ public class CompositeCacheTest {
             }
         };
 
+        System.out.println("cacheType: " + cache.getCacheType());
         System.out.println("cacheName: " + cache.getCacheName());
-        System.out.println("level: " + cache.getCacheName());
         System.out.println("actualCache: " + cache.getActualCache().getClass().getName());
         System.out.println();
     }

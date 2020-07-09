@@ -46,7 +46,6 @@ public interface CacheSyncPolicy {
 
     /**
      * 建立连接，并订阅消息
-     * 注：只能执行一次
      */
     void connnect();
 

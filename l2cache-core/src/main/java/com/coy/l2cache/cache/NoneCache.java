@@ -29,11 +29,6 @@ public class NoneCache implements Level1Cache, Level2Cache {
     }
 
     @Override
-    public String getLevel() {
-        return "0";
-    }
-
-    @Override
     public Object getActualCache() {
         return null;
     }

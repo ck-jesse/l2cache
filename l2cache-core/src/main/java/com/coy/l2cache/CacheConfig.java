@@ -240,7 +240,7 @@ public class CacheConfig {
         /**
          * 缓存更新时通知其他节点的topic名称
          */
-        private String topic = "l2cache:sync:topic";
+        private String topic = "l2cache";
 
         /**
          * 是否支持异步发送消息

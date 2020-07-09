@@ -46,11 +46,6 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     }
 
     @Override
-    public String getLevel() {
-        return "composite";
-    }
-
-    @Override
     public CompositeCache getActualCache() {
         return this;
     }

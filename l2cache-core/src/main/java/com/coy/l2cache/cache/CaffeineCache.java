@@ -66,11 +66,6 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     }
 
     @Override
-    public String getLevel() {
-        return "1";
-    }
-
-    @Override
     public Cache<Object, Object> getActualCache() {
         return this.caffeineCache;
     }

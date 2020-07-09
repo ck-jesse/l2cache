@@ -74,11 +74,6 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
     }
 
     @Override
-    public String getLevel() {
-        return "2";
-    }
-
-    @Override
     public RMap<?, ?> getActualCache() {
         return this.map;
     }

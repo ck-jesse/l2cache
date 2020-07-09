@@ -42,12 +42,12 @@ public class CaffeineCacheTest {
         cacheConfig.getCacheSyncPolicy()
                 .setType(CacheSyncPolicyType.REDIS.name());
 
-        // 缓存同步策略
+        // 构建缓存同步策略
         CacheSyncPolicy cacheSyncPolicy = new RedisCacheSyncPolicy()
                 .setCacheConfig(cacheConfig)
                 .setCacheMessageListener(new CacheMessageListener(cacheConfig.getInstanceId()))
                 .setActualClient(Redisson.create());
-        cacheSyncPolicy.connnect();
+        cacheSyncPolicy.connnect();//
 
         // 构建cache
         cache = (CaffeineCache) new CaffeineCacheBuilder()
@@ -67,8 +67,8 @@ public class CaffeineCacheTest {
             }
         };
 
+        System.out.println("cacheType: " + cache.getCacheType());
         System.out.println("cacheName: " + cache.getCacheName());
-        System.out.println("level: " + cache.getCacheName());
         System.out.println("actualCache: " + cache.getActualCache().getClass().getName());
         System.out.println();
     }
