@@ -30,7 +30,8 @@ public class CacheMessageListener implements MessageListener {
                 logger.debug("[CacheMessageListener][SyncCache] not deal cache instanceId is same, message={}", message.toString());
                 return;
             }
-            logger.info("[CacheMessageListener][SyncCache] message={}", message.toString());
+            logger.info("[CacheMessageListener][SyncCache] instanceId={}, cacheName={}, cacheType={}, optType={}, key={}",
+                    message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey());
 
             Level1Cache level1Cache = getLevel1Cache(message);
             if (null == level1Cache) {

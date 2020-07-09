@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
   #servlet:
   #  context-path: /l2cache-example
 
@@ -64,8 +64,8 @@ l2cache:
       redissonYamlConfig: redisson.yaml
     # 缓存同步策略配置
     cacheSyncPolicy:
-      # 策略类型
-      type: kafka
+      # 策略类型 kafka / redis
+      type: redis
       # 缓存更新时通知其他节点的topic名称
       topic: l2cache
       # 具体的属性配置，不同的类型配置各自的属性即可(自定义和原生的都可以)

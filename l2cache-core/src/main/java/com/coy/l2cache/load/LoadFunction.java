@@ -29,7 +29,7 @@ public class LoadFunction implements Function<Object, Object> {
     private final String cacheName;
     private final Level2Cache level2Cache;
     private final CacheSyncPolicy cacheSyncPolicy;
-    private final Callable<?> valueLoader;
+    private final Callable<?> valueLoader;// 加载数据的目标方法
 
     public LoadFunction(String instanceId, String cacheType, String cacheName,
                         Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader) {
@@ -44,42 +44,32 @@ public class LoadFunction implements Function<Object, Object> {
     @Override
     public Object apply(Object key) {
         try {
-            Object value = null;
+            // 走到此处，表明从L1中没有获取到缓存，需要先从L2中获取缓存，若L2无缓存，则再执行目标方法加载数据到缓存
             if (null == level2Cache) {
                 if (null == valueLoader) {
-                    logger.debug("[LoadFunction] level2Cache and valueLoader is null direct return null, key={}", key);
+                    logger.debug("[LoadFunction] level2Cache and valueLoader is null, return null, key={}", key);
                     return null;
                 }
-                value = valueLoader.call();
-                logger.debug("[LoadFunction] load data from method, level2Cache is null, cacheName={}, key={}, value={}", cacheName,
+                Object value = valueLoader.call();
+                logger.debug("[LoadFunction] load data from target method, level2Cache is null, cacheName={}, key={}, value={}", cacheName,
                         key, value);
-            } else {
-                logger.debug("[LoadFunction] load cache, cacheName={}, key={}", cacheName, key);
-                // 走到此处，表明已经从L1中没有获取到数据，所以先从L2中获取数据
-                value = level2Cache.get(key);
-
-                if (value != null) {
-                    logger.debug("[LoadFunction] get cache from {}, cacheName={}, key={}, value={}", level2Cache.getCacheType(), cacheName, key,
-                            value);
-                    // 从L2中获取到数据后不需要显示设置到L1，利用L1本身的机制进行设置
-                    return value;
+                if (null != cacheSyncPolicy) {
+                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }
+                return value;
+            }
+            if (null == cacheSyncPolicy) {
+                return level2Cache.get(key, valueLoader);
+            }
 
-                if (null == valueLoader) {
-                    logger.debug("[LoadFunction] valueLoader is null direct return null, key={}", key);
-                    return null;
+            // 对 valueLoader 进行包装，以便目标方法执行完后发送缓存同步消息，此方式不会对level2Cache造成污染
+            return level2Cache.get(key, () -> {
+                Object tempValue = valueLoader.call();
+                if (null != cacheSyncPolicy) {
+                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }
-
-                // 执行业务方法获取数据
-                value = valueLoader.call();
-                logger.debug("[LoadFunction] load data from target method, cacheName={}, key={}, value={}", cacheName, key, value);
-
-                level2Cache.put(key, value);
-            }
-            if (null != cacheSyncPolicy) {
-                cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
-            }
-            return value;
+                return tempValue;
+            });
         } catch (Exception ex) {
             throw new org.springframework.cache.Cache.ValueRetrievalException(key, this.valueLoader, ex);
         }

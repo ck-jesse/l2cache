@@ -7,8 +7,8 @@ import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.Cache;
 
+import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -66,13 +66,6 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
     @Override
     public Object buildKey(Object key) {
         return key;
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(this.cacheName).append(":");
-//        if (redis.isUseKeyPrefix() && !StringUtils.isEmpty(redis.getKeyPrefix())) {
-//            sb.append(redis.getKeyPrefix()).append(":");
-//        }
-//        sb.append(key.toString());
-//        return sb.toString();
     }
 
     @Override
@@ -93,6 +86,7 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
     @Override
     public Object get(Object key) {
         Object value = map.get(buildKey(key));
+        logger.debug("[RedisCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return fromStoreValue(value);
     }
 
@@ -103,7 +97,7 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             return null;
         }
         if (value != null && type != null && !type.isInstance(value)) {
-            throw new IllegalStateException("RedisCache Cached value is not of required type [" + type.getName() + "]: " + value);
+            throw new IllegalStateException("[RedisCache] Cached value is not of required type [" + type.getName() + "]: " + value);
         }
         return (T) value;
     }
@@ -114,14 +108,30 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         if (value != null) {
             return (T) value;
         }
+        if (null == valueLoader) {
+            logger.debug("[RedisCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), key);
+            return null;
+        }
+        // 增加分布式锁，集群环境下同一时刻只会有一个加载数据的线程，解决ABA的问题，保证一级缓存二级缓存数据的一致性
         RLock lock = map.getLock(key);
         lock.lock();
         try {
             value = map.get(key);
             if (value == null) {
-                value = valueFromLoader(key, valueLoader);
+                logger.debug("[RedisCache] load data from target method, cacheName={}, key={}", this.getCacheName(), key);
+                value = valueLoader.call();
                 this.put(key, value);
             }
+        } catch (Exception ex) {
+            RuntimeException exception;
+            try {
+                Class<?> c = Class.forName("org.springframework.cache.Cache$ValueRetrievalException");
+                Constructor<?> constructor = c.getConstructor(Object.class, Callable.class, Throwable.class);
+                exception = (RuntimeException) constructor.newInstance(key, valueLoader, ex);
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+            throw exception;
         } finally {
             lock.unlock();
         }
@@ -130,10 +140,10 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 
     @Override
     public void put(Object key, Object value) {
-        /*if (!isAllowNullValues() && value == null) {
+        if (!isAllowNullValues() && value == null) {
             map.remove(buildKey(key));
             return;
-        }*/
+        }
 
         value = toStoreValue(value);
         if (mapCache != null) {
@@ -146,7 +156,8 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
     @Override
     public Object putIfAbsent(Object key, Object value) {
         if (!isAllowNullValues() && value == null) {
-            return this.get(key);// 不允许为null，且cacheValue为null，则直接获取缓存并返回
+            // 不允许为null，且cacheValue为null，则直接获取旧的缓存项并返回
+            return this.get(key);
         }
         Object prevValue = null;
         if (mapCache != null) {
@@ -160,24 +171,14 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 
     @Override
     public void evict(Object key) {
-        logger.debug("RedisCache evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.debug("[RedisCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
         map.fastRemove(buildKey(key));
     }
 
     @Override
     public void clear() {
-        logger.debug("RedisCache clear all cache, cacheName={}", this.getCacheName());
+        logger.debug("[RedisCache] clear all cache, cacheName={}", this.getCacheName());
         map.clear();
     }
 
-    /**
-     *
-     */
-    private static <T> T valueFromLoader(Object key, Callable<T> valueLoader) {
-        try {
-            return valueLoader.call();
-        } catch (Exception var3) {
-            throw new Cache.ValueRetrievalException(key, valueLoader, var3);
-        }
-    }
 }
