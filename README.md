@@ -1,8 +1,8 @@
 # L2cache  -- 基于内存和Redis的二级缓存框架
 
-`L2cache` 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高并发场景下的分布式二级缓存框架。
+L2cache  是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高并发场景下的分布式二级缓存框架。
 
-**L2cache  的二级缓存结构：**
+**L2cache 的二级缓存结构：**
 
 1、L1：一级缓存，内存缓存，`Caffeine` 和 `Guava Cache`。
 
