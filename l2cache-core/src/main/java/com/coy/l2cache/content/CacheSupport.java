@@ -17,17 +17,22 @@ public class CacheSupport {
 
     /**
      * 缓存容器
-     * <key,value>=<cacheType_cacheName, Cache>
+     * Map<cacheType,Map<cacheName,Cache>>
      */
-    private static final Map<String, Cache> CACHE_MAP = new ConcurrentHashMap<>(16);
+    private static final Map<String, ConcurrentHashMap<String, Cache>> CACHE_TYPE_CACHE_MAP = new ConcurrentHashMap<>(16);
 
-    private static final Object lock = new Object();
+    private static final Object newMapLock = new Object();
+    private static final Object buildCacheLock = new Object();
 
     /**
      * 获取缓存实例
      */
     public static Cache getCache(String cacheType, String cacheName) {
-        return CACHE_MAP.get(buildKey(cacheType, cacheName));
+        ConcurrentHashMap<String, Cache> cacheMap = CACHE_TYPE_CACHE_MAP.get(cacheType);
+        if (null == cacheMap) {
+            return null;
+        }
+        return cacheMap.get(cacheName);
     }
 
     /**
@@ -40,23 +45,31 @@ public class CacheSupport {
         if (StringUtils.isEmpty(cacheName)) {
             throw new IllegalArgumentException("缓存名称不能为空");
         }
-        String key = buildKey(cacheType, cacheName);
-        Cache cache = CACHE_MAP.get(key);
+
+        ConcurrentHashMap<String, Cache> cacheMap = CACHE_TYPE_CACHE_MAP.get(cacheType);
+        if (null == cacheMap) {
+            synchronized (newMapLock) {
+                cacheMap = CACHE_TYPE_CACHE_MAP.get(cacheType);
+                if (null == cacheMap) {
+                    cacheMap = new ConcurrentHashMap<>();
+                    CACHE_TYPE_CACHE_MAP.put(cacheType, cacheMap);
+                }
+            }
+        }
+
+        Cache cache = cacheMap.get(cacheName);
         if (null != cache) {
             return cache;
         }
-        synchronized (lock) {
-            cache = CACHE_MAP.get(key);
+        synchronized (buildCacheLock) {
+            cache = cacheMap.get(cacheName);
             if (null != cache) {
                 return cache;
             }
             cache = cacheBuilder.build(cacheName);
-            CACHE_MAP.put(key, cache);
+            cacheMap.put(cacheName, cache);
             return cache;
         }
     }
 
-    private static String buildKey(String cacheType, String cacheName) {
-        return cacheType + "_" + cacheName;
-    }
 }
