@@ -16,7 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RedissonSupport {
 
-    private static final Map<String, RedissonClient> MAP = new ConcurrentHashMap<>();
+    /**
+     * Map<InstanceId,RedissonClient>
+     */
+    private static final Map<String, RedissonClient> REDISSON_MAP = new ConcurrentHashMap<>();
 
     private static final Object lock = new Object();
 
@@ -24,12 +27,12 @@ public class RedissonSupport {
      * 获取或创建缓存实例
      */
     public static RedissonClient getRedisson(CacheConfig cacheConfig) {
-        RedissonClient redissonClient = MAP.get(cacheConfig.getInstanceId());
+        RedissonClient redissonClient = REDISSON_MAP.get(cacheConfig.getInstanceId());
         if (null != redissonClient) {
             return redissonClient;
         }
         synchronized (lock) {
-            redissonClient = MAP.get(cacheConfig.getInstanceId());
+            redissonClient = REDISSON_MAP.get(cacheConfig.getInstanceId());
             if (null != redissonClient) {
                 return redissonClient;
             }
@@ -40,7 +43,7 @@ public class RedissonSupport {
             } else {
                 redissonClient = Redisson.create(config);
             }
-            MAP.put(cacheConfig.getInstanceId(), redissonClient);
+            REDISSON_MAP.put(cacheConfig.getInstanceId(), redissonClient);
             return redissonClient;
         }
     }

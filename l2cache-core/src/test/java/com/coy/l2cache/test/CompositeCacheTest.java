@@ -1,11 +1,12 @@
 package com.coy.l2cache.test;
 
-import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.CacheBuilder;
+import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.builder.CompositeCacheBuilder;
 import com.coy.l2cache.cache.CompositeCache;
 import com.coy.l2cache.cache.expire.DefaultCacheExpiredListener;
+import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
-import com.coy.l2cache.builder.CompositeCacheBuilder;
-import com.coy.l2cache.CacheConfig;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,11 +46,11 @@ public class CompositeCacheTest {
                 .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
                 .setRedissonYamlConfig("redisson.yaml");
 
-        cache = (CompositeCache) new CompositeCacheBuilder()
+        CacheBuilder builder = new CompositeCacheBuilder()
                 .setCacheConfig(cacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
-                .setCacheSyncPolicy(null)
-                .build("compositeCache");
+                .setCacheSyncPolicy(null);
+        cache = (CompositeCache) builder.build("compositeCache");
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
@@ -133,7 +134,7 @@ public class CompositeCacheTest {
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
         System.out.println(String.format("get key=%s, value=%s", key, cache.get(key)));
-        while(true){
+        while (true) {
             Thread.sleep(2000);
             System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, callable)));
         }
