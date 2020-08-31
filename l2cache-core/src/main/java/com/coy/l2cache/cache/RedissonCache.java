@@ -109,7 +109,15 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         }
         // 增加分布式锁，集群环境下同一时刻只会有一个加载数据的线程，解决ABA的问题，保证一级缓存二级缓存数据的一致性
         RLock lock = map.getLock(key);
-        lock.lock();
+        if (redis.isTryLock()) {
+            if (!lock.tryLock()) {
+                // 高并发场景下，拦截一部分请求将其快速失败，保证性能
+                logger.info("[RedisCache] get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), key);
+                return null;
+            }
+        } else {
+            lock.lock();
+        }
         try {
             value = map.get(key);
             if (value == null) {

@@ -175,6 +175,14 @@ public class CacheConfig {
         private long expireTime;
 
         /**
+         * 加载数据时是调用tryLock()，还是lock()
+         * 注：
+         * tryLock() 只有一个请求执行加载动作，其他并发请求，直接返回失败
+         * lock() 只有一个请求执行加载动作，其他并发请求，会阻塞直到获得锁
+         */
+        private boolean tryLock = true;
+
+        /**
          * 缓存最大空闲时间(ms)
          * 注：在 Redisson 中 缓存过期被淘汰的时间 取符合条件的 expireTime 和 maxIdleTime 中间小的值。
          * 如：expireTime=10s, maxIdleTime=5s, 那么当缓存空闲5s时，会被 Redisson 淘汰掉。
