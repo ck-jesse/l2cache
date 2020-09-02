@@ -11,10 +11,11 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Objects.requireNonNull;
 
 /**
- * 扩展原生的CaffeineSpec
+ * 扩展原生的 CaffeineSpec
  *
  * @author chenck
  * @date 2020/5/12 19:41
+ * @see com.github.benmanes.caffeine.cache.CaffeineSpec
  */
 public class CustomCaffeineSpec {
 
@@ -408,14 +409,16 @@ public class CustomCaffeineSpec {
      * 获取过期时间
      */
     public long getExpireTime() {
-        if (expireAfterAccessTimeUnit != null) {
-            return expireAfterAccessTimeUnit.toMillis(expireAfterAccessDuration);
+        // refreshAfterWrite 第一优先
+        if (refreshAfterWriteTimeUnit != null) {
+            return refreshAfterWriteTimeUnit.toMillis(refreshAfterWriteDuration);
         }
+        // expireAfterWrite 第二优先
         if (expireAfterWriteTimeUnit != null) {
             return expireAfterWriteTimeUnit.toMillis(expireAfterWriteDuration);
         }
-        if (refreshAfterWriteTimeUnit != null) {
-            return refreshAfterWriteTimeUnit.toMillis(refreshAfterWriteDuration);
+        if (expireAfterAccessTimeUnit != null) {
+            return expireAfterAccessTimeUnit.toMillis(expireAfterAccessDuration);
         }
         return UNSET_INT;
     }

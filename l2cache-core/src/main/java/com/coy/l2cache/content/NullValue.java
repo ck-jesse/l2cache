@@ -8,7 +8,8 @@ import java.io.Serializable;
  * @author chenck
  * @date 2020/7/1 17:39
  */
-public final class NullValue implements Serializable {
+public class NullValue implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     public static final Object INSTANCE = new NullValue();

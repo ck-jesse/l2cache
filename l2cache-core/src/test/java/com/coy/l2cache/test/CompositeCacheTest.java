@@ -38,9 +38,10 @@ public class CompositeCacheTest {
                 .setL1CacheType(CacheType.CAFFEINE.name())
                 .setL2CacheType(CacheType.REDIS.name());
         cacheConfig.getCaffeine()
-                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=5s,recordStats")
+                .setDefaultSpec("initialCapacity=10,maximumSize=2000,refreshAfterWrite=10s,recordStats")
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
+//                .setAllowExpire(true)// 支持从无有效期改为有有效期，不支持从有有效期改为无有效期
                 .setExpireTime(5000)
                 .setMaxIdleTime(5000)
                 .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
@@ -101,6 +102,18 @@ public class CompositeCacheTest {
     public void putNullTest() throws InterruptedException {
         String key = "key_null";
         cache.put(key, null);
+        printCache(key);
+        System.out.println(cache.get(key));
+    }
+
+    @Test
+    public void putUserTest() throws InterruptedException {
+        String key = "user_key";
+        User user = new User();
+        user.setName("test");
+        user.setAddr(key);
+        user.setCurrTime(System.currentTimeMillis());
+        cache.put(key, user);
         printCache(key);
         System.out.println(cache.get(key));
     }

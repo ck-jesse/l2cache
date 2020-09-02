@@ -2,6 +2,7 @@ package com.coy.l2cache.builder;
 
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheBuilder;
+import com.coy.l2cache.CacheSpec;
 import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.CacheSyncPolicy;
@@ -22,6 +23,11 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
 
     // 暂不开放自定义CacheLoader，默认一个cacheName对应一个CacheLoader
     //private CacheLoader cacheLoader;
+
+    @Override
+    public CacheSpec parseSpec(String cacheName) {
+        return null;
+    }
 
     @Override
     public void copyFrom(CacheBuilder sourceBuilder) {

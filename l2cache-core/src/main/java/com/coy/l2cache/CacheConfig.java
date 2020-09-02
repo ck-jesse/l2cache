@@ -95,8 +95,9 @@ public class CacheConfig {
 
         /**
          * 缓存刷新调度线程池的大小
+         * 默认为 CPU数 * 2
          */
-        private Integer refreshPoolSize = 3;
+        private Integer refreshPoolSize = Runtime.getRuntime().availableProcessors() * 2;
 
         /**
          * 缓存刷新的频率(秒)
@@ -168,11 +169,11 @@ public class CacheConfig {
          */
         private String keyPrefix;
 
-
         /**
-         * 缓存过期时间(ms)
+         * 是否允许过期，默认true，则表示redis里面的缓存支持过期
+         * 注：支持从无有效期改为有有效期，不支持从有有效期改为无有效期
          */
-        private long expireTime;
+        private boolean allowExpire = true;
 
         /**
          * 加载数据时是调用tryLock()，还是lock()
@@ -181,6 +182,12 @@ public class CacheConfig {
          * lock() 只有一个请求执行加载动作，其他并发请求，会阻塞直到获得锁
          */
         private boolean tryLock = true;
+
+        /**
+         * 缓存过期时间(ms)
+         * 作为
+         */
+        private long expireTime;
 
         /**
          * 缓存最大空闲时间(ms)

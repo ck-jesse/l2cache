@@ -18,6 +18,11 @@ public interface CacheBuilder<T extends Cache> {
     T build(String cacheName);
 
     /**
+     * 解析缓存配置，主要针对一级缓存，如guava cache、caffeine等
+     */
+    CacheSpec parseSpec(String cacheName);
+
+    /**
      * 复制属性
      */
     void copyFrom(CacheBuilder sourceBuilder);

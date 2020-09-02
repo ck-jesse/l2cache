@@ -1,9 +1,12 @@
 package com.coy.l2cache.builder;
 
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.CacheSpec;
 import com.coy.l2cache.cache.GuavaCache;
 import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.content.CustomCaffeineSpec;
+import com.coy.l2cache.content.CustomGuavaCacheBuilderSpec;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.CustomCacheLoader;
 import com.google.common.cache.Cache;
@@ -24,6 +27,9 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
 
     private static CacheBuilder<Object, Object> defaultCacheBuilder = CacheBuilder.newBuilder();
 
+    private CacheBuilder<Object, Object> cacheBuilder;
+    private CustomGuavaCacheBuilderSpec cacheBuilderSpec;
+
     @Override
     public GuavaCache build(String cacheName) {
         // 创建CustomCacheLoader
@@ -38,14 +44,23 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
         return new GuavaCache(cacheName, this.getCacheConfig(), customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
 
+    @Override
+    public CacheSpec parseSpec(String cacheName) {
+        this.buildGuavaCacheSpec(cacheName, this.getCacheConfig().getGuava());
+
+        CacheSpec cacheSpec = new CacheSpec();
+        cacheSpec.setExpireTime(cacheBuilderSpec.getExpireTime());
+        cacheSpec.setMaxSize(cacheBuilderSpec.getMaximumSize().intValue());
+        return cacheSpec;
+    }
+
     /**
      * 构建实际缓存对象
      */
     protected Cache<Object, Object> buildActualCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader,
                                                      CacheExpiredListener listener) {
-        String spec = this.getSpec(cacheName, cacheConfig.getGuava());
-
-        CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.from(spec);
+        // 解析spec
+        this.buildGuavaCacheSpec(cacheName, this.getCacheConfig().getGuava());
 
         if (null != listener) {
             cacheBuilder.removalListener(notification -> {
@@ -80,4 +95,19 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
         return spec;
     }
 
+    /**
+     * 获取自定义的 GuavaCacheSpec
+     */
+    private void buildGuavaCacheSpec(String cacheName, CacheConfig.Guava guava) {
+        if (null != cacheBuilder) {
+            return;
+        }
+        String spec = this.getSpec(cacheName, guava);
+        if (!StringUtils.hasText(spec)) {
+            throw new RuntimeException("please setting guava cache spec config");
+        }
+        cacheBuilderSpec = CustomGuavaCacheBuilderSpec.parse(spec);
+        cacheBuilder = cacheBuilderSpec.toCacheBuilder();
+        //cacheBuilder = CacheBuilder.from(spec);
+    }
 }

@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.codec.JsonJacksonCodec;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -28,9 +29,10 @@ public class RedisCacheTest {
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .setAllowNullValues(true)
                 .getRedis()
-                .setExpireTime(2000)
-                .setMaxIdleTime(2000)
-                .setMaxSize(20)
+//                .setExpireTime(2000)
+//                .setMaxIdleTime(2000)
+//                .setMaxSize(20)
+                .setAllowExpire(true)
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient
@@ -42,7 +44,7 @@ public class RedisCacheTest {
 
         // 构建cache
         cache = builder.build("redisCache");
-        cache = builder.build("redisCache2");
+//        cache = builder.build("redisCache2");
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
@@ -81,6 +83,18 @@ public class RedisCacheTest {
     public void putNullTest() throws InterruptedException {
         String key = "key_null";
         cache.put(key, null);
+        printCache(key);
+        System.out.println(cache.get(key));
+    }
+
+    @Test
+    public void putUserTest() throws InterruptedException {
+        String key = "user_key";
+        User user = new User();
+        user.setName("test");
+        user.setAddr(key);
+        user.setCurrTime(System.currentTimeMillis());
+        cache.put(key, user);
         printCache(key);
         System.out.println(cache.get(key));
     }

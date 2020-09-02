@@ -1,5 +1,6 @@
 package com.coy.l2cache.builder;
 
+import com.coy.l2cache.CacheSpec;
 import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.load.CacheLoader;
@@ -25,6 +26,8 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
     private static Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
 
+    private CustomCaffeineSpec customCaffeineSpec;
+
     @Override
     public CaffeineCache build(String cacheName) {
         // 创建CustomCacheLoader
@@ -39,13 +42,23 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         return new CaffeineCache(cacheName, this.getCacheConfig(), customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
 
+    @Override
+    public CacheSpec parseSpec(String cacheName) {
+        this.buildCaffeineSpec(cacheName, this.getCacheConfig().getCaffeine());
+
+        CacheSpec cacheSpec = new CacheSpec();
+        cacheSpec.setExpireTime(customCaffeineSpec.getExpireTime());
+        cacheSpec.setMaxSize((int) customCaffeineSpec.getMaximumSize());
+        return cacheSpec;
+    }
+
     /**
      * 构建实际缓存对象
      */
     protected Cache<Object, Object> buildActualCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader,
                                                      CacheExpiredListener listener) {
         // 解析spec
-        CustomCaffeineSpec customCaffeineSpec = this.getCaffeineSpec(cacheName, cacheConfig.getCaffeine());
+        this.buildCaffeineSpec(cacheName, cacheConfig.getCaffeine());
 
         Caffeine<Object, Object> cacheBuilder = defaultCacheBuilder;
         if (null != customCaffeineSpec) {
@@ -81,14 +94,17 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
     }
 
     /**
-     * 获取自定义的CaffeineSpec
+     * 获取自定义的 CaffeineSpec
      */
-    private CustomCaffeineSpec getCaffeineSpec(String cacheName, CacheConfig.Caffeine caffeine) {
+    private void buildCaffeineSpec(String cacheName, CacheConfig.Caffeine caffeine) {
+        if (null != customCaffeineSpec) {
+            return;
+        }
         String spec = this.getSpec(cacheName, caffeine);
         if (!StringUtils.hasText(spec)) {
-            return null;
+            throw new RuntimeException("please setting caffeine spec config");
         }
-        return CustomCaffeineSpec.parse(spec);
+        customCaffeineSpec = CustomCaffeineSpec.parse(spec);
     }
 
 }
