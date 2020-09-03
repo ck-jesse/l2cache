@@ -4,6 +4,7 @@ import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
@@ -181,10 +182,15 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public void refreshAllExpireCache() {
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
+            Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("[CaffeineCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 // 通过LoadingCache.get(key)来刷新过期缓存
-                loadingCache.get(key);
+                value = loadingCache.get(key);
+                if (null == value || value == NullValue.INSTANCE) {
+                    logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
+                    loadingCache.invalidate(key);
+                }
             }
         }
     }

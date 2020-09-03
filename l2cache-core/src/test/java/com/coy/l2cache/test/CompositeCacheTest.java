@@ -41,7 +41,6 @@ public class CompositeCacheTest {
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10s,recordStats")
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
-                .setAllowExpire(true)// redis中的缓存支持从永久有效改为有有效期，不支持从有有效期改为永久有效
                 .setExpireTime(5000)
                 .setMaxIdleTime(5000)
                 .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以

@@ -32,7 +32,6 @@ public class RedisCacheTest {
 //                .setExpireTime(2000)
 //                .setMaxIdleTime(2000)
 //                .setMaxSize(20)
-                .setAllowExpire(true)
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient
