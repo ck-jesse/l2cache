@@ -178,8 +178,10 @@ public class CacheConfig {
         private boolean tryLock = true;
 
         /**
-         * 是否允许过期，默认false，则表示默认存到redis中的缓存项没有过期时间
+         * 是否允许过期，默认false，则表示存到redis中的缓存项没有过期时间。
+         * 同时节省一些资源，通过一级缓存的缓存刷新和淘汰机制来同步维护redis中的缓存。
          * 注：redis中的缓存支持从永久有效改为有有效期，不支持从有有效期改为永久有效
+         *
          */
         private boolean allowExpire = false;
 

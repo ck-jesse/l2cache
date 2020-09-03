@@ -60,6 +60,10 @@ l2cache:
       useKeyPrefix: true
       # 缓存Key prefix
       keyPrefix: ""
+      # 加载数据时是调用tryLock()，还是lock()，true表示使用tryLock()
+      tryLock: true
+      # 是否允许过期，默认false，则表示存到redis中的缓存项没有过期时间
+      allowExpire: false
       # 缓存过期时间(ms)
       expireTime: 30000
       # 缓存最大空闲时间(ms)
