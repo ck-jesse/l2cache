@@ -170,12 +170,6 @@ public class CacheConfig {
         private String keyPrefix;
 
         /**
-         * 是否允许过期，默认true，则表示redis里面的缓存支持过期
-         * 注：支持从无有效期改为有有效期，不支持从有有效期改为无有效期
-         */
-        private boolean allowExpire = true;
-
-        /**
          * 加载数据时是调用tryLock()，还是lock()
          * 注：
          * tryLock() 只有一个请求执行加载动作，其他并发请求，直接返回失败
@@ -184,8 +178,15 @@ public class CacheConfig {
         private boolean tryLock = true;
 
         /**
+         * 是否允许过期，默认false，则表示默认存到redis中的缓存项没有过期时间
+         * 注：redis中的缓存支持从永久有效改为有有效期，不支持从有有效期改为永久有效
+         */
+        private boolean allowExpire = false;
+
+        /**
          * 缓存过期时间(ms)
-         * 作为
+         * 注：作为默认的缓存过期时间，如果一级缓存设置了过期时间，则以一级缓存的过期时间为准。
+         * 目的是为了支持cacheName维度的缓存过期时间设置
          */
         private long expireTime;
 
@@ -198,6 +199,7 @@ public class CacheConfig {
 
         /**
          * 最大缓存数，以便剔除多余元素
+         * 注：作为默认的最大缓存数，如果一级缓存设置了最大缓存数，则以一级缓存的最大缓存数为准。
          * 注：注意如果与一级缓存（如：caffeine）中最大数量大小不一致，会出现一级缓存和二级缓存中缓存数量不一致，所以建议设置为一致减少不必要的歧义。
          */
         private int maxSize;
