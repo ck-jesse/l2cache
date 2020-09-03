@@ -27,7 +27,7 @@ public class CacheMessageListener implements MessageListener {
     public void onMessage(CacheMessage message) {
         try {
             if (this.cacheInstanceId.equalsIgnoreCase(message.getInstanceId())) {
-                logger.debug("[CacheMessageListener][SyncCache] not deal cache instanceId is same, message={}", message.toString());
+                logger.debug("[CacheMessageListener][SyncCache] instanceId is same no need to deal, message={}", message.toString());
                 return;
             }
             logger.info("[CacheMessageListener][SyncCache] instanceId={}, cacheName={}, cacheType={}, optType={}, key={}",

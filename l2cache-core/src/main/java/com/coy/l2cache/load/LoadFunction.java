@@ -65,7 +65,7 @@ public class LoadFunction implements Function<Object, Object> {
             // 对 valueLoader 进行包装，以便目标方法执行完后发送缓存同步消息，此方式不会对level2Cache造成污染
             return level2Cache.get(key, () -> {
                 if (null == valueLoader) {
-                    logger.debug("[LoadFunction] level2Cache and valueLoader is null, return null, key={}", key);
+                    logger.debug("[LoadFunction] valueLoader is null, return null, key={}", key);
                     return null;
                 }
                 Object tempValue = valueLoader.call();

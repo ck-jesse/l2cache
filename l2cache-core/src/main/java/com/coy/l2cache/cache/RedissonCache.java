@@ -149,10 +149,14 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         }
 
         value = toStoreValue(value);
-        if (mapCache != null) {
+        if (mapCache == null) {
+            map.fastPut(buildKey(key), value);
+            return;
+        }
+        if (redis.getMaxIdleTime() > 0) {
             mapCache.fastPut(buildKey(key), value, this.getExpireTime(), TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
         } else {
-            map.fastPut(buildKey(key), value);
+            mapCache.fastPut(buildKey(key), value, this.getExpireTime(), TimeUnit.MILLISECONDS);
         }
     }
 
@@ -163,11 +167,15 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             return this.get(key);
         }
         Object prevValue = null;
-        if (mapCache != null) {
+        if (mapCache == null) {
+            prevValue = map.putIfAbsent(buildKey(key), toStoreValue(value));
+            return fromStoreValue(prevValue);
+        }
+        if (redis.getMaxIdleTime() > 0) {
             prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), this.getExpireTime(), TimeUnit.MILLISECONDS, redis.getMaxIdleTime(),
                     TimeUnit.MILLISECONDS);
         } else {
-            prevValue = map.putIfAbsent(buildKey(key), toStoreValue(value));
+            prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), this.getExpireTime(), TimeUnit.MILLISECONDS);
         }
         return fromStoreValue(prevValue);
     }
