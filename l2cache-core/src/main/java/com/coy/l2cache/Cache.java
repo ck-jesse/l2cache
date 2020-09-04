@@ -90,7 +90,7 @@ public interface Cache {
      * 从存储值解析为具体值
      */
     default Object fromStoreValue(Object storeValue) {
-        if (this.isAllowNullValues() && storeValue == NullValue.INSTANCE) {
+        if (this.isAllowNullValues() && storeValue instanceof NullValue) {
             return null;
         }
         return storeValue;
