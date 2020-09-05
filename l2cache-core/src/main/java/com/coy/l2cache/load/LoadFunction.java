@@ -69,6 +69,7 @@ public class LoadFunction implements Function<Object, Object> {
                     return null;
                 }
                 Object tempValue = valueLoader.call();
+                logger.debug("[LoadFunction] valueLoader.call, key={}, value={}", key, tempValue);
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }

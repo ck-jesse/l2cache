@@ -97,7 +97,7 @@ public class CacheConfig {
          * 缓存刷新调度线程池的大小
          * 默认为 CPU数 * 2
          */
-        private Integer refreshPoolSize = Runtime.getRuntime().availableProcessors() * 2;
+        private Integer refreshPoolSize = Runtime.getRuntime().availableProcessors();
 
         /**
          * 缓存刷新的频率(秒)

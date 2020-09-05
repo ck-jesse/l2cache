@@ -33,6 +33,6 @@ public interface CacheLoader<K, V> {
      * Computes or retrieves the value corresponding to {@code key}
      * 计算或检索对应的值
      */
-    V load(K key) throws Exception;
+    V load(K key);
 
 }

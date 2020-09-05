@@ -27,7 +27,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      * 用于保证并发场景下对于不同的key找到对应的Callable进行数据加载
      * 注：ConcurrentReferenceHashMap是一个实现软/弱引用的map，防止OOM出现
      */
-    private static final Map<Object, Callable<?>> VALUE_LOADER_CACHE = new ConcurrentReferenceHashMap<>();
+    private Map<Object, Callable<?>> valueLoaderCache = new ConcurrentReferenceHashMap<>();
     private String instanceId;
     private String cacheType;
     private String cacheName;
@@ -59,15 +59,15 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
-        if (!VALUE_LOADER_CACHE.containsKey(key)) {
-            VALUE_LOADER_CACHE.put(key, valueLoader);
+        if (!valueLoaderCache.containsKey(key)) {
+            valueLoaderCache.put(key, valueLoader);
         }
     }
 
     @Override
-    public Object load(Object key) throws Exception {
+    public Object load(Object key) {
         // 直接返回null，目的是使spring cache后续逻辑去执行具体的加载数据方法，然后put到缓存
-        Callable<?> valueLoader = VALUE_LOADER_CACHE.get(key);
+        Callable<?> valueLoader = valueLoaderCache.get(key);
         /*if (null == valueLoader) {
             logger.debug("[CustomCacheLoader] valueLoader is null direct return null, key={}", key);
             return null;

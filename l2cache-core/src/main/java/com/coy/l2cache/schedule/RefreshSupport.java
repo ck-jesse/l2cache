@@ -35,7 +35,7 @@ public class RefreshSupport {
         synchronized (RefreshSupport.class) {
             if (null == scheduler) {
                 scheduler = new ScheduledThreadPoolExecutor(corePoolSize,
-                        new DaemonThreadFactory("cache-refresh-"));
+                        new DaemonThreadFactory("l2cache-refresh-"));
             }
         }
         return scheduler;

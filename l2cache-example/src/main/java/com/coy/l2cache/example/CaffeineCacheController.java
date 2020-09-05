@@ -34,6 +34,13 @@ public class CaffeineCacheController {
         return caffeineCacheService.queryUserSync(userId);
     }
 
+    @RequestMapping(value = "/putUser")
+    public String putUser(String userId) {
+        User user = new User(userId, "addr");
+        caffeineCacheService.putUser(userId, user);
+        return "success";
+    }
+
     @RequestMapping(value = "/evictUserSync")
     public String evictUserSync(String userId) {
         return caffeineCacheService.evictUserSync(userId);

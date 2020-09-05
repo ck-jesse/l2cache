@@ -58,7 +58,7 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
                 redis.setMaxSize(cacheSpec.getMaxSize());// 覆盖默认值
             }
             redis.setExpireTime(cacheSpec.getExpireTime());// 覆盖默认值
-            logger.info("create a Redisson RMapCache instance, 采用一级缓存上expireTime和maxSize, cacheName={}, cacheSpec={}", cacheName, cacheSpec);
+            logger.info("create a Redisson RMapCache instance, 采用一级缓存上expireTime和maxSize, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
             return new RedissonCache(cacheName, cacheConfig, mapCache);
         }
 

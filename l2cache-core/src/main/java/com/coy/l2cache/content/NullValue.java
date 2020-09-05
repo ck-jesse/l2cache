@@ -33,6 +33,6 @@ public class NullValue implements Serializable {
 
     @Override
     public String toString() {
-        return "null";
+        return "NullValue";
     }
 }

@@ -83,14 +83,16 @@ public class L2CacheCacheManager implements CacheManager {
      * @return the Spring L2CacheSpringCache adapter (or a decorator thereof)
      */
     protected Cache createL2CacheSpringCache(String cacheType, String cacheName) {
-        com.coy.l2cache.Cache cache = this.getL2CacheInstance(cacheType, cacheName);
+        DefaultCacheExpiredListener expiredListener = new DefaultCacheExpiredListener();
+        com.coy.l2cache.Cache cache = this.getL2CacheInstance(cacheType, cacheName, expiredListener);
+        expiredListener.setCache(cache);
         return new L2CacheSpringCache(cacheName, cacheConfig, cache);
     }
 
     /**
      * get or create l2cache
      */
-    private com.coy.l2cache.Cache getL2CacheInstance(String cacheType, String cacheName) {
+    private com.coy.l2cache.Cache getL2CacheInstance(String cacheType, String cacheName, CacheExpiredListener expiredListener) {
         com.coy.l2cache.Cache cache = CacheSupport.getCache(cacheType, cacheName);
         if (null != cache) {
             return cache;
@@ -98,7 +100,7 @@ public class L2CacheCacheManager implements CacheManager {
         // 基于SPI机制构建CacheBuilder
         CacheBuilder cacheBuilder = ServiceLoader.load(CacheBuilder.class, cacheType);
         cacheBuilder.setCacheConfig(this.cacheConfig);
-        cacheBuilder.setExpiredListener(this.expiredListener);
+        cacheBuilder.setExpiredListener(expiredListener);
         cacheBuilder.setCacheSyncPolicy(this.cacheSyncPolicy);
         cacheBuilder.setActualCacheClient(this.actualCacheClient);
 

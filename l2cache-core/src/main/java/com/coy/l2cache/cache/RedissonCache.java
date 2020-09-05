@@ -123,6 +123,7 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             if (value == null) {
                 logger.debug("[RedisCache] rlock, load data from target method, cacheName={}, key={}", this.getCacheName(), key);
                 value = valueLoader.call();
+                logger.debug("[RedisCache] rlock, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
                 this.put(key, value);
             }
         } catch (Exception ex) {

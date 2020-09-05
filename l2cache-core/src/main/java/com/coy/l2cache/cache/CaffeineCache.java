@@ -103,7 +103,13 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据
             this.cacheLoader.addValueLoader(key, valueLoader);
 
-            Object value = this.get(key);
+            Object value = ((LoadingCache) this.caffeineCache).get(key);
+            logger.debug("[CaffeineCache] LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            if (isAllowNullValues() && value == null) {
+                // 允许缓存空值，且value为null，则往缓存中put一个NullValue空对象，防止请求穿透到二级缓存或者DB上
+                // 注意：CaffeineCache 的定时任务检查到缓存项的值为NullValue时，会清理掉该缓存项，避免一直缓存，一定程度上解决缓存穿透的问题。
+                caffeineCache.put(key, toStoreValue(value));
+            }
             return (T) fromStoreValue(value);
         }
 
@@ -116,6 +122,10 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void put(Object key, Object value) {
+        if (!isAllowNullValues() && value == null) {
+            caffeineCache.invalidate(key);
+            return;
+        }
         caffeineCache.put(key, toStoreValue(value));
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
