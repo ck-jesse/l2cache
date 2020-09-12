@@ -34,7 +34,7 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
     protected RedissonClient getRedissonClient(CacheConfig cacheConfig) {
         Object actualCacheClient = this.getActualCacheClient();
         if (null != actualCacheClient && actualCacheClient instanceof RedissonClient) {
-            logger.info("use setting RedissonClient instance");
+            logger.info("multiplexing RedissonClient instance");
             return (RedissonClient) actualCacheClient;
         }
 
