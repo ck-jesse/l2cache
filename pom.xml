@@ -7,7 +7,7 @@
     <groupId>com.coy.l2cache</groupId>
     <artifactId>l2cache</artifactId>
     <name>l2cache</name>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
     <description>二级缓存组件</description>
 
