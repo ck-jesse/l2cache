@@ -127,12 +127,14 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
                 this.put(key, value);
             }
         } catch (Exception ex) {
+            logger.error("RedissonCache get error, key=" + key, ex);
             RuntimeException exception;
             try {
                 Class<?> c = Class.forName("org.springframework.cache.Cache$ValueRetrievalException");
                 Constructor<?> constructor = c.getConstructor(Object.class, Callable.class, Throwable.class);
                 exception = (RuntimeException) constructor.newInstance(key, valueLoader, ex);
             } catch (Exception e) {
+                logger.error("RedissonCache exception Wrapper error, key=" + key, e);
                 throw new IllegalStateException(e);
             }
             throw exception;
