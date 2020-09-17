@@ -21,7 +21,7 @@ l2cache:
     # 是否存储空值，默认true，防止缓存穿透
     allowNullValues: true
     # 缓存类型
-    cacheType: caffeine
+    cacheType: composite
     # 组合缓存配置
     composite:
       # 一级缓存类型

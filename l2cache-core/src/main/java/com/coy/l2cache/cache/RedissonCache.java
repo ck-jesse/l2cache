@@ -130,9 +130,16 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             logger.error("RedissonCache get error, key=" + key, ex);
             RuntimeException exception;
             try {
-                Class<?> c = Class.forName("org.springframework.cache.Cache$ValueRetrievalException");
-                Constructor<?> constructor = c.getConstructor(Object.class, Callable.class, Throwable.class);
-                exception = (RuntimeException) constructor.newInstance(key, valueLoader, ex);
+                // 与spring cache集成时，需要包装为spring自定义的异常，否则会报类型转换异常
+                // 先在CacheAspectSupport.execute()捕获Cache.ValueRetrievalException，再强转为CacheOperationInvoker.ThrowableWrapper，
+                // 最后在CacheInterceptor.invoke()方法中 throw CacheOperationInvoker.ThrowableWrapper.getOriginal() 原异常。
+                Class<?> throwableWrapper = Class.forName("org.springframework.cache.interceptor.CacheOperationInvoker$ThrowableWrapper");
+                Constructor<?> wrapperConstructor = throwableWrapper.getConstructor(Throwable.class);
+                RuntimeException wrapperException = (RuntimeException) wrapperConstructor.newInstance(ex);
+
+                Class<?> valueRetrievalException = Class.forName("org.springframework.cache.Cache$ValueRetrievalException");
+                Constructor<?> valueRetrievalConstructor = valueRetrievalException.getConstructor(Object.class, Callable.class, Throwable.class);
+                exception = (RuntimeException) valueRetrievalConstructor.newInstance(key, valueLoader, wrapperException);
             } catch (Exception e) {
                 logger.error("RedissonCache exception Wrapper error, key=" + key, e);
                 throw new IllegalStateException(e);
