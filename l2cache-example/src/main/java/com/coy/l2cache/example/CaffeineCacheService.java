@@ -52,11 +52,6 @@ public class CaffeineCacheService {
         list.add(new User(userId, "addr1"));
         list.add(new User(userId, "addr2"));
         list.add(new User(userId, "addr3"));
-        try {
-            Thread.sleep(2000);// 模拟加载数据的耗时
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         logger.info("加载数据:{}", list);
         return list;
     }

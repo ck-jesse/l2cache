@@ -2,13 +2,14 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
+import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -127,24 +128,8 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
                 this.put(key, value);
             }
         } catch (Exception ex) {
-            logger.error("RedissonCache get error, key=" + key, ex);
-            RuntimeException exception;
-            try {
-                // 与spring cache集成时，需要包装为spring自定义的异常，否则会报类型转换异常
-                // 先在CacheAspectSupport.execute()捕获Cache.ValueRetrievalException，再强转为CacheOperationInvoker.ThrowableWrapper，
-                // 最后在CacheInterceptor.invoke()方法中 throw CacheOperationInvoker.ThrowableWrapper.getOriginal() 原异常。
-                Class<?> throwableWrapper = Class.forName("org.springframework.cache.interceptor.CacheOperationInvoker$ThrowableWrapper");
-                Constructor<?> wrapperConstructor = throwableWrapper.getConstructor(Throwable.class);
-                RuntimeException wrapperException = (RuntimeException) wrapperConstructor.newInstance(ex);
-
-                Class<?> valueRetrievalException = Class.forName("org.springframework.cache.Cache$ValueRetrievalException");
-                Constructor<?> valueRetrievalConstructor = valueRetrievalException.getConstructor(Object.class, Callable.class, Throwable.class);
-                exception = (RuntimeException) valueRetrievalConstructor.newInstance(key, valueLoader, wrapperException);
-            } catch (Exception e) {
-                logger.error("RedissonCache exception Wrapper error, key=" + key, e);
-                throw new IllegalStateException(e);
-            }
-            throw exception;
+            // 将异常包装spring cache异常
+            throw SpringCacheExceptionUtil.warpper(key, valueLoader, ex);
         } finally {
             lock.unlock();
         }

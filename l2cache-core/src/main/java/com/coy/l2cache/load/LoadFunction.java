@@ -4,9 +4,9 @@ import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.sync.CacheMessage;
 import com.coy.l2cache.CacheSyncPolicy;
+import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.Cache;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -76,10 +76,9 @@ public class LoadFunction implements Function<Object, Object> {
                 }
                 return tempValue;
             });
-        } catch (Cache.ValueRetrievalException ex) {
-            throw ex;
         } catch (Exception ex) {
-            throw new Cache.ValueRetrievalException(key, this.valueLoader, ex);
+            // 将异常包装spring cache异常
+            throw SpringCacheExceptionUtil.warpper(key, this.valueLoader, ex);
         }
     }
 }
