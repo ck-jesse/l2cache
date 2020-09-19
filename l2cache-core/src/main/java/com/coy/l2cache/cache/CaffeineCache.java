@@ -151,6 +151,11 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     }
 
     @Override
+    public boolean isExists(Object key) {
+        return false;
+    }
+
+    @Override
     public void clearLocalCache(Object key) {
         logger.info("[CaffeineCache] clear local cache, cacheName={}, key={}", this.getCacheName(), key);
         if (key == null) {

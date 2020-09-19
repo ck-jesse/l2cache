@@ -31,15 +31,25 @@ public class LoadFunction implements Function<Object, Object> {
     private final Level2Cache level2Cache;
     private final CacheSyncPolicy cacheSyncPolicy;
     private final Callable<?> valueLoader;// 加载数据的目标方法
+    /**
+     * 是否存储空值，默认true，防止缓存穿透
+     */
+    private Boolean allowNullValues;
 
     public LoadFunction(String instanceId, String cacheType, String cacheName,
                         Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader) {
+        this(instanceId, cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, false);
+    }
+
+    public LoadFunction(String instanceId, String cacheType, String cacheName,
+                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader, Boolean allowNullValues) {
         this.instanceId = instanceId;
         this.cacheType = cacheType;
         this.cacheName = cacheName;
         this.level2Cache = level2Cache;
         this.cacheSyncPolicy = cacheSyncPolicy;
         this.valueLoader = valueLoader;
+        this.allowNullValues = allowNullValues;
     }
 
     @Override
@@ -64,7 +74,7 @@ public class LoadFunction implements Function<Object, Object> {
             }
 
             // 对 valueLoader 进行包装，以便目标方法执行完后发送缓存同步消息，此方式不会对level2Cache造成污染
-            return level2Cache.get(key, () -> {
+            Object value = level2Cache.get(key, () -> {
                 if (null == valueLoader) {
                     logger.debug("[LoadFunction] valueLoader is null, return null, key={}", key);
                     return null;
@@ -76,6 +86,10 @@ public class LoadFunction implements Function<Object, Object> {
                 }
                 return tempValue;
             });
+            if (null == allowNullValues || !allowNullValues) {
+                return value;
+            }
+            return value;
         } catch (Exception ex) {
             // 将异常包装spring cache异常
             throw SpringCacheExceptionUtil.warpper(key, this.valueLoader, ex);

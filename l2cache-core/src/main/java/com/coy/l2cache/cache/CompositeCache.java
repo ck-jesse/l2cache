@@ -101,6 +101,17 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         level1Cache.clear();
     }
 
+    @Override
+    public boolean isExists(Object key) {
+        if (level1Cache.isExists(key)) {
+            return true;
+        }
+        if (level2Cache.isExists(key)) {
+            return true;
+        }
+        return false;
+    }
+
     public Level1Cache getLevel1Cache() {
         return level1Cache;
     }

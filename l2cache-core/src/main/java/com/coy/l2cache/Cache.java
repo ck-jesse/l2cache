@@ -120,4 +120,10 @@ public interface Cache {
      */
     void clear();
 
+    /**
+     * 检查key是否存在
+     *
+     * @return true 表示存在，false 表示不存在
+     */
+    boolean isExists(Object key);
 }
