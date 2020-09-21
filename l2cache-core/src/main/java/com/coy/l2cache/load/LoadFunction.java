@@ -2,10 +2,12 @@ package com.coy.l2cache.load;
 
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.consts.CacheConsts;
+import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.sync.CacheMessage;
 import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.util.NullValueUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
+import com.github.benmanes.caffeine.cache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +38,13 @@ public class LoadFunction implements Function<Object, Object> {
      * 是否存储空值，设置为true时，可防止缓存穿透
      */
     private boolean allowNullValues;
+    /**
+     * 存放NullValue的key，用于控制NullValue对象的有效时间
+     */
+    private Cache<Object, Integer> nullValueCache;
 
     public LoadFunction(String instanceId, String cacheType, String cacheName,
-                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader, Boolean allowNullValues) {
+                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader, Boolean allowNullValues, Cache<Object, Integer> nullValueCache) {
         this.instanceId = instanceId;
         this.cacheType = cacheType;
         this.cacheName = cacheName;
@@ -46,6 +52,7 @@ public class LoadFunction implements Function<Object, Object> {
         this.cacheSyncPolicy = cacheSyncPolicy;
         this.valueLoader = valueLoader;
         this.allowNullValues = allowNullValues;
+        this.nullValueCache = nullValueCache;
     }
 
     @Override
@@ -54,38 +61,54 @@ public class LoadFunction implements Function<Object, Object> {
             // 走到此处，表明从L1中没有获取到缓存，需要先从L2中获取缓存，若L2无缓存，则再执行目标方法加载数据到缓存
             if (null == level2Cache) {
                 if (null == valueLoader) {
-                    logger.debug("[LoadFunction] level2Cache and valueLoader is null, return null, key={}", key);
-                    return NullValueUtil.toStoreValue(null, this.allowNullValues, this.cacheName);
+                    logger.debug("[LoadFunction] level2Cache and valueLoader is null, return null, cacheName={},key={}", cacheName, key);
+                    return this.toStoreValue(key, null);
                 }
                 Object value = valueLoader.call();
                 logger.debug("[LoadFunction] load data from target method, level2Cache is null, cacheName={}, key={}, value={}", cacheName, key, value);
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }
-                return NullValueUtil.toStoreValue(value, this.allowNullValues, this.cacheName);
+                return this.toStoreValue(key, value);
             }
 
             if (null == cacheSyncPolicy) {
-                return level2Cache.toStoreValue(level2Cache.get(key, valueLoader));
+                return this.toStoreValue(key, level2Cache.get(key, valueLoader));
             }
 
             // 对 valueLoader 进行包装，以便目标方法执行完后发送缓存同步消息，此方式不会对level2Cache造成污染
             Object value = level2Cache.get(key, () -> {
                 if (null == valueLoader) {
-                    logger.debug("[LoadFunction] valueLoader is null, return null, key={}", key);
+                    logger.debug("[LoadFunction] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
                     return null;
                 }
                 Object tempValue = valueLoader.call();
-                logger.debug("[LoadFunction] valueLoader.call, key={}, value={}", key, tempValue);
+                logger.debug("[LoadFunction] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }
                 return tempValue;
             });
-            return level2Cache.toStoreValue(value);
+            return this.toStoreValue(key, value);
         } catch (Exception ex) {
             // 将异常包装spring cache异常
             throw SpringCacheExceptionUtil.warpper(key, this.valueLoader, ex);
         }
     }
+
+    /**
+     * 转换为存储的值
+     */
+    private Object toStoreValue(Object key, Object value) {
+        // allowNullValues=true，且value=null，则往缓存中put一个NullValue空对象，防止请求穿透到二级缓存或者DB上
+        // 注意：CaffeineCache 的定时任务检查到缓存项的值为NullValue时，会清理掉该缓存项，避免一直缓存，一定程度上解决缓存穿透的问题。
+        if (this.allowNullValues && (value == null || value instanceof NullValue)) {
+            if (null != this.nullValueCache) {
+                logger.info("[LoadFunction] NullValueCache put, cacheName={}, key={}, value=1", cacheName, key);
+                this.nullValueCache.put(key, 1);
+            }
+        }
+        return NullValueUtil.toStoreValue(value, this.allowNullValues, this.cacheName);
+    }
+
 }

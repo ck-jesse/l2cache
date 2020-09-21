@@ -3,6 +3,7 @@ package com.coy.l2cache.load;
 
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.CacheSyncPolicy;
+import com.github.benmanes.caffeine.cache.Cache;
 
 import java.util.concurrent.Callable;
 
@@ -33,6 +34,11 @@ public interface CacheLoader<K, V> {
      * 设置是否存储空值
      */
     void setAllowNullValues(boolean allowNullValues);
+
+    /**
+     * 存放NullValue的key，用于控制NullValue对象的有效时间
+     */
+    void setNullValueCache(Cache<Object, Integer> nullValueCache);
 
     /**
      * Computes or retrieves the value corresponding to {@code key}

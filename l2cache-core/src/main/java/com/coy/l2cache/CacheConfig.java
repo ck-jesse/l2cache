@@ -36,6 +36,13 @@ public class CacheConfig {
     private boolean allowNullValues = true;
 
     /**
+     * NullValue的过期时间，单位秒，默认30秒
+     * 用于淘汰NullValue的值
+     * 注：当缓存项的过期时间小于该值时，则NullValue不会淘汰
+     */
+    private long nullValueExpireTime = 60;
+
+    /**
      * 是否动态根据cacheName创建Cache的实现，默认true
      */
     private boolean dynamic = true;

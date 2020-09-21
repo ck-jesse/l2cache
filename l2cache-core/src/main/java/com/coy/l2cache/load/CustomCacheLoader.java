@@ -2,6 +2,7 @@ package com.coy.l2cache.load;
 
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.CacheSyncPolicy;
+import com.github.benmanes.caffeine.cache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -34,6 +35,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     private Level2Cache level2Cache;
     private CacheSyncPolicy cacheSyncPolicy;
     private boolean allowNullValues;
+    private Cache<Object, Integer> nullValueCache;
 
     private CustomCacheLoader(String instanceId, String cacheType, String cacheName) {
         this.instanceId = instanceId;
@@ -64,6 +66,11 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     }
 
     @Override
+    public void setNullValueCache(Cache<Object, Integer> nullValueCache) {
+        this.nullValueCache = nullValueCache;
+    }
+
+    @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
         if (!valueLoaderCache.containsKey(key)) {
             valueLoaderCache.put(key, valueLoader);
@@ -79,7 +86,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
             return null;
         }*/
 
-        LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, this.allowNullValues);
+        LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, this.allowNullValues, this.nullValueCache);
         return loadFunction.apply(key);
     }
 

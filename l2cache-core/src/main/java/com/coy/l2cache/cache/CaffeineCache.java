@@ -66,19 +66,11 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                     .scheduleWithFixedDelay(new RefreshExpiredCacheTask(this), 5,
                             this.caffeine.getRefreshPeriod(), TimeUnit.SECONDS);
         }
-
-//        CacheSpec cacheSpec = CacheSupport.getCacheSpec(cacheConfig.getComposite().getL1CacheType(), cacheName);
-//        long expireTime = cacheSpec.getExpireTime();
-//        if (expireTime > 0) {
-//            expireTime = expireTime / 3;
-//        }
-//        // 最小值为5s
-//        if (expireTime < 5000) {
-//            expireTime = 5000;
-//        }
-//        nullValueCache = Caffeine.newBuilder().expireAfterWrite(expireTime, TimeUnit.MILLISECONDS)
-//                .build();
-//        logger.info("[CaffeineCache] init local NullValueCache, cacheName={}, expireTime={}", this.getCacheName(), expireTime);
+        if (this.isAllowNullValues()) {
+            this.nullValueCache = Caffeine.newBuilder().expireAfterWrite(cacheConfig.getNullValueExpireTime(), TimeUnit.SECONDS).build();
+            cacheLoader.setNullValueCache(this.nullValueCache);
+            logger.info("[CaffeineCache] NullValueCache init success, cacheName={}, expireTime={} s", this.getCacheName(), cacheConfig.getNullValueExpireTime());
+        }
     }
 
     @Override
@@ -125,17 +117,12 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
             Object value = ((LoadingCache) this.caffeineCache).get(key);
             logger.debug("[CaffeineCache] LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
-            if (isAllowNullValues() && (value == null || value instanceof NullValue)) {
-                // 允许缓存空值，且value为null，则往缓存中put一个NullValue空对象，防止请求穿透到二级缓存或者DB上
-                // 注意：CaffeineCache 的定时任务检查到缓存项的值为NullValue时，会清理掉该缓存项，避免一直缓存，一定程度上解决缓存穿透的问题。
-//                nullValueCache.put(key, 1);
-            }
             return (T) fromStoreValue(value);
         }
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
         Object value = this.caffeineCache.get(key, new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
-                null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues()));
+                null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues(), this.nullValueCache));
         logger.debug("[CaffeineCache] Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) fromStoreValue(value);
     }
@@ -148,10 +135,12 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
         caffeineCache.put(key, toStoreValue(value));
 
-//        // 允许null值，且值为空，则记录到nullValueCache，用于淘汰NullValue
-//        if (this.isAllowNullValues() && (value == null || value instanceof NullValue)) {
-//            nullValueCache.put(key, 1);
-//        }
+        // 允许null值，且值为空，则记录到nullValueCache，用于淘汰NullValue
+        if (this.isAllowNullValues() && (value == null || value instanceof NullValue)) {
+            if (null != nullValueCache) {
+                nullValueCache.put(key, 1);
+            }
+        }
 
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
@@ -162,7 +151,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public void evict(Object key) {
         logger.debug("[CaffeineCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
         caffeineCache.invalidate(key);
-//        nullValueCache.invalidate(key);
+        if (null != nullValueCache) {
+            nullValueCache.invalidate(key);
+        }
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
         }
@@ -172,7 +163,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public void clear() {
         logger.debug("[CaffeineCache] clear cache, cacheName={}", this.getCacheName());
         caffeineCache.invalidateAll();
-//        nullValueCache.invalidateAll();
+        if (null != nullValueCache) {
+            nullValueCache.invalidateAll();
+        }
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
         }
@@ -190,10 +183,14 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         logger.info("[CaffeineCache] clear local cache, cacheName={}, key={}", this.getCacheName(), key);
         if (key == null) {
             caffeineCache.invalidateAll();
-//            nullValueCache.invalidateAll();
+            if (null != nullValueCache) {
+                nullValueCache.invalidateAll();
+            }
         } else {
             caffeineCache.invalidate(key);
-//            nullValueCache.invalidate(key);
+            if (null != nullValueCache) {
+                nullValueCache.invalidate(key);
+            }
         }
     }
 
@@ -232,24 +229,23 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("[CaffeineCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
-                // 通过LoadingCache.get(key)来刷新过期缓存
-                value = loadingCache.get(key);
+                value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
 
-                if (null == value || value instanceof NullValue) {
+                if (null == value) {
+                    continue;
+                }
+                if (value instanceof NullValue) {
+                    if (null == nullValueCache) {
+                        continue;
+                    }
+                    // getIfPresent 触发淘汰
+                    Object nullValue = nullValueCache.getIfPresent(key);
+                    if (null != nullValue) {
+                        continue;
+                    }
                     logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                     loadingCache.invalidate(key);
                 }
-
-//                if (null == value) {
-//                    continue;
-//                }
-//                if (value instanceof NullValue) {
-//                    Object nullValue = nullValueCache.getIfPresent(key);
-//                    if (null == nullValue) {
-//                        logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
-//                        loadingCache.invalidate(key);
-//                    }
-//                }
             }
         }
     }

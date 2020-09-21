@@ -10,6 +10,7 @@ import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
 import com.coy.l2cache.schedule.RefreshSupport;
 import com.coy.l2cache.sync.CacheMessage;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.cache.Cache;
 import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
@@ -44,6 +45,10 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
      * L1 Guava Cache
      */
     private Cache<Object, Object> guavaCache;
+    /**
+     * 存放NullValue的key，用于控制NullValue对象的有效时间
+     */
+    private com.github.benmanes.caffeine.cache.Cache<Object, Integer> nullValueCache;
 
     public GuavaCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy,
                       Cache<Object, Object> guavaCache) {
@@ -58,6 +63,12 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             RefreshSupport.getInstance(this.guava.getRefreshPoolSize())
                     .scheduleWithFixedDelay(new RefreshExpiredCacheTask(this), 5,
                             this.guava.getRefreshPeriod(), TimeUnit.SECONDS);
+        }
+
+        if (this.isAllowNullValues()) {
+            this.nullValueCache = Caffeine.newBuilder().expireAfterWrite(cacheConfig.getNullValueExpireTime(), TimeUnit.SECONDS).build();
+            cacheLoader.setNullValueCache(this.nullValueCache);
+            logger.info("[GuavaCache] NullValueCache init success, cacheName={}, expireTime={} s", this.getCacheName(), cacheConfig.getNullValueExpireTime());
         }
     }
 
@@ -115,7 +126,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
             Object value = this.guavaCache.get(key, () -> {
                 LoadFunction loadFunction = new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
-                        null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues());
+                        null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues(), this.nullValueCache);
                 return loadFunction.apply(key);
             });
             logger.debug("GuavaCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
@@ -207,16 +218,22 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("GuavaCache refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
-                // 通过LoadingCache.get(key)来刷新过期缓存
                 try {
-                    value = loadingCache.get(key);
+                    value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
 
-                    if (null == value || value instanceof NullValue) {
-                        // 判断是否淘汰NullValue对象
-                        if (!guava.isRefreshInvalidateNullValue()) {
+                    if (null == value) {
+                        continue;
+                    }
+                    if (value instanceof NullValue) {
+                        if (null == nullValueCache) {
                             continue;
                         }
-                        logger.info("[GuavaCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
+                        // getIfPresent 触发淘汰
+                        Object nullValue = nullValueCache.getIfPresent(key);
+                        if (null != nullValue) {
+                            continue;
+                        }
+                        logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                         loadingCache.invalidate(key);
                     }
                 } catch (ExecutionException e) {
