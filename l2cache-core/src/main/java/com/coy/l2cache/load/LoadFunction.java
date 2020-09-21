@@ -55,7 +55,7 @@ public class LoadFunction implements Function<Object, Object> {
             if (null == level2Cache) {
                 if (null == valueLoader) {
                     logger.debug("[LoadFunction] level2Cache and valueLoader is null, return null, key={}", key);
-                    return null;
+                    return NullValueUtil.toStoreValue(null, this.allowNullValues, this.cacheName);
                 }
                 Object value = valueLoader.call();
                 logger.debug("[LoadFunction] load data from target method, level2Cache is null, cacheName={}, key={}, value={}", cacheName, key, value);
