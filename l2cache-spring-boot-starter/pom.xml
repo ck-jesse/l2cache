@@ -5,7 +5,7 @@
     <parent>
         <artifactId>l2cache</artifactId>
         <groupId>com.coy.l2cache</groupId>
-        <version>1.0.4</version>
+        <version>1.0.5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>l2cache-spring-boot-starter</artifactId>
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.coy.l2cache</groupId>
             <artifactId>l2cache-core</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
 
         <dependency>

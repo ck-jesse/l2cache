@@ -37,6 +37,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
         CacheLoader customCacheLoader = CustomCacheLoader.newInstance(this.getCacheConfig().getInstanceId(),
                 CacheType.GUAVA.name().toLowerCase(), cacheName);
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
+        customCacheLoader.setAllowNullValues(this.getCacheConfig().isAllowNullValues());
 
         Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig(), customCacheLoader,
                 this.getExpiredListener());

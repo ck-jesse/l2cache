@@ -189,8 +189,9 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 
     @Override
     public boolean isExists(Object key) {
-        logger.debug("[RedisCache] key is exists, cacheName={}, key={}", this.getCacheName(), key);
-        return map.containsKey(key);
+        boolean rslt = map.containsKey(key);
+        logger.debug("[RedisCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
+        return rslt;
     }
 
 }

@@ -115,7 +115,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
         Object value = this.caffeineCache.get(key, new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
-                null, this.getCacheSyncPolicy(), valueLoader));
+                null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues()));
         logger.debug("[CaffeineCache] Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) fromStoreValue(value);
     }
@@ -152,7 +152,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public boolean isExists(Object key) {
-        return false;
+        boolean rslt = caffeineCache.asMap().containsKey(key);
+        logger.debug("[CaffeineCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
+        return rslt;
     }
 
     @Override
@@ -202,7 +204,12 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 logger.debug("[CaffeineCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 value = loadingCache.get(key);
+
                 if (null == value || value instanceof NullValue) {
+                    // 判断是否淘汰NullValue对象
+                    if (!caffeine.isRefreshInvalidateNullValue()) {
+                        continue;
+                    }
                     logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                     loadingCache.invalidate(key);
                 }

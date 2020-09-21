@@ -79,6 +79,11 @@ public class NoneCache implements Level1Cache, Level2Cache {
     }
 
     @Override
+    public boolean isExists(Object key) {
+        return false;
+    }
+
+    @Override
     public void clearLocalCache(Object key) {
 
     }

@@ -30,6 +30,11 @@ public interface CacheLoader<K, V> {
     void setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy);
 
     /**
+     * 设置是否存储空值
+     */
+    void setAllowNullValues(boolean allowNullValues);
+
+    /**
      * Computes or retrieves the value corresponding to {@code key}
      * 计算或检索对应的值
      */

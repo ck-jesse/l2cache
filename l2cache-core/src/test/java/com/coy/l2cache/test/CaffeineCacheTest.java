@@ -61,9 +61,10 @@ public class CaffeineCacheTest {
 
             @Override
             public String call() throws Exception {
-                String result = "loader_value" + count.getAndAdd(1);
-                System.out.println("loader value from valueLoader, return " + result);
-                return result;
+//                String result = "loader_value" + count.getAndAdd(1);
+//                System.out.println("loader value from valueLoader, return " + result);
+//                return result;
+                return null;
             }
         };
 

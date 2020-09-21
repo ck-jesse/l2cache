@@ -2,7 +2,7 @@ package com.coy.l2cache;
 
 
 import com.coy.l2cache.load.LoadFunction;
-import com.coy.l2cache.content.NullValue;
+import com.coy.l2cache.util.NullValueUtil;
 
 import java.util.concurrent.Callable;
 
@@ -90,24 +90,14 @@ public interface Cache {
      * 从存储值解析为具体值
      */
     default Object fromStoreValue(Object storeValue) {
-        if (this.isAllowNullValues() && storeValue instanceof NullValue) {
-            return null;
-        }
-        return storeValue;
+        return NullValueUtil.fromStoreValue(storeValue, this.isAllowNullValues());
     }
 
     /**
      * 转换为存储值
      */
     default Object toStoreValue(Object userValue) {
-        if (userValue == null) {
-            if (this.isAllowNullValues()) {
-                return NullValue.INSTANCE;
-            }
-            throw new IllegalArgumentException(
-                    "Cache '" + getCacheName() + "' is configured to not allow null values but null was provided");
-        }
-        return userValue;
+        return NullValueUtil.toStoreValue(userValue, this.isAllowNullValues(), this.getCacheName());
     }
 
     /**

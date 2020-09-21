@@ -31,7 +31,7 @@ public class CacheConfig {
     private String instanceId = RandomUtil.getUUID();
 
     /**
-     * 是否存储空值，默认true，防止缓存穿透
+     * 是否存储空值，设置为true时，可防止缓存穿透
      */
     private boolean allowNullValues = true;
 
@@ -102,7 +102,13 @@ public class CacheConfig {
         /**
          * 缓存刷新的频率(秒)
          */
-        private Long refreshPeriod = 5L;
+        private Long refreshPeriod = 10L;
+
+        /**
+         * 缓存刷新时，是否淘汰缓存NullValue对象，true 表示淘汰，false 表示不淘汰(默认)
+         * 设置为true，则表示是提前淘汰NullValue对象，设置为false，则表示NullValue对象的过期时间与缓存过期时间一致
+         */
+        private boolean refreshInvalidateNullValue = false;
 
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
@@ -132,12 +138,18 @@ public class CacheConfig {
         /**
          * 缓存刷新调度线程池的大小
          */
-        private Integer refreshPoolSize = 3;
+        private Integer refreshPoolSize = Runtime.getRuntime().availableProcessors();
 
         /**
          * 缓存刷新的频率(秒)
          */
-        private Long refreshPeriod = 5L;
+        private Long refreshPeriod = 10L;
+
+        /**
+         * 缓存刷新时，是否淘汰缓存NullValue对象，true 表示淘汰，false 表示不淘汰(默认)
+         * 设置为true，则表示是提前淘汰NullValue对象，设置为false，则表示NullValue对象的过期时间与缓存过期时间一致
+         */
+        private boolean refreshInvalidateNullValue = false;
 
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.

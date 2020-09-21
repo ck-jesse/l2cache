@@ -35,6 +35,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         CacheLoader customCacheLoader = CustomCacheLoader.newInstance(this.getCacheConfig().getInstanceId(),
                 CacheType.CAFFEINE.name().toLowerCase(), cacheName);
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
+        customCacheLoader.setAllowNullValues(this.getCacheConfig().isAllowNullValues());
 
         Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig(), customCacheLoader,
                 this.getExpiredListener());

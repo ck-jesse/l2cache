@@ -33,6 +33,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     private String cacheName;
     private Level2Cache level2Cache;
     private CacheSyncPolicy cacheSyncPolicy;
+    private boolean allowNullValues;
 
     private CustomCacheLoader(String instanceId, String cacheType, String cacheName) {
         this.instanceId = instanceId;
@@ -58,6 +59,11 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     }
 
     @Override
+    public void setAllowNullValues(boolean allowNullValues) {
+        this.allowNullValues = allowNullValues;
+    }
+
+    @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
         if (!valueLoaderCache.containsKey(key)) {
             valueLoaderCache.put(key, valueLoader);
@@ -73,7 +79,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
             return null;
         }*/
 
-        LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader);
+        LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, this.allowNullValues);
         return loadFunction.apply(key);
     }
 

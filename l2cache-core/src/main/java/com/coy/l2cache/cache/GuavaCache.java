@@ -115,7 +115,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
             Object value = this.guavaCache.get(key, () -> {
                 LoadFunction loadFunction = new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
-                        null, this.getCacheSyncPolicy(), valueLoader);
+                        null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues());
                 return loadFunction.apply(key);
             });
             logger.debug("GuavaCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
@@ -149,6 +149,13 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
         }
+    }
+
+    @Override
+    public boolean isExists(Object key) {
+        boolean rslt = guavaCache.asMap().containsKey(key);
+        logger.debug("[GuavaCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
+        return rslt;
     }
 
     @Override
@@ -203,7 +210,12 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 try {
                     value = loadingCache.get(key);
+
                     if (null == value || value instanceof NullValue) {
+                        // 判断是否淘汰NullValue对象
+                        if (!guava.isRefreshInvalidateNullValue()) {
+                            continue;
+                        }
                         logger.info("[GuavaCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                         loadingCache.invalidate(key);
                     }
