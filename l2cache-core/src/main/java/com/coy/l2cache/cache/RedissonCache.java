@@ -2,6 +2,7 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
@@ -113,8 +114,8 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         if (redis.isTryLock()) {
             if (!lock.tryLock()) {
                 // 高并发场景下，拦截一部分请求将其快速失败，保证性能
-                logger.info("[RedisCache] get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), key);
-                return null;
+                logger.warn("[RedisCache] 重复请求, get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), key);
+                throw new RedisTrylockFailException("重复请求 tryLock fastfail, key=" + key);
             }
         } else {
             lock.lock();

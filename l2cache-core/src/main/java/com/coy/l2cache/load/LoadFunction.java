@@ -3,6 +3,7 @@ package com.coy.l2cache.load;
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.content.NullValue;
+import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.sync.CacheMessage;
 import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.util.NullValueUtil;
@@ -90,6 +91,10 @@ public class LoadFunction implements Function<Object, Object> {
                 return tempValue;
             });
             return this.toStoreValue(key, value);
+        } catch (RedisTrylockFailException e) {
+            // 针对 redis 加载数据时的重复请求，直接返回null，避免缓存NullValue
+            logger.warn("[LoadFunction] RedisTrylockFailException cacheName={}, key={}, msg={}", cacheName, key, e.getMessage());
+            return null;
         } catch (Exception ex) {
             // 将异常包装spring cache异常
             throw SpringCacheExceptionUtil.warpper(key, this.valueLoader, ex);
