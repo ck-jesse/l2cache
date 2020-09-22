@@ -66,9 +66,12 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         }
 
         if (this.isAllowNullValues()) {
-            this.nullValueCache = Caffeine.newBuilder().expireAfterWrite(cacheConfig.getNullValueExpireTime(), TimeUnit.SECONDS).build();
+            this.nullValueCache = Caffeine.newBuilder()
+                    .expireAfterWrite(cacheConfig.getNullValueExpireTimeSeconds(), TimeUnit.SECONDS)
+                    .maximumSize(cacheConfig.getNullValueMaxSize())
+                    .build();
             cacheLoader.setNullValueCache(this.nullValueCache);
-            logger.info("[GuavaCache] NullValueCache init success, cacheName={}, expireTime={} s", this.getCacheName(), cacheConfig.getNullValueExpireTime());
+            logger.info("[CaffeineCache] NullValueCache init success, cacheName={}, expireTime={} s, maxSize={}", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize());
         }
     }
 
@@ -217,7 +220,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             LoadingCache loadingCache = (LoadingCache) guavaCache;
             Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("GuavaCache refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("[GuavaCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 try {
                     value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
 
@@ -233,12 +236,15 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                         if (null != nullValue) {
                             continue;
                         }
-                        logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
+                        logger.info("[GuavaCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                         loadingCache.invalidate(key);
                     }
                 } catch (ExecutionException e) {
-                    logger.error("GuavaCache refreshAllExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
+                    logger.error("[GuavaCache] refreshAllExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
                 }
+            }
+            if (null != nullValueCache) {
+                logger.debug("[GuavaCache] refreshAllExpireCache number of NullValue, cacheName={}, size={}", this.getCacheName(), nullValueCache.asMap().size());
             }
         }
     }

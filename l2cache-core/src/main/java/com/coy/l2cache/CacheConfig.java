@@ -40,7 +40,13 @@ public class CacheConfig {
      * 用于淘汰NullValue的值
      * 注：当缓存项的过期时间小于该值时，则NullValue不会淘汰
      */
-    private long nullValueExpireTime = 60;
+    private long nullValueExpireTimeSeconds = 60;
+
+    /**
+     * NullValue 的最大数量，防止出现内存溢出
+     * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
+     */
+    private long nullValueMaxSize = 3000;
 
     /**
      * 是否动态根据cacheName创建Cache的实现，默认true

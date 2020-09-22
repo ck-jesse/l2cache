@@ -67,9 +67,12 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                             this.caffeine.getRefreshPeriod(), TimeUnit.SECONDS);
         }
         if (this.isAllowNullValues()) {
-            this.nullValueCache = Caffeine.newBuilder().expireAfterWrite(cacheConfig.getNullValueExpireTime(), TimeUnit.SECONDS).build();
+            this.nullValueCache = Caffeine.newBuilder()
+                    .expireAfterWrite(cacheConfig.getNullValueExpireTimeSeconds(), TimeUnit.SECONDS)
+                    .maximumSize(cacheConfig.getNullValueMaxSize())
+                    .build();
             cacheLoader.setNullValueCache(this.nullValueCache);
-            logger.info("[CaffeineCache] NullValueCache init success, cacheName={}, expireTime={} s", this.getCacheName(), cacheConfig.getNullValueExpireTime());
+            logger.info("[CaffeineCache] NullValueCache init success, cacheName={}, expireTime={} s, maxSize={}", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize());
         }
     }
 
@@ -246,6 +249,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                     logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                     loadingCache.invalidate(key);
                 }
+            }
+            if (null != nullValueCache) {
+                logger.debug("[CaffeineCache] refreshAllExpireCache number of NullValue, cacheName={}, size={}", this.getCacheName(), nullValueCache.asMap().size());
             }
         }
     }
