@@ -124,7 +124,7 @@ public class RedisCacheTest {
     @Test
     public void getAndLoadTest() throws InterruptedException {
         // 3 get and load from Callable
-        String key = "key_loader";
+        String key = "key_loader123";
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
     }

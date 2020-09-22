@@ -195,6 +195,11 @@ public class CacheConfig {
         private String keyPrefix;
 
         /**
+         * 加载数据时，是否加锁
+         */
+        private boolean lock = false;
+
+        /**
          * 加载数据时是调用tryLock()，还是lock()
          * 注：
          * tryLock() 只有一个请求执行加载动作，其他并发请求，直接返回失败

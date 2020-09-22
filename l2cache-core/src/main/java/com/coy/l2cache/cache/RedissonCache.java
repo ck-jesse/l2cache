@@ -109,16 +109,19 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             logger.debug("[RedisCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), key);
             return null;
         }
-        // 增加分布式锁，集群环境下同一时刻只会有一个加载数据的线程，解决ABA的问题，保证一级缓存二级缓存数据的一致性
-        RLock lock = map.getLock(key);
-        if (redis.isTryLock()) {
-            if (!lock.tryLock()) {
-                // 高并发场景下，拦截一部分请求将其快速失败，保证性能
-                logger.warn("[RedisCache] 重复请求, get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), key);
-                throw new RedisTrylockFailException("重复请求 tryLock fastfail, key=" + key);
+        RLock lock = null;
+        if (redis.isLock()) {
+            // 增加分布式锁，集群环境下同一时刻只会有一个加载数据的线程，解决ABA的问题，保证一级缓存二级缓存数据的一致性
+            lock = map.getLock(key);
+            if (redis.isTryLock()) {
+                if (!lock.tryLock()) {
+                    // 高并发场景下，拦截一部分请求将其快速失败，保证性能
+                    logger.warn("[RedisCache] 重复请求, get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), key);
+                    throw new RedisTrylockFailException("重复请求 tryLock fastfail, key=" + key);
+                }
+            } else {
+                lock.lock();
             }
-        } else {
-            lock.lock();
         }
         try {
             value = map.get(key);
@@ -132,7 +135,9 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             // 将异常包装spring cache异常
             throw SpringCacheExceptionUtil.warpper(key, valueLoader, ex);
         } finally {
-            lock.unlock();
+            if (null != lock) {
+                lock.unlock();
+            }
         }
         return (T) fromStoreValue(value);
     }
