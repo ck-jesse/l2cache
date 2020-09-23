@@ -8,7 +8,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenck
@@ -20,18 +22,36 @@ public class CaffeineCacheService {
     private final Logger logger = LoggerFactory.getLogger(CaffeineCacheService.class);
 
     /**
+     * 用于模拟db
+     */
+    private static Map<String, User> userMap = new HashMap<>();
+
+    {
+        userMap.put("user01", new User("user01", "addr"));
+        userMap.put("user02", new User("user03", "addr"));
+        userMap.put("user03", new User("user03", "addr"));
+    }
+
+    /**
      * 获取或加载缓存项
      * <p>
      * 注：sync=false，CaffeineCache在定时刷新过期缓存时，是通过get(Object key)来获取缓存项，由于没有valueLoader（加载缓存项的具体逻辑），所以定时刷新缓存时，缓存项过期则会被淘汰。
      */
     @Cacheable(value = "userCache", key = "#userId")
     public User queryUser(String userId) {
-        User user = new User(userId, "addr");
+        User user = userMap.get(userId);
         try {
-            Thread.sleep(2000);// 模拟加载数据的耗时
+            Thread.sleep(1000);// 模拟加载数据的耗时
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        logger.info("加载数据:{}", user);
+        return user;
+    }
+
+    @Cacheable(value = "queryUserSync", key = "#userId", sync = true)
+    public User queryUserSync(String userId) {
+        User user = userMap.get(userId);
         logger.info("加载数据:{}", user);
         return user;
     }
@@ -46,12 +66,11 @@ public class CaffeineCacheService {
      * <p>
      * 建议：设置@Cacheable的sync=true，可以利用Caffeine的特性，防止缓存击穿（方式同一个key和不同key）
      */
-    @Cacheable(value = "userCacheSync", key = "#userId", sync = true)
-    public List<User> queryUserSync(String userId) {
+    @Cacheable(value = "queryUserSyncList", key = "#userId", sync = true)
+    public List<User> queryUserSyncList(String userId) {
+        User user = userMap.get(userId);
         List<User> list = new ArrayList();
-        list.add(new User(userId, "addr1"));
-        list.add(new User(userId, "addr2"));
-        list.add(new User(userId, "addr3"));
+        list.add(user);
         logger.info("加载数据:{}", list);
         return list;
     }

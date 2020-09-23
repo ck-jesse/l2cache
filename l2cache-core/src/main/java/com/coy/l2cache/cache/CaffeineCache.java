@@ -248,6 +248,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                     }
                     logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                     loadingCache.invalidate(key);
+                    if (null != cacheSyncPolicy) {
+                        cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+                    }
                 }
             }
             if (null != nullValueCache) {

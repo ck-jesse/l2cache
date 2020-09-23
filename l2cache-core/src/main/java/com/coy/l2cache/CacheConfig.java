@@ -46,7 +46,7 @@ public class CacheConfig {
      * NullValue 的最大数量，防止出现内存溢出
      * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
      */
-    private long nullValueMaxSize = 3000;
+    private long nullValueMaxSize = 10000;
 
     /**
      * 是否动态根据cacheName创建Cache的实现，默认true

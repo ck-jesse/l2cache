@@ -21,6 +21,11 @@ public interface Cache {
     boolean isAllowNullValues();
 
     /**
+     * 获取null值的过期时间
+     */
+    long getNullValueExpireTimeSeconds();
+
+    /**
      * 获取缓存实例id
      */
     String getInstanceId();

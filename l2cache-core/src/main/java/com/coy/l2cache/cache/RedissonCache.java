@@ -2,12 +2,12 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RMapCache;
-import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,9 +101,10 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
-        Object value = this.get(key);
+        Object value = map.get(buildKey(key));
         if (value != null) {
-            return (T) value;
+            logger.debug("[RedisCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
             logger.debug("[RedisCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), key);
@@ -126,9 +127,9 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         try {
             value = map.get(key);
             if (value == null) {
-                logger.debug("[RedisCache] rlock, load data from target method, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("[RedisCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), key, redis.isLock());
                 value = valueLoader.call();
-                logger.debug("[RedisCache] rlock, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                logger.debug("[RedisCache] rlock, cacheName={}, key={}, value={}, isLock={}", this.getCacheName(), key, value, redis.isLock());
                 this.put(key, value);
             }
         } catch (Exception ex) {
@@ -154,10 +155,17 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             map.fastPut(buildKey(key), value);
             return;
         }
+        // 如果是null值，则单独设置其过期时间
+        long expireTime = this.getExpireTime();
+        if (value instanceof NullValue) {
+            expireTime = TimeUnit.SECONDS.toMillis(this.getNullValueExpireTimeSeconds());
+        }
         if (redis.getMaxIdleTime() > 0) {
-            mapCache.fastPut(buildKey(key), value, this.getExpireTime(), TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
+            mapCache.fastPut(buildKey(key), value, expireTime, TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
+            logger.debug("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
         } else {
-            mapCache.fastPut(buildKey(key), value, this.getExpireTime(), TimeUnit.MILLISECONDS);
+            mapCache.fastPut(buildKey(key), value, expireTime, TimeUnit.MILLISECONDS);
+            logger.debug("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
         }
     }
 
@@ -172,11 +180,17 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             prevValue = map.putIfAbsent(buildKey(key), toStoreValue(value));
             return fromStoreValue(prevValue);
         }
+        // 如果是null值，则单独设置其过期时间
+        long expireTime = this.getExpireTime();
+        if (value instanceof NullValue) {
+            expireTime = TimeUnit.SECONDS.toMillis(this.getNullValueExpireTimeSeconds());
+        }
         if (redis.getMaxIdleTime() > 0) {
-            prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), this.getExpireTime(), TimeUnit.MILLISECONDS, redis.getMaxIdleTime(),
-                    TimeUnit.MILLISECONDS);
+            prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), expireTime, TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
+            logger.debug("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
         } else {
-            prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), this.getExpireTime(), TimeUnit.MILLISECONDS);
+            prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), expireTime, TimeUnit.MILLISECONDS);
+            logger.debug("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
         }
         return fromStoreValue(prevValue);
     }

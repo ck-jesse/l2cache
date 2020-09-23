@@ -17,16 +17,29 @@ public abstract class AbstractAdaptingCache implements Cache {
      * 是否允许为空
      */
     private final boolean allowNullValues;
+    /**
+     * NullValue的过期时间，单位秒
+     */
+    private long nullValueExpireTimeSeconds;
 
     public AbstractAdaptingCache(String cacheName, CacheConfig cacheConfig) {
         this.instanceId = cacheConfig.getInstanceId();
         this.cacheName = cacheName;
         this.allowNullValues = cacheConfig.isAllowNullValues();
+        this.nullValueExpireTimeSeconds = cacheConfig.getNullValueExpireTimeSeconds();
+        if (this.nullValueExpireTimeSeconds < 0) {
+            this.nullValueExpireTimeSeconds = 60;
+        }
     }
 
     @Override
     public boolean isAllowNullValues() {
         return this.allowNullValues;
+    }
+
+    @Override
+    public long getNullValueExpireTimeSeconds() {
+        return this.nullValueExpireTimeSeconds;
     }
 
     @Override

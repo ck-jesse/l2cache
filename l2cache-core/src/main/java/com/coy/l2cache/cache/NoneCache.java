@@ -114,6 +114,11 @@ public class NoneCache implements Level1Cache, Level2Cache {
     }
 
     @Override
+    public long getNullValueExpireTimeSeconds() {
+        return 0;
+    }
+
+    @Override
     public String getInstanceId() {
         return cacheConfig.getInstanceId();
     }

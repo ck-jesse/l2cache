@@ -24,10 +24,10 @@ public class DefaultCacheExpiredListener implements CacheExpiredListener {
     @Override
     public void onExpired(Object key, Object value) {
         if (null == cache) {
-            logger.info("[CacheExpiredListener] level1Cache clear expired cache, key={}, value={}", key, value);
+            logger.info("level1Cache clear expired cache, key={}, value={}", key, value);
             return;
         }
-        logger.info("[CacheExpiredListener] level1Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
+        logger.info("level1Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
         if (!(value instanceof NullValue)) {
             return;
         }
@@ -38,12 +38,12 @@ public class DefaultCacheExpiredListener implements CacheExpiredListener {
                 return;
             }
             level2Cache.evict(key);
-            logger.info("[CacheExpiredListener] level2Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
+            logger.info("level2Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
             return;
         }
         if (cache instanceof Level2Cache) {
             cache.evict(key);
-            logger.info("[CacheExpiredListener] level2Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
+            logger.info("level2Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
         }
     }
 

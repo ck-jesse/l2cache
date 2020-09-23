@@ -238,6 +238,9 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                         }
                         logger.info("[GuavaCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                         loadingCache.invalidate(key);
+                        if (null != cacheSyncPolicy) {
+                            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+                        }
                     }
                 } catch (ExecutionException e) {
                     logger.error("[GuavaCache] refreshAllExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);

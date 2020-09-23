@@ -45,7 +45,8 @@ public class LoadFunction implements Function<Object, Object> {
     private Cache<Object, Integer> nullValueCache;
 
     public LoadFunction(String instanceId, String cacheType, String cacheName,
-                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader, Boolean allowNullValues, Cache<Object, Integer> nullValueCache) {
+                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader,
+                        Boolean allowNullValues, Cache<Object, Integer> nullValueCache) {
         this.instanceId = instanceId;
         this.cacheType = cacheType;
         this.cacheName = cacheName;
@@ -77,19 +78,15 @@ public class LoadFunction implements Function<Object, Object> {
                 return this.toStoreValue(key, level2Cache.get(key, valueLoader));
             }
 
-            // 对 valueLoader 进行包装，以便目标方法执行完后发送缓存同步消息，此方式不会对level2Cache造成污染
-            Object value = level2Cache.get(key, () -> {
-                if (null == valueLoader) {
-                    logger.debug("[LoadFunction] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
-                    return null;
-                }
-                Object tempValue = valueLoader.call();
-                logger.debug("[LoadFunction] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
+            // 对 valueLoader 进行包装，以便目标方法执行完后，先put到redis，再发送缓存同步消息，此方式不会对level2Cache造成污染
+            ValueLoaderWarpper warpper = new ValueLoaderWarpper(cacheName, key, valueLoader);
+            Object value = level2Cache.get(key, warpper);
+            if (warpper.isCall()) {
+                // 必须在redis.put()之后再发送消息，否则，消息消费方从redis中获取不到缓存，会继续加载值，若程序刚启动，而没有valueLoader,则redis会被设置为null值
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }
-                return tempValue;
-            });
+            }
             return this.toStoreValue(key, value);
         } catch (RedisTrylockFailException e) {
             // 针对 redis 加载数据时的重复请求，直接返回null，避免缓存NullValue

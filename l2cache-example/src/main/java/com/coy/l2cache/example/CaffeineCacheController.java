@@ -30,8 +30,13 @@ public class CaffeineCacheController {
     }
 
     @RequestMapping(value = "/queryUserSync")
-    public List<User> queryUserSync(String userId) {
+    public User queryUserSync(String userId) {
         return caffeineCacheService.queryUserSync(userId);
+    }
+
+    @RequestMapping(value = "/queryUserSyncList")
+    public List<User> queryUserSyncList(String userId) {
+        return caffeineCacheService.queryUserSyncList(userId);
     }
 
     @RequestMapping(value = "/putUser")
