@@ -36,8 +36,8 @@ public class ValueLoaderWarpper implements Callable {
             logger.warn("[LoadFunction] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
             return null;
         }
-        call = true;
         Object tempValue = valueLoader.call();
+        call = true;
         logger.debug("[LoadFunction] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
         return tempValue;
     }

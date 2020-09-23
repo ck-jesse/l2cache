@@ -27,7 +27,7 @@ public class DefaultCacheExpiredListener implements CacheExpiredListener {
             logger.info("level1Cache clear expired cache, key={}, value={}", key, value);
             return;
         }
-        logger.info("level1Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
+        logger.debug("level1Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
         if (!(value instanceof NullValue)) {
             return;
         }
