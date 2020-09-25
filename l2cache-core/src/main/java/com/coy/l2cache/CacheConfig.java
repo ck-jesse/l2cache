@@ -229,6 +229,12 @@ public class CacheConfig {
         private int maxSize;
 
         /**
+         * 是否启动最大值，默认false
+         * 注：主要为了支持需要缓存的数据量比较大，导致本地缓存因为机器的限制值存放部分数据，而redis可以存放全部数据，所以本地缓存建议设置最大值，当超过最大值时，会从redis中获取
+         */
+        private boolean startupMaxSize = false;
+
+        /**
          * Redisson 的yaml配置文件
          */
         private String redissonYamlConfig;

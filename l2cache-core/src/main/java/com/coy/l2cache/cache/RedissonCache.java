@@ -125,7 +125,9 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             }
         }
         try {
-            value = map.get(key);
+            if (redis.isLock()) {
+                value = map.get(key);
+            }
             if (value == null) {
                 logger.debug("[RedisCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), key, redis.isLock());
                 value = valueLoader.call();
@@ -153,19 +155,18 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         value = toStoreValue(value);
         if (mapCache == null) {
             map.fastPut(buildKey(key), value);
+            logger.info("[RedisCache] put cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return;
         }
-        // 如果是null值，则单独设置其过期时间
-        long expireTime = this.getExpireTime();
-        if (value instanceof NullValue) {
-            expireTime = TimeUnit.SECONDS.toMillis(this.getNullValueExpireTimeSeconds());
-        }
+        // 过期时间处理
+        long expireTime = this.expireTimeDeal(value);
+
         if (redis.getMaxIdleTime() > 0) {
             mapCache.fastPut(buildKey(key), value, expireTime, TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
-            logger.debug("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
+            logger.info("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
         } else {
             mapCache.fastPut(buildKey(key), value, expireTime, TimeUnit.MILLISECONDS);
-            logger.debug("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
+            logger.info("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
         }
     }
 
@@ -180,17 +181,15 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
             prevValue = map.putIfAbsent(buildKey(key), toStoreValue(value));
             return fromStoreValue(prevValue);
         }
-        // 如果是null值，则单独设置其过期时间
-        long expireTime = this.getExpireTime();
-        if (value instanceof NullValue) {
-            expireTime = TimeUnit.SECONDS.toMillis(this.getNullValueExpireTimeSeconds());
-        }
+        // 过期时间处理
+        long expireTime = this.expireTimeDeal(value);
+
         if (redis.getMaxIdleTime() > 0) {
             prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), expireTime, TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
-            logger.debug("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
+            logger.info("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
         } else {
             prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), expireTime, TimeUnit.MILLISECONDS);
-            logger.debug("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
+            logger.info("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
         }
         return fromStoreValue(prevValue);
     }
@@ -212,6 +211,21 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
         boolean rslt = map.containsKey(key);
         logger.debug("[RedisCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
         return rslt;
+    }
+
+    /**
+     * 过期时间处理
+     * 如果是null值，则单独设置其过期时间
+     */
+    private long expireTimeDeal(Object value) {
+        long expireTime = this.getExpireTime();
+        if (value instanceof NullValue) {
+            expireTime = TimeUnit.SECONDS.toMillis(this.getNullValueExpireTimeSeconds());
+        }
+        if (expireTime < 0) {
+            expireTime = 0;// 0表示无限存储
+        }
+        return expireTime;
     }
 
 }

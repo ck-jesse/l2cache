@@ -49,32 +49,31 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
         // 获取一级缓存对应CacheSpec
         // 二级缓存的过期时间和最大缓存数量从一级缓存上取，保证一级缓存和二级缓存的配置一致
         CacheSpec cacheSpec = CacheSupport.getCacheSpec(cacheConfig.getComposite().getL1CacheType(), cacheName);
-
-        if (null != cacheSpec && (cacheSpec.getExpireTime() > 0 || cacheSpec.getMaxSize() > 0)) {
-            // 缓存有过期时间
-            RMapCache<Object, Object> mapCache = redissonClient.getMapCache(cacheName);
-            if (cacheSpec.getMaxSize() > 0) {
-                mapCache.setMaxSize(cacheSpec.getMaxSize());
-                redis.setMaxSize(cacheSpec.getMaxSize());// 覆盖默认值
+        if (null != cacheSpec) {
+            // 覆盖CacheConfig.Redis的默认值
+            redis.setMaxSize(cacheSpec.getMaxSize());
+            if (cacheSpec.getExpireTime() < 0) {
+                redis.setExpireTime(0);// 0 表示无过期时间
+            } else {
+                redis.setExpireTime(cacheSpec.getExpireTime());
             }
-            redis.setExpireTime(cacheSpec.getExpireTime());// 覆盖默认值
-            logger.info("create a Redisson RMapCache instance, 采用一级缓存上expireTime和maxSize, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
-            return new RedissonCache(cacheName, cacheConfig, mapCache);
+            logger.info("采用一级缓存上expireTime和maxSize, 覆盖CacheConfig.Redis的默认值, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
         }
 
         if (redis.getExpireTime() > 0 || redis.getMaxSize() > 0) {
             // 缓存有过期时间
             RMapCache<Object, Object> mapCache = redissonClient.getMapCache(cacheName);
-            if (redis.getMaxSize() > 0) {
+            if (redis.isStartupMaxSize() && redis.getMaxSize() > 0) {
                 mapCache.setMaxSize(redis.getMaxSize());
             }
-            logger.info("create a Redisson RMapCache instance default, cacheName={}", cacheName);
+            logger.info("create a Redisson RMapCache instance, cacheName={}, expireTime={}, maxSize={}, startupMaxSize={}", cacheName,
+                    redis.getExpireTime(), redis.getMaxSize(), redis.isStartupMaxSize());
             return new RedissonCache(cacheName, cacheConfig, mapCache);
         }
 
         // 缓存永久有效
         RMap<Object, Object> map = redissonClient.getMap(cacheName);
-        logger.info("create a Redisson RMap instance default, cacheName={}", cacheName);
+        logger.info("create a Redisson RMap instance, cacheName={}", cacheName);
         return new RedissonCache(cacheName, cacheConfig, map);
     }
 }

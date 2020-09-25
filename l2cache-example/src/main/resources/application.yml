@@ -45,11 +45,13 @@ l2cache:
       # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
       # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
       # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
-      defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=5m,recordStats
+      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=1m,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
-        userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=5m
-        userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=5m,recordStats
+        userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=1m
+        userCacheSync: initialCapacity=10,maximumSize=2,refreshAfterWrite=1m,recordStats
+        # 无过期时间配置
+        queryUserSync: initialCapacity=10,maximumSize=2,recordStats
     # 二级缓存
     redis:
       # 是否启用缓存Key prefix
