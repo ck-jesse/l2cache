@@ -163,10 +163,10 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 
         if (redis.getMaxIdleTime() > 0) {
             mapCache.fastPut(buildKey(key), value, expireTime, TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
-            logger.info("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
+            logger.info("[RedisCache] put cache, cacheName={}, expireTime={} ms, maxIdleTime={}, key={}, value={}", this.getCacheName(), expireTime, redis.getMaxIdleTime(), key, value);
         } else {
             mapCache.fastPut(buildKey(key), value, expireTime, TimeUnit.MILLISECONDS);
-            logger.info("[RedisCache] put cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
+            logger.info("[RedisCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, key, value);
         }
     }
 
@@ -186,10 +186,10 @@ public class RedissonCache extends AbstractAdaptingCache implements Level2Cache 
 
         if (redis.getMaxIdleTime() > 0) {
             prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), expireTime, TimeUnit.MILLISECONDS, redis.getMaxIdleTime(), TimeUnit.MILLISECONDS);
-            logger.info("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms, maxIdleTime={}", this.getCacheName(), key, value, expireTime, redis.getMaxIdleTime());
+            logger.info("[RedisCache] putIfAbsent cache, cacheName={}, expireTime={} ms, maxIdleTime={}, key={}, value={}", this.getCacheName(), expireTime, redis.getMaxIdleTime(), key, value);
         } else {
             prevValue = mapCache.putIfAbsent(buildKey(key), toStoreValue(value), expireTime, TimeUnit.MILLISECONDS);
-            logger.info("[RedisCache] putIfAbsent cache, cacheName={}, key={}, value={}, expireTime={} ms", this.getCacheName(), key, value, expireTime);
+            logger.info("[RedisCache] putIfAbsent cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, key, value);
         }
         return fromStoreValue(prevValue);
     }
