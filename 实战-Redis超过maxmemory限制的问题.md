@@ -50,21 +50,45 @@ org.redisson.client.RedisOutOfMemoryException: command not allowed when used mem
 
 内心一阵独白MMP，临近上线，`Redisson`出现这么个巨坑。于是准备把涉及的多个服务和自研的二级缓存组件中相关Redisson的实现全部给替换掉。
 
-但是时间和风险成本太高，于是拉上另一个架构师一起来分析，一个一个Redis节点排查，最终发现其中有一个节点内存使用率达到100%，
+但是时间和风险成本太高，于是拉上另一个架构师一起来分析，一个一个Redis节点排查，最终发现其中有一个节点内存使用率达到100%，具体如下：
+
+### memory_usage
+
+![memory_usage](img\memory_usage.png)
 
 
 
-![1601093947479](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1601093947479.png)
+### evicted_keys  
 
+另外，分析超出maxmemory限制的问题，可以通过 evicted_keys 这个指标直观的分析出来。
 
+> evicted_keys  表示因达到maxmemory限制而被驱逐的键的数量。
+
+若 evicted_keys > 0，则说明已经出现了超过maxmemory限制的情况，那么客户端极有可能会报 `command not allowed when used memory > 'maxmemory'.` 这个错误。
+
+![evictd_keys](img\evictd_keys.png)
+
+### info 
+
+通过Info命令查看Redis状态
+
+![info evictd_keys](img\info evictd_keys.png)
+
+由此可见，除了要了解redis的实现原理外，还要对其各项运维指标有深入的了解，这样才能更好的去应对各种突发问题。
 
 
 
 ## 方案
 
-1、将库存服务中订单ID缓存的时间
+1、清理掉Redis数据
 
-2、
+2、减小库存服务中订单ID缓存的过期时间
+
+3、采用多次hash的方式将数据均匀分布到不同的节点上（暂未实现）
+
+4、采用Redisson PRO版本来解决热点key数据路由到不同的数据分区进行存储，分散单节点的压力。
+
+> Redisson PRO 为收费版本。
 
 
 
@@ -78,16 +102,4 @@ org.redisson.client.RedisOutOfMemoryException: command not allowed when used mem
 
 3、对Redis的各项指标了解不够深入，其实可以很快定位到问题
 
-4、技术选型一定要慎重，除了他的特性外，更多的要关注他有什么坑
-
-
-
-分析超出maxmemory的问题，可以通过 evicted_keys 这个指标直观的。
-
-> evicted_keys  表示因达到maxmemory限制而被驱逐的键的数量。
-
-![1601093753146](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1601093753146.png)
-
-info 命令查看Redis状态
-
-![1601095036122](C:\Users\Administrator\AppData\Roaming\Typora\typora-user-images\1601095036122.png)
+4、技术选型一定要慎重，除了它的特性外，更多的要关注它有什么坑
