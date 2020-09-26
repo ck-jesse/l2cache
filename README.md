@@ -91,6 +91,8 @@ l2cache:
     #instanceId: a1
     # 是否存储空值，默认true，防止缓存穿透
     allowNullValues: true
+    # 空值过期时间，单位秒
+    nullValueExpireTimeSeconds: 300
     # 缓存类型
     cacheType: composite
     # 组合缓存配置
@@ -106,36 +108,42 @@ l2cache:
       # 是否自动刷新过期缓存 true 是 false 否
       autoRefreshExpireCache: true
       # 缓存刷新调度线程池的大小
-      refreshPoolSize: 1
+      refreshPoolSize: 2
       # 缓存刷新的频率(秒)
-      refreshPeriod: 5
+      refreshPeriod: 10
       # 高并发场景下建议使用refreshAfterWrite，在缓存过期后不会被回收，再次访问时会去刷新缓存，在新值没有加载完毕前，其他的线程访问始终返回旧值
       # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
       # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
       # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
       # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
-      defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+      defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30m,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
         userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
         userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+        # 无过期时间配置
+        queryUserSync: initialCapacity=10,maximumSize=2,recordStats
     # 二级缓存
     redis:
       # 是否启用缓存Key prefix
-      useKeyPrefix: true
+      #useKeyPrefix: true
       # 缓存Key prefix
-      keyPrefix: ""
+      #keyPrefix: ""
+      # 加载数据时，是否加锁
+      lock: false
+      # 加锁时，true调用tryLock()，false调用lock()
+      tryLock: true
       # 缓存过期时间(ms)
-      expireTime: 30000
+      #expireTime: 30000
       # 缓存最大空闲时间(ms)
-      maxIdleTime: 30000
+      #maxIdleTime: 30000
       # 最大缓存数
-      maxSize: 200
+      #maxSize: 200
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
       # 缓存同步策略配置
     cacheSyncPolicy:
-      # 策略类型
+      # 策略类型 kafka / redis
       type: redis
       # 缓存更新时通知其他节点的topic名称
       topic: l2cache
@@ -183,53 +191,82 @@ l2cache:
 结合Spring Cache的注解来使用。
 
 ```java
+@Service
+public class CaffeineCacheService {
 
-/**
- * 获取或加载缓存项
- * <p>
- * 注：sync=false，CaffeineCache在定时刷新过期缓存时，是通过get(Object key)来获取缓存项，由于没有valueLoader（加载缓存项的具体逻辑），所以定时刷新缓存时，缓存项过期则会被淘汰。
- */
-@Cacheable(value = "userCache", key = "#userId")
-public User queryUser(String userId) {
-    User user = new User(userId, "addr");
-    logger.info("加载数据:{}", user);
-    return user;
-}
+    private final Logger logger = LoggerFactory.getLogger(CaffeineCacheService.class);
 
-/**
- * 获取或加载缓存项
- * <p>
- * 注：因底层是基于caffeine来实现一级缓存，所以利用的caffeine本身的同步机制来实现
- * sync=true 则表示并发场景下同步加载缓存项，
- * sync=true，是通过get(Object key, Callable<T> valueLoader)来获取或加载缓存项，此时valueLoader（加载缓存项的具体逻辑）会被缓存起来，所以CaffeineCache在定时刷新过期缓存时，缓存项过期则会重新加载。
- * sync=false，是通过get(Object key)来获取缓存项，由于没有valueLoader（加载缓存项的具体逻辑），所以CaffeineCache在定时刷新过期缓存时，缓存项过期则会被淘汰。
- * <p>
- * 建议：设置@Cacheable的sync=true，可以利用Caffeine的特性，防止缓存击穿（方式同一个key和不同key）
- */
-@Cacheable(value = "userCacheSync", key = "#userId", sync = true)
-public List<User> queryUserSync(String userId) {
-    List<User> list = new ArrayList();
-    list.add(new User(userId, "addr1"));
-    logger.info("加载数据:{}", list);
-    return list;
-}
+    /**
+     * 用于模拟db
+     */
+    private static Map<String, User> userMap = new HashMap<>();
 
-/**
- * 设置缓存
- * 注：通过 @CachePut 标注的方法添加的缓存项，在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会被淘汰。
- * 如果先执行了 @Cacheable(sync = true) 标注的方法，再执行 @CachePut 标注的方法，那么在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会重新加载。
- */
-@CachePut(value = "userCacheSync", key = "#userId")
-public User putUser(String userId, User user) {
-    return user;
-}
+    {
+        userMap.put("user01", new User("user01", "addr"));
+        userMap.put("user02", new User("user03", "addr"));
+        userMap.put("user03", new User("user03", "addr"));
+    }
 
-/**
- * 淘汰缓存
- */
-@CacheEvict(value = "userCacheSync", key = "#userId")
-public String evictUserSync(String userId) {
-    return userId;
+    /**
+     * 获取或加载缓存项
+     * <p>
+     * 注：sync=false，CaffeineCache在定时刷新过期缓存时，是通过get(Object key)来获取缓存项，由于没有valueLoader（加载缓存项的具体逻辑），所以定时刷新缓存时，缓存项过期则会被淘汰。
+     */
+    @Cacheable(value = "userCache", key = "#userId")
+    public User queryUser(String userId) {
+        User user = userMap.get(userId);
+        try {
+            Thread.sleep(1000);// 模拟加载数据的耗时
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        logger.info("加载数据:{}", user);
+        return user;
+    }
+
+    @Cacheable(value = "queryUserSync", key = "#userId", sync = true)
+    public User queryUserSync(String userId) {
+        User user = userMap.get(userId);
+        logger.info("加载数据:{}", user);
+        return user;
+    }
+
+    /**
+     * 获取或加载缓存项
+     * <p>
+     * 注：因底层是基于caffeine来实现一级缓存，所以利用的caffeine本身的同步机制来实现
+     * sync=true 则表示并发场景下同步加载缓存项，
+     * sync=true，是通过get(Object key, Callable<T> valueLoader)来获取或加载缓存项，此时valueLoader（加载缓存项的具体逻辑）会被缓存起来，所以CaffeineCache在定时刷新过期缓存时，缓存项过期则会重新加载。
+     * sync=false，是通过get(Object key)来获取缓存项，由于没有valueLoader（加载缓存项的具体逻辑），所以CaffeineCache在定时刷新过期缓存时，缓存项过期则会被淘汰。
+     * <p>
+     * 建议：设置@Cacheable的sync=true，可以利用Caffeine的特性，防止缓存击穿（方式同一个key和不同key）
+     */
+    @Cacheable(value = "queryUserSyncList", key = "#userId", sync = true)
+    public List<User> queryUserSyncList(String userId) {
+        User user = userMap.get(userId);
+        List<User> list = new ArrayList();
+        list.add(user);
+        logger.info("加载数据:{}", list);
+        return list;
+    }
+
+    /**
+     * 设置缓存
+     * 注：通过 @CachePut 标注的方法添加的缓存项，在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会被淘汰。
+     * 如果先执行了 @Cacheable(sync = true) 标注的方法，再执行 @CachePut 标注的方法，那么在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会重新加载。
+     */
+    @CachePut(value = "userCacheSync", key = "#userId")
+    public User putUser(String userId, User user) {
+        return user;
+    }
+
+    /**
+     * 淘汰缓存
+     */
+    @CacheEvict(value = "userCacheSync", key = "#userId")
+    public String evictUserSync(String userId) {
+        return userId;
+    }
 }
 ```
 
