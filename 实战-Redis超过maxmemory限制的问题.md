@@ -84,7 +84,9 @@ org.redisson.client.RedisOutOfMemoryException: command not allowed when used mem
 
 2、减小库存服务中订单ID缓存的过期时间
 
-3、采用多次hash的方式将数据均匀分布到不同的节点上（暂未实现）
+> 单个数据结构只被保存在一个固定的槽内，所以存在单节点瓶颈
+
+3、将`Hash数据结构`换为`String数据结构` ，达到将orderId均匀分布到不同的节点上的目的。
 
 4、采用Redisson PRO版本来解决热点key数据路由到不同的数据分区进行存储，分散单节点的压力。
 
