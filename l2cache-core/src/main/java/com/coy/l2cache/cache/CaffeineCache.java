@@ -137,6 +137,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             return;
         }
         caffeineCache.put(key, toStoreValue(value));
+        logger.info("[CaffeineCache] put cache, cacheName={}, key={}, value={}", this.getCacheName(), key, toStoreValue(value));
 
         // 允许null值，且值为空，则记录到nullValueCache，用于淘汰NullValue
         if (this.isAllowNullValues() && (value == null || value instanceof NullValue)) {
