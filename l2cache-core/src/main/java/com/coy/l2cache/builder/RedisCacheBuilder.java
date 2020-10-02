@@ -3,6 +3,7 @@ package com.coy.l2cache.builder;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.CacheSpec;
 import com.coy.l2cache.cache.RedissonCache;
+import com.coy.l2cache.cache.RedissonRBucketCache;
 import com.coy.l2cache.content.CacheSupport;
 import com.coy.l2cache.content.RedissonSupport;
 import org.redisson.api.RMap;
@@ -15,12 +16,12 @@ import org.slf4j.LoggerFactory;
  * @author chenck
  * @date 2020/7/2 9:37
  */
-public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
+public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache> {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCacheBuilder.class);
 
     @Override
-    public RedissonCache build(String cacheName) {
+    public RedissonRBucketCache build(String cacheName) {
 
         RedissonClient redissonClient = this.getRedissonClient(this.getCacheConfig());
 
@@ -43,7 +44,7 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
     }
 
 
-    protected RedissonCache buildActualCache(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
+    protected RedissonRBucketCache buildActualCache(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
         CacheConfig.Redis redis = this.getCacheConfig().getRedis();
 
         // 获取一级缓存对应CacheSpec
@@ -59,7 +60,10 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
             }
             logger.info("采用一级缓存上expireTime和maxSize, 覆盖CacheConfig.Redis的默认值, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
         }
+        logger.info("create a RedissonRBucketCache instance, cacheName={}", cacheName);
+        return new RedissonRBucketCache(cacheName, cacheConfig, redissonClient);
 
+        /* 因为 RMapCache 在大量key过期时，会导致出现未及时淘汰的情况，同时存在热点key的问题，所以改造为使用RBucket实现
         if (redis.getExpireTime() > 0 || redis.getMaxSize() > 0) {
             // 缓存有过期时间
             RMapCache<Object, Object> mapCache = redissonClient.getMapCache(cacheName);
@@ -74,6 +78,6 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonCache> {
         // 缓存永久有效
         RMap<Object, Object> map = redissonClient.getMap(cacheName);
         logger.info("create a Redisson RMap instance, cacheName={}", cacheName);
-        return new RedissonCache(cacheName, cacheConfig, map);
+        return new RedissonCache(cacheName, cacheConfig, map);*/
     }
 }

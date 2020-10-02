@@ -1,5 +1,6 @@
 package com.coy.l2cache.test;
 
+import com.coy.l2cache.cache.RedissonRBucketCache;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.builder.RedisCacheBuilder;
 import com.coy.l2cache.cache.RedissonCache;
@@ -21,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RedisCacheTest {
 
     CacheConfig cacheConfig = new CacheConfig();
-    RedissonCache cache;
+    RedissonRBucketCache cache;
     Callable<String> callable;
 
     @Before
@@ -64,12 +65,12 @@ public class RedisCacheTest {
 
     // 因为get()可能会触发load操作，所以打印数据时使用该方法
     private void printAllCache() {
-        System.out.println("L2 所有的缓存值");
-        Map map1 = cache.getActualCache().readAllMap();
-        map1.forEach((o1, o2) -> {
-            System.out.println(String.format("key=%s, value=%s", o1, o2));
-        });
-        System.out.println();
+//        System.out.println("L2 所有的缓存值");
+//        Map map1 = cache.getActualCache().readAllMap();
+//        map1.forEach((o1, o2) -> {
+//            System.out.println(String.format("key=%s, value=%s", o1, o2));
+//        });
+//        System.out.println();
     }
 
     private void printCache(Object key) {
