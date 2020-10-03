@@ -28,18 +28,18 @@ public class RedissonRBucketTest {
 
     @Test
     public void putTest() {
-        String prefix = "bucket_test";
+        String prefix = "bucket:test";
         for (int i = 1; i < 100000; i++) {
             String key = prefix + i;
             System.out.println("put " + key);
             RBucket<Object> bucket = redissonClient.getBucket(key);
-            bucket.set(key, 5, TimeUnit.MINUTES);
+            bucket.set(key, 3, TimeUnit.MINUTES);
         }
     }
 
     @Test
     public void getTest() throws InterruptedException {
-        String key = "bucket_test99999";
+        String key = "bucket:test99999";
         RBucket<Object> bucket = redissonClient.getBucket(key);
         while (true) {
             if (bucket.isExists()) {

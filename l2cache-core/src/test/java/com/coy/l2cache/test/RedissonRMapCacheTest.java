@@ -38,7 +38,7 @@ public class RedissonRMapCacheTest {
      */
     @Test
     public void putTest() {
-        String prefix = "test";
+        String prefix = "map:test";
         for (int i = 1; i < 100000; i++) {
             String key = prefix + i;
             System.out.println("put " + key);
@@ -51,7 +51,7 @@ public class RedissonRMapCacheTest {
      */
     @Test
     public void getTest() throws InterruptedException {
-        String key = "test99999";
+        String key = "map:test99999";
         while (true) {
             // 判断key是否存在
             if (mapCache.isExists()) {
