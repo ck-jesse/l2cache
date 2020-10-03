@@ -9,7 +9,10 @@ import org.redisson.api.RedissonClient;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 模拟大量
+ * 模拟 Redisson 的 RBucket(String结构)存储大量有过期时间的key时，使用缓存时是否会出现不准确的情况
+ *
+ * 1、解决 RMapCache(hash结构) 大量key集中过期，缓存未删除导致的缓存混乱的问题
+ * 2、解决 RMapCache(hash结构) 热点key集中存储的问题
  *
  * @author chenck
  * @date 2020/10/3 19:34
