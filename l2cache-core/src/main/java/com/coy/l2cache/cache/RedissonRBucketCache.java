@@ -73,6 +73,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         return this.redissonClient;
     }
 
+    /**
+     * 获取 RBucket 对象
+     */
     private RBucket<Object> getBucket(Object key) {
         RBucket<Object> bucket = redissonClient.getBucket((String) buildKey(key));
         return bucket;
@@ -102,11 +105,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         RBucket<Object> bucket = getBucket(key);
         Object value = bucket.get();
         if (value != null) {
-            logger.debug("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), buildKey(key), value);
+            logger.info("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), buildKey(key), value);
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
-            logger.debug("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), buildKey(key));
+            logger.warn("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), buildKey(key));
             return null;
         }
         RLock lock = null;
@@ -155,8 +158,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         value = toStoreValue(value);
         // 过期时间处理
         long expireTime = this.expireTimeDeal(value);
-        bucket.set(value, expireTime, TimeUnit.MILLISECONDS);
-        logger.info("[RedissonRBucketCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, buildKey(key), value);
+        if (expireTime > 0) {
+            bucket.set(value, expireTime, TimeUnit.MILLISECONDS);
+            logger.info("[RedissonRBucketCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, buildKey(key), value);
+        } else {
+            bucket.set(value);
+            logger.info("[RedissonRBucketCache] put cache, cacheName={}, key={}, value={}", this.getCacheName(), buildKey(key), value);
+        }
     }
 
     @Override
@@ -166,11 +174,17 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return this.get(key);
         }
         RBucket<Object> bucket = getBucket(key);
+        Object oldValue = bucket.get();
         // 过期时间处理
         long expireTime = this.expireTimeDeal(value);
-        Object prevValue = bucket.getAndSet(value, expireTime, TimeUnit.HOURS);
-        logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, expireTime={} ms, key={}, value={}, prevValue={}", this.getCacheName(), expireTime, buildKey(key), value, prevValue);
-        return fromStoreValue(prevValue);
+        if (expireTime > 0) {
+            boolean rslt = bucket.trySet(value, expireTime, TimeUnit.MILLISECONDS);
+            logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, expireTime={} ms, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, rslt, buildKey(key), value, oldValue);
+        } else {
+            boolean rslt = bucket.trySet(value);
+            logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), rslt, buildKey(key), value, oldValue);
+        }
+        return fromStoreValue(oldValue);
     }
 
     @Override
@@ -181,7 +195,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public void clear() {
-        logger.info("[RedissonRBucketCache] not support clear all cache, cacheName={}", this.getCacheName());
+        logger.warn("[RedissonRBucketCache] not support clear all cache, cacheName={}", this.getCacheName());
     }
 
     @Override
@@ -201,7 +215,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             expireTime = TimeUnit.SECONDS.toMillis(this.getNullValueExpireTimeSeconds());
         }
         if (expireTime < 0) {
-            expireTime = 0;// 0表示无限存储
+            expireTime = 0;
         }
         return expireTime;
     }

@@ -215,23 +215,29 @@ public class CacheConfig {
         private long expireTime;
 
         /**
-         * 缓存最大空闲时间(ms)
+         * 缓存最大空闲时间(ms) - RMap 参数
          * 注：在 Redisson 中 缓存过期被淘汰的时间 取符合条件的 expireTime 和 maxIdleTime 中间小的值。
          * 如：expireTime=10s, maxIdleTime=5s, 那么当缓存空闲5s时，会被 Redisson 淘汰掉。
+         * 注：从1.0.13版本开始废弃
          */
+        @Deprecated
         private long maxIdleTime;
 
         /**
-         * 最大缓存数，以便剔除多余元素
+         * 最大缓存数，以便剔除多余元素 - RMap 参数
          * 注：作为默认的最大缓存数，如果一级缓存设置了最大缓存数，则以一级缓存的最大缓存数为准。
          * 注：注意如果与一级缓存（如：caffeine）中最大数量大小不一致，会出现一级缓存和二级缓存中缓存数量不一致，所以建议设置为一致减少不必要的歧义。
+         * 注：从1.0.13版本开始废弃
          */
+        @Deprecated
         private int maxSize;
 
         /**
-         * 是否启动最大值，默认false
+         * 是否启动最大值，默认false - RMap 参数
          * 注：主要为了支持需要缓存的数据量比较大，导致本地缓存因为机器的限制值存放部分数据，而redis可以存放全部数据，所以本地缓存建议设置最大值，当超过最大值时，会从redis中获取
+         * 注：从1.0.13版本开始废弃
          */
+        @Deprecated
         private boolean startupMaxSize = false;
 
         /**

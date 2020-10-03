@@ -14,6 +14,7 @@ import org.redisson.codec.JsonJacksonCodec;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -30,7 +31,8 @@ public class RedisCacheTest {
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .setAllowNullValues(true)
                 .getRedis()
-//                .setExpireTime(2000)
+                .setExpireTime(30000)
+                .setLock(true)
 //                .setMaxIdleTime(2000)
 //                .setMaxSize(20)
                 .setRedissonYamlConfig("redisson.yaml");
@@ -77,6 +79,11 @@ public class RedisCacheTest {
         Object value = cache.get(key);
         System.out.println(String.format("L2 缓存值 key=%s, value=%s", key, value));
         System.out.println();
+    }
+
+    @Test
+    public void test() {
+        System.out.println(TimeUnit.MILLISECONDS.toMillis(5000));
     }
 
     @Test
@@ -179,6 +186,14 @@ public class RedisCacheTest {
         cache.clear();
         System.out.println("clear后：缓存中所有的元素");
         printAllCache();
+    }
+
+    @Test
+    public void isExistsTest() throws InterruptedException {
+        String key = "key1";
+        cache.put(key, "value");
+        boolean rslt = cache.isExists(key);
+        System.out.println(rslt);
     }
 
 }
