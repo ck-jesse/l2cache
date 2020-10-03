@@ -5,9 +5,11 @@ import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -55,11 +57,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public Object buildKey(Object key) {
-        if (!(key instanceof CharSequence)) {
-            throw new IllegalArgumentException("Redisson RBucket 只支持String类型的key");
+        if (key == null || "".equals(key)) {
+            throw new IllegalArgumentException("key不能为空");
         }
         StringBuilder sb = new StringBuilder(this.getCacheName()).append(SPLIT);
-        sb.append(key);
+        sb.append(key.toString());
         return sb.toString();
     }
 
