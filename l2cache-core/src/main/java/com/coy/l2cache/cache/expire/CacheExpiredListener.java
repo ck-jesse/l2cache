@@ -11,5 +11,5 @@ public interface CacheExpiredListener<K, V> {
     /**
      * 缓存过期后触发
      */
-    void onExpired(K key, V value);
+    void onExpired(K key, V value, String removalCause);
 }

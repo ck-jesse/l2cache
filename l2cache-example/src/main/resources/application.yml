@@ -14,6 +14,7 @@ spring:
     name: l2cache-example
 
 # 二级缓存配置
+# 注：caffeine 不适用于数据量大，并且缓存命中率极低的业务场景，如用户维度的缓存。请慎重选择。
 l2cache:
   config:
     # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
@@ -45,7 +46,9 @@ l2cache:
       # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
       # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
       # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
-      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=1m,recordStats
+      # 注意：当缓存项在有效期内重复利用率很低时，不适合用本地缓存，如3千万用户参加抢购活动，用户信息的缓存，则不能用本地缓存。
+      # 因为超过最大数量限制时，再往里面添加元素，会异步按照LFU淘汰元素，若未及时淘汰，在大量用户请求的情况，会导致堆内存飙升，频繁的FullGC和YoungGC，最终导致OOM。
+      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=1m,softValues,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
         userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=1m

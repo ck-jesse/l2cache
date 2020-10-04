@@ -68,7 +68,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
         if (null != listener) {
             cacheBuilder.removalListener((key, value, cause) -> {
-                listener.onExpired(key, value);
+                listener.onExpired(key, value, cause.name());
             });
         }
         if (null == cacheLoader) {

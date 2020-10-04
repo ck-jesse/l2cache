@@ -65,7 +65,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
 
         if (null != listener) {
             cacheBuilder.removalListener(notification -> {
-                listener.onExpired(notification.getKey(), notification.getValue());
+                listener.onExpired(notification.getKey(), notification.getValue(), notification.getCause().name());
             });
         }
         if (null == cacheLoader) {

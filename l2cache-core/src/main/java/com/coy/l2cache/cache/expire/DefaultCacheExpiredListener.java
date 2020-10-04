@@ -22,12 +22,12 @@ public class DefaultCacheExpiredListener implements CacheExpiredListener {
     private Cache cache;
 
     @Override
-    public void onExpired(Object key, Object value) {
+    public void onExpired(Object key, Object value, String removalCause) {
         if (null == cache) {
-            logger.info("level1Cache clear expired cache, key={}, value={}", key, value);
+            logger.info("level1Cache clear expired cache, removalCause={}, key={}, value={}", removalCause, key, value);
             return;
         }
-        logger.debug("level1Cache evict expired cache, cacheName={}, key={}, value={}", cache.getCacheName(), key, value);
+        logger.debug("level1Cache evict expired cache, removalCause={}, cacheName={}, key={}, value={}", removalCause, cache.getCacheName(), key, value);
         if (!(value instanceof NullValue)) {
             return;
         }
