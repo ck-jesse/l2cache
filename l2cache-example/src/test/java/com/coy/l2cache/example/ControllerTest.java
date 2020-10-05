@@ -1,14 +1,8 @@
 package com.coy.l2cache.example;
 
 import com.alibaba.fastjson.JSON;
-import jdk.internal.org.objectweb.asm.tree.IntInsnNode;
 import org.junit.Test;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
 
 public class ControllerTest {
 
