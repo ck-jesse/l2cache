@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
   #servlet:
   #  context-path: /l2cache-example
 
@@ -48,13 +48,13 @@ l2cache:
       # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
       # 注意：当缓存项在有效期内重复利用率很低时，不适合用本地缓存，如3千万用户参加抢购活动，用户信息的缓存，则不能用本地缓存。
       # 因为超过最大数量限制时，再往里面添加元素，会异步按照LFU淘汰元素，若未及时淘汰，在大量用户请求的情况，会导致堆内存飙升，频繁的FullGC和YoungGC，最终导致OOM。
-      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=1m,softValues,recordStats
+      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=2m,softValues,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
-        userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=1m
-        userCacheSync: initialCapacity=10,maximumSize=2,refreshAfterWrite=1m,recordStats
+        userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=2m
+        userCacheSync: initialCapacity=10,maximumSize=2,refreshAfterWrite=2m,recordStats
         # 无过期时间配置
-        queryUserSync: initialCapacity=10,maximumSize=2,recordStats
+        queryUserSync: initialCapacity=10,maximumSize=20,refreshAfterWrite=1m,recordStats
     # 二级缓存
     redis:
       # 是否启用缓存Key prefix

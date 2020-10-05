@@ -32,10 +32,13 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
 
     @Override
     public GuavaCache build(String cacheName) {
+        // 构建 CacheSpec
+        CacheSpec cacheSpec = this.parseSpec(cacheName);
+
         // 创建CustomCacheLoader
         // 保证一个GuavaCache对应一个CacheLoader，也就是cacheName维度进行隔离
         CacheLoader customCacheLoader = CustomCacheLoader.newInstance(this.getCacheConfig().getInstanceId(),
-                CacheType.GUAVA.name().toLowerCase(), cacheName);
+                CacheType.GUAVA.name().toLowerCase(), cacheName, cacheSpec.getMaxSize());
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
         customCacheLoader.setAllowNullValues(this.getCacheConfig().isAllowNullValues());
 

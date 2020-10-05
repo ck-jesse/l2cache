@@ -1,5 +1,7 @@
 package com.coy.l2cache.example;
 
+import com.coy.l2cache.cache.CompositeCache;
+import com.coy.l2cache.cache.Level1Cache;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.spring.L2CacheCacheManager;
 import lombok.extern.slf4j.Slf4j;
@@ -66,5 +68,23 @@ public class CaffeineCacheController {
             cache.clear();
         }
         return "success";
+    }
+
+    @RequestMapping(value = "/delValueLoader")
+    public String delValueLoader(String userId) {
+        com.coy.l2cache.Cache l2cache = (com.coy.l2cache.Cache) cacheManager.getCache("queryUserSync").getNativeCache();
+        if (l2cache instanceof CompositeCache) {
+            Level1Cache level1Cache = ((CompositeCache) l2cache).getLevel1Cache();
+            level1Cache.getCacheLoader().delValueLoader(userId);
+        }
+        return "true";
+    }
+
+    @RequestMapping(value = "/justput")
+    public String justput(String userId) {
+        User user = new User(userId, "justput");
+        com.coy.l2cache.Cache l2cache = (com.coy.l2cache.Cache) cacheManager.getCache("queryUserSync").getNativeCache();
+        l2cache.put(userId, user);
+        return "justput";
     }
 }

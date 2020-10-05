@@ -115,7 +115,7 @@ public class CacheConfig {
         /**
          * 缓存刷新的频率(秒)
          */
-        private Long refreshPeriod = 10L;
+        private Long refreshPeriod = 30L;
 
         /**
          * 缓存刷新时，是否淘汰缓存NullValue对象，true 表示淘汰，false 表示不淘汰(默认)

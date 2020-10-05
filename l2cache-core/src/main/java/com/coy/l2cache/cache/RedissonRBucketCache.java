@@ -112,7 +112,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
-            logger.warn("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), buildKey(key));
+            logger.info("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), buildKey(key));
             return null;
         }
         RLock lock = null;

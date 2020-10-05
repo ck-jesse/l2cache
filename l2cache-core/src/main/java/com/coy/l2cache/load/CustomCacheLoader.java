@@ -3,9 +3,9 @@ package com.coy.l2cache.load;
 import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.CacheSyncPolicy;
 import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -27,8 +27,10 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      * <key, Callable>
      * 用于保证并发场景下对于不同的key找到对应的Callable进行数据加载
      * 注：ConcurrentReferenceHashMap是一个实现软/弱引用的map，防止OOM出现
+     * 注：由 ConcurrentReferenceHashMap 优化为 Caffeine.Cache，并设置最大元素梳理，避免元素过多占用内存过多，导致频繁的gc
+     * Caffeine 基于大小的淘汰机制，因为是异步线程池的方式来执行的清理任务，所以在大量不同key访问的情况下，清理任务可能出现堆积的情况，也就是说极端情况下也会出现缓存未被及时清理掉占用大量内存的情况出现
      */
-    private Map<Object, Callable<?>> valueLoaderCache = new ConcurrentReferenceHashMap<>();
+    private Cache<Object, Callable<?>> valueLoaderCache;
     private String instanceId;
     private String cacheType;
     private String cacheName;
@@ -37,17 +39,26 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     private boolean allowNullValues;
     private Cache<Object, Integer> nullValueCache;
 
-    private CustomCacheLoader(String instanceId, String cacheType, String cacheName) {
+    private CustomCacheLoader(String instanceId, String cacheType, String cacheName, Integer maxSize) {
         this.instanceId = instanceId;
         this.cacheType = cacheType;
         this.cacheName = cacheName;
+        if (null == maxSize || maxSize <= 0) {
+            maxSize = 1000;
+        }
+        valueLoaderCache = Caffeine.newBuilder()
+                .removalListener((key, value, cause) -> {
+                    logger.info("valueLoader is Recycled, cacheName={}, cause={}, key={}, valueLoader={}", cacheName, cause, key, value);
+                })
+                .maximumSize(maxSize)
+                .build();
     }
 
     /**
      * create CacheLoader instance
      */
-    public static CustomCacheLoader newInstance(String instanceId, String cacheType, String cacheName) {
-        return new CustomCacheLoader(instanceId, cacheType, cacheName);
+    public static CustomCacheLoader newInstance(String instanceId, String cacheType, String cacheName, Integer maxSize) {
+        return new CustomCacheLoader(instanceId, cacheType, cacheName, maxSize);
     }
 
     @Override
@@ -72,15 +83,20 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
-        if (!valueLoaderCache.containsKey(key)) {
+        if (null == valueLoaderCache.getIfPresent(key)) {
             valueLoaderCache.put(key, valueLoader);
         }
     }
 
     @Override
+    public void delValueLoader(Object key) {
+        valueLoaderCache.invalidate(key);
+    }
+
+    @Override
     public Object load(Object key) {
         // 直接返回null，目的是使spring cache后续逻辑去执行具体的加载数据方法，然后put到缓存
-        Callable<?> valueLoader = valueLoaderCache.get(key);
+        Callable<?> valueLoader = valueLoaderCache.getIfPresent(key);
         /*if (null == valueLoader) {
             logger.debug("[CustomCacheLoader] valueLoader is null direct return null, key={}", key);
             return null;

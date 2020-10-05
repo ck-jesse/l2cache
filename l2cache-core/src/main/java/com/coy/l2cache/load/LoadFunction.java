@@ -79,13 +79,23 @@ public class LoadFunction implements Function<Object, Object> {
             }
 
             // 对 valueLoader 进行包装，以便目标方法执行完后，先put到redis，再发送缓存同步消息，此方式不会对level2Cache造成污染
-            ValueLoaderWarpper warpper = new ValueLoaderWarpper(cacheName, key, valueLoader);
+            ValueLoaderWarpper warpper = null;
+            if (null != valueLoader) {
+                warpper = new ValueLoaderWarpper(cacheName, key, valueLoader);
+            }
+            // 先从redis获取缓存，若不存在，则执行ValueLoaderWarpper从db加载数据
             Object value = level2Cache.get(key, warpper);
-            if (warpper.isCall()) {
+            if (null != warpper && warpper.isCall()) {
                 // 必须在redis.put()之后再发送消息，否则，消息消费方从redis中获取不到缓存，会继续加载值，若程序刚启动，而没有valueLoader,则redis会被设置为null值
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));
                 }
+            }
+            // 集群环境下，valueLoader和value都为null时，直接返回null，避免缓存NullValue，导致出现实际上数据存在，而获取到null值的情况。
+            // value等于null，表示从redis中获取的值为null（也就是key不存在），所以直接返回null，避免缓存NullValue，导致缓存和db不一致的情况。
+            if (null == valueLoader && null == value) {
+                logger.info("[LoadFunction] valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                return null;
             }
             return this.toStoreValue(key, value);
         } catch (RedisTrylockFailException e) {

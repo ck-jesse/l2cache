@@ -30,10 +30,13 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
     @Override
     public CaffeineCache build(String cacheName) {
+        // 构建 CacheSpec
+        CacheSpec cacheSpec = this.parseSpec(cacheName);
+
         // 创建CustomCacheLoader
         // 保证一个CaffeineCache对应一个CacheLoader，也就是cacheName维度进行隔离
         CacheLoader customCacheLoader = CustomCacheLoader.newInstance(this.getCacheConfig().getInstanceId(),
-                CacheType.CAFFEINE.name().toLowerCase(), cacheName);
+                CacheType.CAFFEINE.name().toLowerCase(), cacheName, cacheSpec.getMaxSize());
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
         customCacheLoader.setAllowNullValues(this.getCacheConfig().isAllowNullValues());
 

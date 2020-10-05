@@ -21,6 +21,11 @@ public interface CacheLoader<K, V> {
     void addValueLoader(Object key, Callable<?> valueLoader);
 
     /**
+     * 删除valueLoader
+     */
+    void delValueLoader(Object key);
+
+    /**
      * 设置二级缓存
      */
     void setLevel2Cache(Level2Cache level2Cache);
