@@ -1,14 +1,14 @@
 package com.coy.l2cache.cache;
 
 import com.coy.l2cache.CacheConfig;
-import com.coy.l2cache.CacheSpec;
 import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
-import com.coy.l2cache.content.CacheSupport;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.LoadFunction;
+import com.coy.l2cache.schedule.NullValueClearSupport;
+import com.coy.l2cache.schedule.NullValueClearTask;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
 import com.coy.l2cache.schedule.RefreshSupport;
 import com.coy.l2cache.sync.CacheMessage;
@@ -70,9 +70,23 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             this.nullValueCache = Caffeine.newBuilder()
                     .expireAfterWrite(cacheConfig.getNullValueExpireTimeSeconds(), TimeUnit.SECONDS)
                     .maximumSize(cacheConfig.getNullValueMaxSize())
+                    .removalListener((key, value, cause) -> {
+                        logger.info("[NullValueCache] remove NullValue, removalCause={}, cacheName={}, key={}, value={}", cause, this.getCacheName(), key, value);
+                        if (null != key) {
+                            this.caffeineCache.invalidate(key);
+                            if (null != this.cacheSyncPolicy) {
+                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+                            }
+                        }
+                    })
                     .build();
             cacheLoader.setNullValueCache(this.nullValueCache);
-            logger.info("[CaffeineCache] NullValueCache init success, cacheName={}, expireTime={} s, maxSize={}", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize());
+
+            // 定期清理 NullValue
+            NullValueClearSupport.getInstance().scheduleWithFixedDelay(new NullValueClearTask(this.getCacheName(), this.nullValueCache), 5,
+                    cacheConfig.getNullValueClearPeriodSeconds(), TimeUnit.SECONDS);
+
+            logger.info("[CaffeineCache] NullValueCache初始化成功, cacheName={}, expireTime={}s, maxSize={}, clearPeriodSeconds={}s", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize(), cacheConfig.getNullValueClearPeriodSeconds());
         }
     }
 
@@ -230,17 +244,17 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public void refreshAllExpireCache() {
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
-            Object value = null;
             if (null != nullValueCache) {
                 logger.info("[CaffeineCache] refreshAllExpireCache, cacheName={}, size={}, NullValueSize={}, stats={}", this.getCacheName(), loadingCache.estimatedSize(), nullValueCache.estimatedSize(), loadingCache.stats());
             } else {
                 logger.info("[CaffeineCache] refreshAllExpireCache, cacheName={}, size={}, stats={}", this.getCacheName(), loadingCache.estimatedSize(), loadingCache.stats());
             }
+            Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("[CaffeineCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
 
-                if (null == value) {
+                /*if (null == value) {
                     continue;
                 }
                 if (value instanceof NullValue) {
@@ -257,9 +271,8 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                     if (null != cacheSyncPolicy) {
                         cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
                     }
-                }
+                }*/
             }
-
         }
     }
 

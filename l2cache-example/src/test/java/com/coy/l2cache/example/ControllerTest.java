@@ -21,7 +21,7 @@ public class ControllerTest {
 
     @Test
     public void queryUserSync() {
-        String url = HOST + "/queryUserSync?userId=user01";
+        String url = HOST + "/queryUserSync?userId=user01222";
 
         User user = restTemplate.getForObject(url, User.class);
         System.out.println(JSON.toJSONString(user));

@@ -48,7 +48,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         }
         valueLoaderCache = Caffeine.newBuilder()
                 .removalListener((key, value, cause) -> {
-                    logger.info("valueLoader is Recycled, cacheName={}, cause={}, key={}, valueLoader={}", cacheName, cause, key, value);
+                    logger.info("[CustomCacheLoader]valueLoader is Recycled, cacheName={}, cause={}, key={}, valueLoader={}", cacheName, cause, key, value);
                 })
                 .maximumSize(maxSize)
                 .build();
