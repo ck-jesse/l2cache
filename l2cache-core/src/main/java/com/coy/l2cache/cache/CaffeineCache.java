@@ -8,7 +8,7 @@ import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.schedule.NullValueClearSupport;
-import com.coy.l2cache.schedule.NullValueClearTask;
+import com.coy.l2cache.schedule.NullValueCacheClearTask;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
 import com.coy.l2cache.schedule.RefreshSupport;
 import com.coy.l2cache.sync.CacheMessage;
@@ -83,7 +83,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             cacheLoader.setNullValueCache(this.nullValueCache);
 
             // 定期清理 NullValue
-            NullValueClearSupport.getInstance().scheduleWithFixedDelay(new NullValueClearTask(this.getCacheName(), this.nullValueCache), 5,
+            NullValueClearSupport.getInstance().scheduleWithFixedDelay(new NullValueCacheClearTask(this.getCacheName(), this.nullValueCache), 5,
                     cacheConfig.getNullValueClearPeriodSeconds(), TimeUnit.SECONDS);
 
             logger.info("[CaffeineCache] NullValueCache初始化成功, cacheName={}, expireTime={}s, maxSize={}, clearPeriodSeconds={}s", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize(), cacheConfig.getNullValueClearPeriodSeconds());
