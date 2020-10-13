@@ -15,6 +15,7 @@ public class DateUtils {
     public static final String DATE_FORMAT_14 = "yyyyMMddHHmmss";
     public static final String DATE_FORMAT_17 = "yyyyMMdd HH:mm:ss";
     public static final String DATE_FORMAT_19 = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_FORMAT_23 = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String DATE_FORMAT_19_FORWARD_SLASH = "yyyy/MM/dd HH:mm:ss";
     private static final String MINUS = "-";
 
