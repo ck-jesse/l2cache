@@ -1,5 +1,6 @@
 package com.coy.l2cache.example;
 
+import com.coy.l2cache.CacheConfig;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
@@ -16,17 +17,19 @@ public class CaffeineCacheTest {
      * 导致频繁的gc，甚至最终出现OOM。
      */
     public static void main(String[] args) {
-        Cache<String, String> valueLoaderCache = Caffeine.newBuilder()
+        Cache<String, CacheConfig> valueLoaderCache = Caffeine.newBuilder()
                 .initialCapacity(32)
                 .maximumSize(1000)
                 .build();
 
-        for (int i = 0; i < 100000; i++) {
-            if (i % 10000 == 0) {
-                System.out.println("size="+valueLoaderCache.estimatedSize());
-            }
-            valueLoaderCache.put("key" + i, "valuevvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" + i);
-        }
-        System.out.println("size="+valueLoaderCache.estimatedSize());
+        CacheConfig cacheConfig = new CacheConfig();
+        cacheConfig.setInstanceId("123123");
+        valueLoaderCache.put("test", cacheConfig);
+
+        cacheConfig.setInstanceId("sdfdsfsdsdf");
+        System.out.println();
+
+        Short isLimitMarkup = 1;
+        System.out.println(isLimitMarkup == 1);
     }
 }
