@@ -80,7 +80,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * @param duplicateIndex 复制品下标
      */
     private Object buildKeyByDuplicate(Object key, int duplicateIndex) {
-        return this.buildKeyBase(key.toString() + duplicateIndex);
+        return this.buildKeyBase(key.toString() + SPLIT + duplicateIndex);
     }
 
     /**
@@ -242,8 +242,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         logger.info("[RedissonRBucketCache] evict cache, cacheName={}, key={}, result={}", this.getCacheName(), cacheKey, result);
         // key复制品处理
         if (redis.isDuplicate()) {
-            // TODO
-            //this.duplicateEvict(key, value, redis.getDuplicateSize());
+            this.duplicateEvict(key, redis.getDuplicateSize());
         }
     }
 
@@ -297,6 +296,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         return (List<T>) list;
     }
 
+    @Override
     public <T> void batchPut(Map<Object, T> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
@@ -315,7 +315,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             }
             // key复制品处理
-            if (!redis.isDuplicate()) {
+            if (redis.isDuplicate()) {
                 this.duplicatePutBuild(key, value, batch, redis.getDuplicateSize());
             }
         });
@@ -344,20 +344,25 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * 以redis内存空间来降低单分片压力。
      */
     private void duplicatePut(Object key, Object value, int duplicateSize) {
+        boolean check = this.checkSaveDuplicate(key, value, duplicateSize);
+        if (!check) {
+            return;
+        }
+
         RBatch batch = redissonClient.createBatch();
 
         this.duplicatePutBuild(key, value, batch, duplicateSize);
 
         BatchResult result = batch.execute();
-        logger.debug("[RedissonRBucketCache] duplicatePut cache, cacheName={}, size={}, result={}", this.getCacheName(), result.getResponses().size(), result.getResponses());
+        logger.info("[RedissonRBucketCache] duplicatePut put succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), key, result.getResponses().size(), result.getSyncedSlaves());
     }
 
     /**
      * 构建副本
      */
     private void duplicatePutBuild(Object key, Object value, RBatch batch, int duplicateSize) {
-        if (duplicateSize <= 0) {
-            logger.warn("[RedissonRBucketCache] duplicatePut duplicateSize less than 0, not put, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, key, value);
+        boolean check = this.checkSaveDuplicate(key, value, duplicateSize);
+        if (!check) {
             return;
         }
 
@@ -370,10 +375,10 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             tempKey = (String) buildKeyByDuplicate(key.toString(), i);
             if (expireTime > 0) {
                 batch.getBucket(tempKey).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
-                logger.info("[RedissonRBucketCache] duplicatePut cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
+                logger.info("[RedissonRBucketCache] duplicatePut put, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
             } else {
                 batch.getBucket(tempKey).setAsync(value);
-                logger.info("[RedissonRBucketCache] duplicatePut cache, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
+                logger.info("[RedissonRBucketCache] duplicatePut put, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
             }
         }
     }
@@ -382,20 +387,25 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * 副本TrySet
      */
     private void duplicateTrySet(Object key, Object value, int duplicateSize) {
+        boolean check = this.checkSaveDuplicate(key, value, duplicateSize);
+        if (!check) {
+            return;
+        }
+
         RBatch batch = redissonClient.createBatch();
 
         this.duplicateTrySetBuild(key, value, batch, duplicateSize);
 
         BatchResult result = batch.execute();
-        logger.debug("[RedissonRBucketCache] duplicatePut cache, cacheName={}, size={}, result={}", this.getCacheName(), result.getResponses().size(), result.getResponses());
+        logger.info("[RedissonRBucketCache] duplicateTrySet trySet succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), key, result.getResponses().size(), result.getSyncedSlaves());
     }
 
     /**
      * 构建副本
      */
     private void duplicateTrySetBuild(Object key, Object value, RBatch batch, int duplicateSize) {
-        if (duplicateSize <= 0) {
-            logger.warn("[RedissonRBucketCache] duplicateTrySet duplicateSize less than 0, not put, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, key, value);
+        boolean check = this.checkSaveDuplicate(key, value, duplicateSize);
+        if (!check) {
             return;
         }
 
@@ -408,12 +418,47 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             tempKey = (String) buildKeyByDuplicate(key.toString(), i);
             if (expireTime > 0) {
                 batch.getBucket(tempKey).trySetAsync(value, expireTime, TimeUnit.MILLISECONDS);
-                logger.info("[RedissonRBucketCache] duplicateTrySet cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
+                logger.info("[RedissonRBucketCache] duplicateTrySet trySet, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
             } else {
                 batch.getBucket(tempKey).trySetAsync(value);
-                logger.info("[RedissonRBucketCache] duplicateTrySet cache, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
+                logger.info("[RedissonRBucketCache] duplicateTrySet trySet, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
             }
         }
     }
 
+    /**
+     * 检查是否需要保存副本
+     */
+    private boolean checkSaveDuplicate(Object key, Object value, int duplicateSize) {
+        if (value instanceof NullValue) {
+            logger.info("[RedissonRBucketCache] duplicatePut not put, value is NullValue, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, key, value);
+            return false;
+        }
+        if (duplicateSize <= 0) {
+            logger.warn("[RedissonRBucketCache] duplicatePut not put, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, key, value);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 淘汰副本
+     */
+    private void duplicateEvict(Object key, int duplicateSize) {
+        boolean check = this.checkSaveDuplicate(key, null, duplicateSize);
+        if (!check) {
+            return;
+        }
+        RBatch batch = redissonClient.createBatch();
+
+        String tempKey = "";
+        for (int i = 0; i < duplicateSize; i++) {
+            tempKey = (String) buildKeyByDuplicate(key.toString(), i);
+            batch.getBucket(tempKey).deleteAsync();
+            logger.info("[RedissonRBucketCache] duplicateEvict evict, cacheName={}, key={}", this.getCacheName(), tempKey);
+        }
+
+        BatchResult result = batch.execute();
+        logger.info("[RedissonRBucketCache] duplicateEvict evict succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), key, result.getResponses().size(), result.getSyncedSlaves());
+    }
 }

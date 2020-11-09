@@ -113,7 +113,7 @@ public class RedisCacheTest {
     @Test
     public void putAndGetTest() throws InterruptedException {
         String key = "key";
-        String value = "value";
+        String value = "valueaaaaaa";
 
         // 1 put and get
         cache.put(key, value);
@@ -124,12 +124,13 @@ public class RedisCacheTest {
         System.out.println();
 
         // 2 put and get(key, type)
-        String key1 = "key1";
-        cache.put(key1, NullValue.INSTANCE);
+        String key1 = "key111";
+        cache.put(key1, "NullValue.INSTANCEaaaaaa");
         printCache(key1);
 
-        NullValue value1 = cache.get(key1, NullValue.class);
-        System.out.println(String.format("get key1=%s, value1=%s", key, value1));
+//        NullValue value1 = cache.get(key1, NullValue.class);
+        String value1 = cache.get(key1, String.class);
+        System.out.println(String.format("get key1=%s, value1=%s", key1, value1));
         System.out.println();
     }
 
