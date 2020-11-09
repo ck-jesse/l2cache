@@ -4,6 +4,9 @@ package com.coy.l2cache;
 import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.util.NullValueUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -121,4 +124,49 @@ public interface Cache {
      * @return true 表示存在，false 表示不存在
      */
     boolean isExists(Object key);
+
+    // ----- 批量操作
+
+    /**
+     * 批量get
+     * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
+     */
+    default List<Object> batchGet(List<Object> keyList) {
+        List<Object> list = new ArrayList<>();
+        if (null == keyList || keyList.size() == 0) {
+            return list;
+        }
+        keyList.forEach(key -> {
+            list.add(get(key));
+        });
+        return list;
+    }
+
+    /**
+     * 批量get
+     * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
+     */
+    default <T> List<T> batchGet(List<Object> keyList, Class<T> type) {
+        List<T> list = new ArrayList<>();
+        if (null == keyList || keyList.size() == 0) {
+            return list;
+        }
+        keyList.forEach(key -> {
+            list.add(get(key, type));
+        });
+        return list;
+    }
+
+    /**
+     * 批量put
+     */
+    default <T> void batchPut(Map<Object, T> map) {
+        if (null == map || map.size() == 0) {
+            return;
+        }
+        map.forEach((key, value) -> {
+            put(key, value);
+        });
+    }
+
 }

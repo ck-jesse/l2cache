@@ -12,6 +12,9 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.codec.JsonJacksonCodec;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -196,4 +199,35 @@ public class RedisCacheTest {
         System.out.println(rslt);
     }
 
+
+    @Test
+    public void batchPut() {
+        Map<Object, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put("key" + i, new User("name" + i, "addr" + i));
+        }
+        System.out.println("batch put " + map);
+
+        // 批量put
+        cache.batchPut(map);
+
+        // key 完全匹配
+        List<Object> keyList = new ArrayList<>(map.keySet());
+        List<Object> list1 = cache.batchGet(keyList);
+        System.out.println("batch get 1" + list1);
+
+        // key 完全匹配
+        List<String> list2 = cache.batchGet(keyList, String.class);
+        System.out.println("batch get 2" + list2);
+
+        // key 全部存在(少于缓存中的key)
+        keyList.remove(1);
+        list1 = cache.batchGet(keyList);
+        System.out.println("batch get 3" + list1);
+
+        // key 部分存在缓存，部分不存在缓存
+        keyList.add("other");
+        list1 = cache.batchGet(keyList);
+        System.out.println("batch get 4" + list1);
+    }
 }

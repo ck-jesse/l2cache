@@ -5,6 +5,8 @@ import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
+import org.redisson.api.BatchResult;
+import org.redisson.api.RBatch;
 import org.redisson.api.RBucket;
 import org.redisson.api.RLock;
 import org.redisson.api.RMap;
@@ -12,6 +14,9 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -206,6 +211,65 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         boolean rslt = getBucket(key).isExists();
         logger.debug("[RedissonRBucketCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), buildKey(key), rslt);
         return rslt;
+    }
+
+    @Override
+    public List<Object> batchGet(List<Object> keyList) {
+        if (null == keyList || keyList.size() == 0) {
+            return new ArrayList<>();
+        }
+        RBatch batch = redissonClient.createBatch();
+        List<String> keyListStr = new ArrayList<>();
+        keyList.forEach(key -> {
+            keyListStr.add((String) buildKey(key));
+        });
+        keyListStr.forEach(key -> {
+            batch.getBucket(key).getAsync();
+        });
+        BatchResult result = batch.execute();
+        List<Object> response = result.getResponses();
+        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyListStr, response);
+        if (null == response) {
+            return new ArrayList<>();
+        }
+        List<Object> list = new ArrayList<>();
+        response.forEach(value -> {
+            if (null != fromStoreValue(value)) {
+                list.add(value);
+            }
+        });
+        return list;
+    }
+
+    @Override
+    public <T> List<T> batchGet(List<Object> keyList, Class<T> type) {
+        List<Object> list = batchGet(keyList);
+        if (null == list || list.size() == 0) {
+            return (List<T>) list;
+        }
+        return (List<T>) list;
+    }
+
+    public <T> void batchPut(Map<Object, T> map) {
+        if (null == map || map.size() == 0) {
+            return;
+        }
+        RBatch batch = redissonClient.createBatch();
+        map.entrySet().forEach(entry -> {
+            String key = (String) buildKey(entry.getKey());
+            Object value = toStoreValue(entry.getValue());
+            // 过期时间处理
+            long expireTime = this.expireTimeDeal(value);
+            if (expireTime > 0) {
+                batch.getBucket(key).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
+                logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, key, value);
+            } else {
+                batch.getBucket(key).setAsync(value);
+                logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            }
+        });
+        BatchResult result = batch.execute();
+        logger.debug("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, result={}", this.getCacheName(), map.size(), result.getResponses());
     }
 
     /**

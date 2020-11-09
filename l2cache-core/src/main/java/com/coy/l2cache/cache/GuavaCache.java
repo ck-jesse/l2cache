@@ -17,6 +17,8 @@ import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -274,5 +276,36 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                 .setCacheName(this.getCacheName())
                 .setKey(key)
                 .setOptType(optType);
+    }
+
+    /**
+     * 因为 GuavaCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
+     */
+    @Override
+    public List<Object> batchGet(List<Object> keyList) {
+        List<Object> list = new ArrayList<>();
+        if (null == keyList || keyList.size() == 0) {
+            return list;
+        }
+        keyList.forEach(key -> {
+            Object value = this.guavaCache.getIfPresent(key);
+            logger.debug("[GuavaCache] batchGet, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            if (null != fromStoreValue(value)) {
+                list.add(fromStoreValue(value));
+            }
+        });
+        return list;
+    }
+
+    /**
+     * 因为 GuavaCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
+     */
+    @Override
+    public <T> List<T> batchGet(List<Object> keyList, Class<T> type) {
+        List<Object> list = batchGet(keyList);
+        if (null == list || list.size() == 0) {
+            return (List<T>) list;
+        }
+        return (List<T>) list;
     }
 }

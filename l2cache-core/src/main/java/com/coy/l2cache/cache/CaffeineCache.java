@@ -18,6 +18,9 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -253,25 +256,6 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("[CaffeineCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
-
-                /*if (null == value) {
-                    continue;
-                }
-                if (value instanceof NullValue) {
-                    if (null == nullValueCache) {
-                        continue;
-                    }
-                    // getIfPresent 触发淘汰
-                    Object nullValue = nullValueCache.getIfPresent(key);
-                    if (null != nullValue) {
-                        continue;
-                    }
-                    logger.info("[CaffeineCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
-                    loadingCache.invalidate(key);
-                    if (null != cacheSyncPolicy) {
-                        cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
-                    }
-                }*/
             }
         }
     }
@@ -284,4 +268,36 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 .setKey(key)
                 .setOptType(optType);
     }
+
+    /**
+     * 因为 CaffeineCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
+     */
+    @Override
+    public List<Object> batchGet(List<Object> keyList) {
+        List<Object> list = new ArrayList<>();
+        if (null == keyList || keyList.size() == 0) {
+            return list;
+        }
+        keyList.forEach(key -> {
+            Object value = this.caffeineCache.getIfPresent(key);
+            logger.debug("[CaffeineCache] batchGet, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            if (null != fromStoreValue(value)) {
+                list.add(fromStoreValue(value));
+            }
+        });
+        return list;
+    }
+
+    /**
+     * 因为 CaffeineCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
+     */
+    @Override
+    public <T> List<T> batchGet(List<Object> keyList, Class<T> type) {
+        List<Object> list = batchGet(keyList);
+        if (null == list || list.size() == 0) {
+            return (List<T>) list;
+        }
+        return (List<T>) list;
+    }
+
 }

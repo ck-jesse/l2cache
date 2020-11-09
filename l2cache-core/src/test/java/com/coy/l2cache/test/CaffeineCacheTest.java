@@ -14,6 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +40,7 @@ public class CaffeineCacheTest {
                 .getCaffeine()
                 //.setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats")
-                .setAutoRefreshExpireCache(true)
+                .setAutoRefreshExpireCache(false)
                 .setRefreshPoolSize(3)
                 .setRefreshPeriod(5L)
         ;
@@ -250,6 +255,43 @@ public class CaffeineCacheTest {
         // 过期时，触发加载新值
         cache.refreshAllExpireCache();
         printAllCache();
+    }
+
+    @Test
+    public void batchPut() {
+        Map<Object, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put("key" + i, new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+
+        // 批量put
+        cache.batchPut(map);
+
+        // key 完全匹配
+        List<Object> keyList = new ArrayList<>(map.keySet());
+        List<Object> list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+
+        // key 完全匹配
+        List<String> list2 = cache.batchGet(keyList, String.class);
+        System.out.println(list2);
+
+        // key 全部存在(少于缓存中的key)
+        keyList.remove(1);
+        list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+
+        // key 部分存在缓存，部分不存在缓存
+        keyList.add("other");
+        list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+    }
+
+    @Test
+    public void batchGet() {
+        List<Object> keyList = new ArrayList<>();
+
     }
 
 }
