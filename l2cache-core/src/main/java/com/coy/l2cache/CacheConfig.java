@@ -246,6 +246,18 @@ public class CacheConfig {
         private boolean startupMaxSize = false;
 
         /**
+         * 是否启用副本，默认false
+         * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
+         * 以redis内存空间来降低单分片压力。
+         */
+        private boolean isDuplicate = false;
+
+        /**
+         * 副本数量
+         */
+        private int duplicateSize = 10;
+
+        /**
          * Redisson 的yaml配置文件
          */
         private String redissonYamlConfig;

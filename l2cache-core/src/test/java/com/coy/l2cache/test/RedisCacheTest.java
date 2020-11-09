@@ -34,10 +34,11 @@ public class RedisCacheTest {
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .setAllowNullValues(true)
                 .getRedis()
-                .setExpireTime(30000)
+                .setExpireTime(300000)
                 .setLock(true)
 //                .setMaxIdleTime(2000)
 //                .setMaxSize(20)
+                .setDuplicate(true)
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient

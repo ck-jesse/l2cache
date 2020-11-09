@@ -1,7 +1,7 @@
 package com.coy.l2cache.util;
 
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author chenck
@@ -10,7 +10,7 @@ import java.util.UUID;
 public class RandomUtil {
 
     public static int getRandomInt(int min, int max) {
-        Random random = new Random();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         return random.nextInt(max) % (max - min + 1) + min;
     }
 

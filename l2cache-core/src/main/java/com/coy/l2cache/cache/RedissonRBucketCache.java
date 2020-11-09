@@ -4,6 +4,7 @@ import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
+import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import org.redisson.api.BatchResult;
 import org.redisson.api.RBatch;
@@ -63,6 +64,30 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public Object buildKey(Object key) {
+        if (redis.isDuplicate()) {
+            // 根据 随机数 构建缓存key，用于获取缓存
+            int duplicateIndex = RandomUtil.getRandomInt(0, redis.getDuplicateSize());
+            return this.buildKeyByDuplicate(key.toString(), duplicateIndex);
+        } else {
+            return this.buildKeyBase(key);
+        }
+    }
+
+    /**
+     * 根据 复制品下标 构建缓存key
+     * 注：用于操作复制品缓存数据
+     *
+     * @param duplicateIndex 复制品下标
+     */
+    private Object buildKeyByDuplicate(Object key, int duplicateIndex) {
+        return this.buildKeyBase(key.toString() + duplicateIndex);
+    }
+
+    /**
+     * 构建基础缓存key
+     * 注：用于操作基本的缓存key
+     */
+    private Object buildKeyBase(Object key) {
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }
@@ -83,16 +108,19 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     /**
      * 获取 RBucket 对象
+     *
+     * @param cacheKey 已经拼接好的缓存key
      */
-    private RBucket<Object> getBucket(Object key) {
-        RBucket<Object> bucket = redissonClient.getBucket((String) buildKey(key));
+    private RBucket<Object> getBucket(String cacheKey) {
+        RBucket<Object> bucket = redissonClient.getBucket(cacheKey);
         return bucket;
     }
 
     @Override
     public Object get(Object key) {
-        Object value = getBucket(key).get();
-        logger.debug("[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), buildKey(key), value);
+        String cacheKey = (String) buildKey(key);
+        Object value = getBucket(cacheKey).get();
+        logger.debug("[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
         return fromStoreValue(value);
     }
 
@@ -110,14 +138,15 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
-        RBucket<Object> bucket = getBucket(key);
+        String cacheKey = (String) buildKey(key);
+        RBucket<Object> bucket = getBucket(cacheKey);
         Object value = bucket.get();
         if (value != null) {
-            logger.info("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), buildKey(key), value);
+            logger.info("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
-            logger.info("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), buildKey(key));
+            logger.info("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
             return null;
         }
         RLock lock = null;
@@ -127,8 +156,8 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             if (redis.isTryLock()) {
                 if (!lock.tryLock()) {
                     // 高并发场景下，拦截一部分请求将其快速失败，保证性能
-                    logger.warn("[RedissonRBucketCache] 重复请求, get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), buildKey(key));
-                    throw new RedisTrylockFailException("重复请求 tryLock fastfail, key=" + buildKey(key));
+                    logger.warn("[RedissonRBucketCache] 重复请求, get(key, callable) tryLock fastfail, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
+                    throw new RedisTrylockFailException("重复请求 tryLock fastfail, key=" + cacheKey);
                 }
             } else {
                 lock.lock();
@@ -139,9 +168,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 value = bucket.get();
             }
             if (value == null) {
-                logger.debug("[RedissonRBucketCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), buildKey(key), redis.isLock());
+                logger.debug("[RedissonRBucketCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), cacheKey, redis.isLock());
                 value = valueLoader.call();
-                logger.debug("[RedissonRBucketCache] rlock, cacheName={}, key={}, value={}, isLock={}", this.getCacheName(), buildKey(key), value, redis.isLock());
+                logger.debug("[RedissonRBucketCache] rlock, cacheName={}, key={}, value={}, isLock={}", this.getCacheName(), cacheKey, value, redis.isLock());
                 this.put(key, value);
             }
         } catch (Exception ex) {
@@ -157,7 +186,8 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public void put(Object key, Object value) {
-        RBucket<Object> bucket = getBucket(key);
+        String cacheKey = (String) buildKeyBase(key);
+        RBucket<Object> bucket = getBucket(cacheKey);
         if (!isAllowNullValues() && value == null) {
             bucket.delete();
             return;
@@ -168,10 +198,14 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         long expireTime = this.expireTimeDeal(value);
         if (expireTime > 0) {
             bucket.set(value, expireTime, TimeUnit.MILLISECONDS);
-            logger.info("[RedissonRBucketCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, buildKey(key), value);
+            logger.info("[RedissonRBucketCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, cacheKey, value);
         } else {
             bucket.set(value);
-            logger.info("[RedissonRBucketCache] put cache, cacheName={}, key={}, value={}", this.getCacheName(), buildKey(key), value);
+            logger.info("[RedissonRBucketCache] put cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+        }
+        // key复制品处理
+        if (redis.isDuplicate()) {
+            this.duplicatePut(key, value, redis.getDuplicateSize());
         }
     }
 
@@ -181,24 +215,36 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             // 不允许为null，且cacheValue为null，则直接获取旧的缓存项并返回
             return this.get(key);
         }
-        RBucket<Object> bucket = getBucket(key);
+        String cacheKey = (String) buildKeyBase(key);
+        RBucket<Object> bucket = getBucket(cacheKey);
         Object oldValue = bucket.get();
         // 过期时间处理
         long expireTime = this.expireTimeDeal(value);
+        boolean rslt = false;
         if (expireTime > 0) {
-            boolean rslt = bucket.trySet(value, expireTime, TimeUnit.MILLISECONDS);
-            logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, expireTime={} ms, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, rslt, buildKey(key), value, oldValue);
+            rslt = bucket.trySet(value, expireTime, TimeUnit.MILLISECONDS);
+            logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, expireTime={} ms, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, rslt, cacheKey, value, oldValue);
         } else {
-            boolean rslt = bucket.trySet(value);
-            logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), rslt, buildKey(key), value, oldValue);
+            rslt = bucket.trySet(value);
+            logger.info("[RedissonRBucketCache] putIfAbsent cache, cacheName={}, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), rslt, cacheKey, value, oldValue);
+        }
+        // key复制品处理
+        if (rslt && redis.isDuplicate()) {
+            this.duplicateTrySet(key, value, redis.getDuplicateSize());
         }
         return fromStoreValue(oldValue);
     }
 
     @Override
     public void evict(Object key) {
-        logger.info("[RedissonRBucketCache] evict cache, cacheName={}, key={}", this.getCacheName(), buildKey(key));
-        getBucket(key).delete();
+        String cacheKey = (String) buildKeyBase(key);
+        boolean result = getBucket(cacheKey).delete();
+        logger.info("[RedissonRBucketCache] evict cache, cacheName={}, key={}, result={}", this.getCacheName(), cacheKey, result);
+        // key复制品处理
+        if (redis.isDuplicate()) {
+            // TODO
+            //this.duplicateEvict(key, value, redis.getDuplicateSize());
+        }
     }
 
     @Override
@@ -208,8 +254,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public boolean isExists(Object key) {
-        boolean rslt = getBucket(key).isExists();
-        logger.debug("[RedissonRBucketCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), buildKey(key), rslt);
+        String cacheKey = (String) buildKeyBase(key);
+        boolean rslt = getBucket(cacheKey).isExists();
+        logger.debug("[RedissonRBucketCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), cacheKey, rslt);
         return rslt;
     }
 
@@ -250,13 +297,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         return (List<T>) list;
     }
 
-    public <T> void batchPut(Map<Object, T> map) {
-        if (null == map || map.size() == 0) {
+    public <T> void batchPut(Map<Object, T> dataMap) {
+        if (null == dataMap || dataMap.size() == 0) {
             return;
         }
         RBatch batch = redissonClient.createBatch();
-        map.entrySet().forEach(entry -> {
-            String key = (String) buildKey(entry.getKey());
+        dataMap.entrySet().forEach(entry -> {
+            String key = (String) buildKeyBase(entry.getKey());
             Object value = toStoreValue(entry.getValue());
             // 过期时间处理
             long expireTime = this.expireTimeDeal(value);
@@ -267,9 +314,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 batch.getBucket(key).setAsync(value);
                 logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             }
+            // key复制品处理
+            if (!redis.isDuplicate()) {
+                this.duplicatePutBuild(key, value, batch, redis.getDuplicateSize());
+            }
         });
         BatchResult result = batch.execute();
-        logger.debug("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, result={}", this.getCacheName(), map.size(), result.getResponses());
+        logger.debug("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), result.getSyncedSlaves());
     }
 
     /**
@@ -285,6 +336,84 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             expireTime = 0;
         }
         return expireTime;
+    }
+
+    /**
+     * 副本Put
+     * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
+     * 以redis内存空间来降低单分片压力。
+     */
+    private void duplicatePut(Object key, Object value, int duplicateSize) {
+        RBatch batch = redissonClient.createBatch();
+
+        this.duplicatePutBuild(key, value, batch, duplicateSize);
+
+        BatchResult result = batch.execute();
+        logger.debug("[RedissonRBucketCache] duplicatePut cache, cacheName={}, size={}, result={}", this.getCacheName(), result.getResponses().size(), result.getResponses());
+    }
+
+    /**
+     * 构建副本
+     */
+    private void duplicatePutBuild(Object key, Object value, RBatch batch, int duplicateSize) {
+        if (duplicateSize <= 0) {
+            logger.warn("[RedissonRBucketCache] duplicatePut duplicateSize less than 0, not put, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, key, value);
+            return;
+        }
+
+        value = toStoreValue(value);
+        // 过期时间处理
+        long expireTime = this.expireTimeDeal(value);
+
+        String tempKey = "";
+        for (int i = 0; i < duplicateSize; i++) {
+            tempKey = (String) buildKeyByDuplicate(key.toString(), i);
+            if (expireTime > 0) {
+                batch.getBucket(tempKey).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
+                logger.info("[RedissonRBucketCache] duplicatePut cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
+            } else {
+                batch.getBucket(tempKey).setAsync(value);
+                logger.info("[RedissonRBucketCache] duplicatePut cache, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
+            }
+        }
+    }
+
+    /**
+     * 副本TrySet
+     */
+    private void duplicateTrySet(Object key, Object value, int duplicateSize) {
+        RBatch batch = redissonClient.createBatch();
+
+        this.duplicateTrySetBuild(key, value, batch, duplicateSize);
+
+        BatchResult result = batch.execute();
+        logger.debug("[RedissonRBucketCache] duplicatePut cache, cacheName={}, size={}, result={}", this.getCacheName(), result.getResponses().size(), result.getResponses());
+    }
+
+    /**
+     * 构建副本
+     */
+    private void duplicateTrySetBuild(Object key, Object value, RBatch batch, int duplicateSize) {
+        if (duplicateSize <= 0) {
+            logger.warn("[RedissonRBucketCache] duplicateTrySet duplicateSize less than 0, not put, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, key, value);
+            return;
+        }
+
+        value = toStoreValue(value);
+        // 过期时间处理
+        long expireTime = this.expireTimeDeal(value);
+
+        String tempKey = "";
+        for (int i = 0; i < duplicateSize; i++) {
+            tempKey = (String) buildKeyByDuplicate(key.toString(), i);
+            if (expireTime > 0) {
+                batch.getBucket(tempKey).trySetAsync(value, expireTime, TimeUnit.MILLISECONDS);
+                logger.info("[RedissonRBucketCache] duplicateTrySet cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
+            } else {
+                batch.getBucket(tempKey).trySetAsync(value);
+                logger.info("[RedissonRBucketCache] duplicateTrySet cache, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
+            }
+        }
     }
 
 }

@@ -160,11 +160,11 @@ public interface Cache {
     /**
      * 批量put
      */
-    default <T> void batchPut(Map<Object, T> map) {
-        if (null == map || map.size() == 0) {
+    default <T> void batchPut(Map<Object, T> dataMap) {
+        if (null == dataMap || dataMap.size() == 0) {
             return;
         }
-        map.forEach((key, value) -> {
+        dataMap.forEach((key, value) -> {
             put(key, value);
         });
     }
