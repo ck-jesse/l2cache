@@ -65,7 +65,7 @@ public class CacheConfigNew {
          * NullValue 的最大数量，防止出现内存溢出
          * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
          */
-        private long nullValueMaxSize = 5000;
+        private long nullValueMaxSize = 3000;
 
         /**
          * NullValue 的清理频率(秒)
@@ -106,6 +106,11 @@ public class CacheConfigNew {
          * 二级缓存类型
          */
         private String l2CacheType = CacheType.REDIS.name();
+        /**
+         * 是否开启一级缓存，默认true开启
+         * 注：便于动态控制一二级缓存
+         */
+        private boolean startupL1Cache = true;
     }
 
     /**
@@ -188,16 +193,6 @@ public class CacheConfigNew {
     public static class Redis {
 
         /**
-         * Whether to use the key prefix when writing to Redis.
-         */
-        private boolean useKeyPrefix = true;
-
-        /**
-         * 缓存Key prefix.
-         */
-        private String keyPrefix;
-
-        /**
          * 加载数据时，是否加锁
          */
         private boolean lock = false;
@@ -218,30 +213,33 @@ public class CacheConfigNew {
         private long expireTimeMilliSeconds;
 
         /**
-         * 缓存最大空闲时间(ms) - RMap 参数
-         * 注：在 Redisson 中 缓存过期被淘汰的时间 取符合条件的 expireTime 和 maxIdleTime 中间小的值。
-         * 如：expireTime=10s, maxIdleTime=5s, 那么当缓存空闲5s时，会被 Redisson 淘汰掉。
-         * 注：从1.0.13版本开始废弃
+         * 是否启用副本，默认false
+         * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
+         * 以redis内存空间来降低单分片压力。
          */
-        @Deprecated
-        private long maxIdleTimeMilliSeconds;
+        private boolean duplicate = false;
 
         /**
-         * 最大缓存数，以便剔除多余元素 - RMap 参数
-         * 注：作为默认的最大缓存数，如果一级缓存设置了最大缓存数，则以一级缓存的最大缓存数为准。
-         * 注：注意如果与一级缓存（如：caffeine）中最大数量大小不一致，会出现一级缓存和二级缓存中缓存数量不一致，所以建议设置为一致减少不必要的歧义。
-         * 注：从1.0.13版本开始废弃
+         * 针对所有key启用副本
          */
-        @Deprecated
-        private int maxSize;
+        private boolean duplicateALlKey = false;
 
         /**
-         * 是否启动最大值，默认false - RMap 参数
-         * 注：主要为了支持需要缓存的数据量比较大，导致本地缓存因为机器的限制值存放部分数据，而redis可以存放全部数据，所以本地缓存建议设置最大值，当超过最大值时，会从redis中获取
-         * 注：从1.0.13版本开始废弃
+         * 默认副本数量
          */
-        @Deprecated
-        private boolean startupMaxSize = false;
+        private int defaultDuplicateSize = 10;
+
+        /**
+         * 副本缓存key集合
+         * <key,副本数量>
+         */
+        private Map<String, Integer> duplicateKeyMap = new HashMap<>();
+
+        /**
+         * 副本缓存名字集合
+         * <cacheName,副本数量>
+         */
+        private Map<String, Integer> duplicateCacheNameMap = new HashMap<>();
 
         /**
          * Redisson 的yaml配置文件
