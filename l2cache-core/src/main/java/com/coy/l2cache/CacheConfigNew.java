@@ -39,7 +39,7 @@ public class CacheConfigNew {
      * 缓存配置集合
      * <key,value>=<cacheName, Config>=<缓存名称, 缓存配置>
      */
-    private Map<String, CacheConfig> configMap = new HashMap<>();
+    private Map<String, Config> configMap = new HashMap<>();
 
     /**
      * 缓存配置

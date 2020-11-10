@@ -253,6 +253,11 @@ public class CacheConfig {
         private boolean duplicate = false;
 
         /**
+         * 针对所有key启用副本
+         */
+        private boolean duplicateALlKey = false;
+
+        /**
          * 默认副本数量
          */
         private int defaultDuplicateSize = 10;
