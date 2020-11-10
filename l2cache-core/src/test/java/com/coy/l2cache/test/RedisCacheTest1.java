@@ -129,6 +129,8 @@ public class RedisCacheTest1 {
         String key = "key_loader123";
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
+
+        System.out.println(cache.get(key));
     }
 
     @Test
