@@ -70,7 +70,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         }
         // 根据 随机数 构建缓存key，用于获取缓存
         int duplicateSize = this.getDuplicateSize(key.toString());
-        if(duplicateSize <= 0){
+        if (duplicateSize <= 0) {
             return cacheKey;
         }
         int duplicateIndex = RandomUtil.getRandomInt(0, duplicateSize);
