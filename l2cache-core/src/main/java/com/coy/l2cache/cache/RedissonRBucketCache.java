@@ -265,10 +265,12 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return new ArrayList<>();
         }
         RBatch batch = redissonClient.createBatch();
+        // 生成完整的key
         List<String> keyListStr = new ArrayList<>();
         keyList.forEach(key -> {
             keyListStr.add((String) buildKey(key));
         });
+        // 添加获取缓存值的命令
         keyListStr.forEach(key -> {
             batch.getBucket(key).getAsync();
         });
@@ -316,7 +318,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             }
             // key复制品处理
             if (redis.isDuplicate()) {
-                this.duplicatePutBuild(key, value, batch, redis.getDuplicateSize());
+                this.duplicatePutBuild(entry.getKey(), value, batch, redis.getDuplicateSize());
             }
         });
         BatchResult result = batch.execute();

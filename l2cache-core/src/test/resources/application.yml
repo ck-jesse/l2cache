@@ -68,6 +68,10 @@ l2cache:
       maxIdleTime: 30000
       # 最大缓存数
       maxSize: 200
+      # 是否启用副本，以redis内存空间来降低单分片压力
+      isDuplicate: true
+      # 副本数量
+      duplicateSize: 3
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
       # 缓存同步策略配置

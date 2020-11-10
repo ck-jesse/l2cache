@@ -206,7 +206,7 @@ public class RedisCacheTest {
     public void batchPut() {
         Map<Object, User> map = new HashMap<>();
         for (int i = 0; i < 5; i++) {
-            map.put("key" + i, new User("name" + i, "addr" + i));
+            map.put("user" + i, new User("name" + i, "addr" + i));
         }
         System.out.println("batch put " + map);
 
