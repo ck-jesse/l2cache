@@ -69,7 +69,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return cacheKey;
         }
         // 根据 随机数 构建缓存key，用于获取缓存
-        int duplicateIndex = RandomUtil.getRandomInt(0, redis.getDefaultDuplicateSize());
+        int duplicateSize = this.getDuplicateSize(key.toString());
+        if(duplicateSize <= 0){
+            return cacheKey;
+        }
+        int duplicateIndex = RandomUtil.getRandomInt(0, duplicateSize);
         return this.buildKeyByDuplicate(key.toString(), duplicateIndex);
     }
 
