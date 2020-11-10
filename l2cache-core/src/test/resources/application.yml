@@ -22,8 +22,6 @@ spring:
 # 二级缓存配置
 l2cache:
   config:
-    # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
-    #instanceId: a1
     # 是否存储空值，默认true，防止缓存穿透
     allowNullValues: true
     # 缓存类型
@@ -38,8 +36,6 @@ l2cache:
       startupL1Cache: true
     # 一级缓存
     caffeine:
-      # 是否构建异步Caffeine true 是 false 否
-      asyncCache: false
       # 是否自动刷新过期缓存 true 是 false 否
       autoRefreshExpireCache: true
       # 缓存刷新调度线程池的大小
@@ -58,20 +54,12 @@ l2cache:
         userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
     # 二级缓存
     redis:
-      # 是否启用缓存Key prefix
-      useKeyPrefix: true
-      # 缓存Key prefix
-      keyPrefix: ""
       # 加载数据时，是否加锁
       lock: false
       # 加载数据时是调用tryLock()，还是lock()，true表示使用tryLock()
       tryLock: true
       # 缓存过期时间(ms)
       expireTime: 30000
-      # 缓存最大空闲时间(ms)
-      maxIdleTime: 30000
-      # 最大缓存数
-      maxSize: 200
       # 是否启用副本，以redis内存空间来降低单分片压力
       duplicate: true
       # 默认副本数量

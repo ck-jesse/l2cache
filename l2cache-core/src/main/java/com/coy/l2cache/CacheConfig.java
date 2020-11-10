@@ -1,5 +1,6 @@
 package com.coy.l2cache;
 
+import com.coy.l2cache.consts.CacheRange;
 import com.coy.l2cache.consts.CacheSyncPolicyType;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.util.RandomUtil;
@@ -90,10 +91,10 @@ public class CacheConfig {
          */
         private String l2CacheType = CacheType.REDIS.name();
         /**
-         * 是否开启一级缓存，默认true开启
-         * 注：便于动态控制一二级缓存的切换
+         * 一级缓存范围，
+         * 注：当 cacheType = composite时，便于动态控制一二级缓存的切换
          */
-        private boolean startupL1Cache = true;
+        private String l1CacheRange = CacheRange.ENABLE.name();
     }
 
     /**
