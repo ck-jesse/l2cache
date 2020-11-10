@@ -82,8 +82,8 @@ public class CacheBuilderTest {
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .getRedis()
                 .setExpireTime(1000)
-                .setMaxIdleTime(5000)
-                .setMaxSize(2)
+//                .setMaxIdleTime(5000)
+//                .setMaxSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
         CacheBuilder builder = new RedisCacheBuilder().setCacheConfig(cacheConfig);
@@ -117,8 +117,8 @@ public class CacheBuilderTest {
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .getRedis()
                 .setExpireTime(3000)
-                .setMaxIdleTime(3000)
-                .setMaxSize(2)
+//                .setMaxIdleTime(3000)
+//                .setMaxSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
         CacheBuilder builder = new RedisCacheBuilder().setCacheConfig(cacheConfig);

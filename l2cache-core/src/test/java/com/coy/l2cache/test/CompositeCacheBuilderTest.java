@@ -66,8 +66,8 @@ public class CompositeCacheBuilderTest {
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
                 .setExpireTime(5000)
-                .setMaxIdleTime(5000)
-                .setMaxSize(2)
+//                .setMaxIdleTime(5000)
+//                .setMaxSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
         Cache cache = new CompositeCacheBuilder()
@@ -108,8 +108,8 @@ public class CompositeCacheBuilderTest {
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
                 .setExpireTime(5000)
-                .setMaxIdleTime(5000)
-                .setMaxSize(2)
+//                .setMaxIdleTime(5000)
+//                .setMaxSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
         Cache cache = new CompositeCacheBuilder()

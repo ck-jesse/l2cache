@@ -519,12 +519,12 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * 副本数量的优先级：单个key维度 > cacheName维度 > 默认副本数量
      */
     private int getDuplicateSize(String cacheKey) {
-        Integer duplicateSize = redis.getDefaultDuplicateSize();
         if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
-            duplicateSize = redis.getDuplicateKeyMap().get(cacheKey);
-        } else if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
-            duplicateSize = redis.getDuplicateCacheNameMap().get(this.getCacheName());
+            return redis.getDuplicateKeyMap().get(cacheKey);
         }
-        return duplicateSize;
+        if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
+            return redis.getDuplicateCacheNameMap().get(this.getCacheName());
+        }
+        return redis.getDefaultDuplicateSize();
     }
 }

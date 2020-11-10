@@ -42,8 +42,8 @@ public class CompositeCacheTest {
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
                 .setExpireTime(5000)
-                .setMaxIdleTime(5000)
-                .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
+//                .setMaxIdleTime(5000)
+//                .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
                 .setRedissonYamlConfig("redisson.yaml");
 
         CacheBuilder builder = new CompositeCacheBuilder()

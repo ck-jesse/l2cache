@@ -50,7 +50,9 @@ public class RedisCacheTest {
 //        cache = builder.build("redisCache2");
 
         cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
-        cacheConfig.getRedis().getDuplicateKeyMap();
+
+
+        cacheConfig.getRedis().getDuplicateKeyMap().put("redisCache:key1", 5);
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
@@ -78,37 +80,37 @@ public class RedisCacheTest {
 //        });
 //        System.out.println();
     }
-
+//
     private void printCache(Object key) {
         Object value = cache.get(key);
         System.out.println(String.format("L2 缓存值 key=%s, value=%s", key, value));
         System.out.println();
     }
-
-    @Test
-    public void test() {
-        System.out.println(TimeUnit.MILLISECONDS.toMillis(5000));
-    }
-
-    @Test
-    public void putNullTest() throws InterruptedException {
-        String key = "key_null";
-        cache.put(key, null);
-        printCache(key);
-        System.out.println(cache.get(key));
-    }
-
-    @Test
-    public void putUserTest() throws InterruptedException {
-        String key = "user_key";
-        User user = new User();
-        user.setName("test");
-        user.setAddr(key);
-        user.setCurrTime(System.currentTimeMillis());
-        cache.put(key, user);
-        printCache(key);
-        System.out.println(cache.get(key));
-    }
+//
+//    @Test
+//    public void test() {
+//        System.out.println(TimeUnit.MILLISECONDS.toMillis(5000));
+//    }
+//
+//    @Test
+//    public void putNullTest() throws InterruptedException {
+//        String key = "key_null";
+//        cache.put(key, null);
+//        printCache(key);
+//        System.out.println(cache.get(key));
+//    }
+//
+//    @Test
+//    public void putUserTest() throws InterruptedException {
+//        String key = "user_key";
+//        User user = new User();
+//        user.setName("test");
+//        user.setAddr(key);
+//        user.setCurrTime(System.currentTimeMillis());
+//        cache.put(key, user);
+//        printCache(key);
+//        System.out.println(cache.get(key));
+//    }
 
     @Test
     public void putAndGetTest() throws InterruptedException {
@@ -117,21 +119,21 @@ public class RedisCacheTest {
 
         // 1 put and get
         cache.put(key, value);
-        printCache(key);
+//        printCache(key);
 
         value = cache.get(key, String.class);
         System.out.println(String.format("get key=%s, value=%s", key, value));
         System.out.println();
 
         // 2 put and get(key, type)
-        String key1 = "key111";
-        cache.put(key1, "NullValue.INSTANCEaaaaaa");
-        printCache(key1);
-
-//        NullValue value1 = cache.get(key1, NullValue.class);
-        String value1 = cache.get(key1, String.class);
-        System.out.println(String.format("get key1=%s, value1=%s", key1, value1));
-        System.out.println();
+//        String key1 = "key111";
+//        cache.put(key1, "NullValue.INSTANCEaaaaaa");
+//        printCache(key1);
+//
+////        NullValue value1 = cache.get(key1, NullValue.class);
+//        String value1 = cache.get(key1, String.class);
+//        System.out.println(String.format("get key1=%s, value1=%s", key1, value1));
+//        System.out.println();
     }
 
     @Test
