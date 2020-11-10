@@ -2,12 +2,9 @@ package com.coy.l2cache.builder;
 
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.CacheSpec;
-import com.coy.l2cache.cache.RedissonCache;
 import com.coy.l2cache.cache.RedissonRBucketCache;
 import com.coy.l2cache.content.CacheSupport;
 import com.coy.l2cache.content.RedissonSupport;
-import org.redisson.api.RMap;
-import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +49,6 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
         CacheSpec cacheSpec = CacheSupport.getCacheSpec(cacheConfig.getComposite().getL1CacheType(), cacheName);
         if (null != cacheSpec) {
             // 覆盖CacheConfig.Redis的默认值
-            redis.setMaxSize(cacheSpec.getMaxSize());
             if (cacheSpec.getExpireTime() < 0) {
                 redis.setExpireTime(0);// 0 表示无过期时间
             } else {
@@ -62,22 +58,5 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
         }
         logger.info("create a RedissonRBucketCache instance, cacheName={}", cacheName);
         return new RedissonRBucketCache(cacheName, cacheConfig, redissonClient);
-
-        /* 因为 RMapCache 在大量key过期时，会导致出现未及时淘汰的情况，同时存在热点key的问题，所以改造为使用RBucket实现
-        if (redis.getExpireTime() > 0 || redis.getMaxSize() > 0) {
-            // 缓存有过期时间
-            RMapCache<Object, Object> mapCache = redissonClient.getMapCache(cacheName);
-            if (redis.isStartupMaxSize() && redis.getMaxSize() > 0) {
-                mapCache.setMaxSize(redis.getMaxSize());
-            }
-            logger.info("create a Redisson RMapCache instance, cacheName={}, expireTime={}, maxSize={}, startupMaxSize={}", cacheName,
-                    redis.getExpireTime(), redis.getMaxSize(), redis.isStartupMaxSize());
-            return new RedissonCache(cacheName, cacheConfig, mapCache);
-        }
-
-        // 缓存永久有效
-        RMap<Object, Object> map = redissonClient.getMap(cacheName);
-        logger.info("create a Redisson RMap instance, cacheName={}", cacheName);
-        return new RedissonCache(cacheName, cacheConfig, map);*/
     }
 }

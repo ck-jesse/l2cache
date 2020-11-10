@@ -1,6 +1,5 @@
 package com.coy.l2cache.util;
 
-import com.coy.l2cache.cache.RedissonCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,7 @@ import java.util.concurrent.Callable;
  */
 public class SpringCacheExceptionUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedissonCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpringCacheExceptionUtil.class);
 
     /**
      * 异常包装

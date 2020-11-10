@@ -91,7 +91,7 @@ public class CacheConfig {
         private String l2CacheType = CacheType.REDIS.name();
         /**
          * 是否开启一级缓存，默认true开启
-         * 注：便于动态控制一二级缓存
+         * 注：便于动态控制一二级缓存的切换
          */
         private boolean startupL1Cache = true;
     }
@@ -103,14 +103,6 @@ public class CacheConfig {
     @Setter
     @Accessors(chain = true)
     public static class Caffeine implements Config {
-
-        private final Logger logger = LoggerFactory.getLogger(CacheConfig.Caffeine.class);
-
-        /**
-         * 是否异步缓存，true 表示是，false 表示否(默认)
-         */
-        private boolean asyncCache = false;
-
         /**
          * 是否自动刷新过期缓存 true 表示是(默认)，false 表示否
          */
@@ -128,12 +120,6 @@ public class CacheConfig {
         private Long refreshPeriod = 30L;
 
         /**
-         * 缓存刷新时，是否淘汰缓存NullValue对象，true 表示淘汰，false 表示不淘汰(默认)
-         * 设置为true，则表示是提前淘汰NullValue对象，设置为false，则表示NullValue对象的过期时间与缓存过期时间一致
-         */
-        private boolean refreshInvalidateNullValue = false;
-
-        /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
          */
         private String defaultSpec;
@@ -143,7 +129,6 @@ public class CacheConfig {
          * <key,value>=<cacheName, spec>
          */
         private Map<String, String> specs = new HashMap<>();
-
     }
 
     /**
@@ -166,13 +151,7 @@ public class CacheConfig {
         /**
          * 缓存刷新的频率(秒)
          */
-        private Long refreshPeriod = 10L;
-
-        /**
-         * 缓存刷新时，是否淘汰缓存NullValue对象，true 表示淘汰，false 表示不淘汰(默认)
-         * 设置为true，则表示是提前淘汰NullValue对象，设置为false，则表示NullValue对象的过期时间与缓存过期时间一致
-         */
-        private boolean refreshInvalidateNullValue = false;
+        private Long refreshPeriod = 30L;
 
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
@@ -195,18 +174,6 @@ public class CacheConfig {
     public static class Redis implements Config {
 
         /**
-         * Whether to use the key prefix when writing to Redis.
-         */
-        @Deprecated
-        private boolean useKeyPrefix = true;
-
-        /**
-         * 缓存Key prefix.
-         */
-        @Deprecated
-        private String keyPrefix;
-
-        /**
          * 加载数据时，是否加锁
          */
         private boolean lock = false;
@@ -225,32 +192,6 @@ public class CacheConfig {
          * 目的是为了支持cacheName维度的缓存过期时间设置
          */
         private long expireTime;
-
-        /**
-         * 缓存最大空闲时间(ms) - RMap 参数
-         * 注：在 Redisson 中 缓存过期被淘汰的时间 取符合条件的 expireTime 和 maxIdleTime 中间小的值。
-         * 如：expireTime=10s, maxIdleTime=5s, 那么当缓存空闲5s时，会被 Redisson 淘汰掉。
-         * 注：从1.0.13版本开始废弃
-         */
-        @Deprecated
-        private long maxIdleTime;
-
-        /**
-         * 最大缓存数，以便剔除多余元素 - RMap 参数
-         * 注：作为默认的最大缓存数，如果一级缓存设置了最大缓存数，则以一级缓存的最大缓存数为准。
-         * 注：注意如果与一级缓存（如：caffeine）中最大数量大小不一致，会出现一级缓存和二级缓存中缓存数量不一致，所以建议设置为一致减少不必要的歧义。
-         * 注：从1.0.13版本开始废弃
-         */
-        @Deprecated
-        private int maxSize;
-
-        /**
-         * 是否启动最大值，默认false - RMap 参数
-         * 注：主要为了支持需要缓存的数据量比较大，导致本地缓存因为机器的限制值存放部分数据，而redis可以存放全部数据，所以本地缓存建议设置最大值，当超过最大值时，会从redis中获取
-         * 注：从1.0.13版本开始废弃
-         */
-        @Deprecated
-        private boolean startupMaxSize = false;
 
         /**
          * 是否启用副本，默认false

@@ -1,16 +1,13 @@
 package com.coy.l2cache.test;
 
 import com.coy.l2cache.cache.RedissonRBucketCache;
-import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.builder.RedisCacheBuilder;
-import com.coy.l2cache.cache.RedissonCache;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
-import org.redisson.codec.JsonJacksonCodec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
