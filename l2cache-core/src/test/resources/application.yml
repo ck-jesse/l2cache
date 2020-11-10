@@ -60,6 +60,8 @@ l2cache:
       useKeyPrefix: true
       # 缓存Key prefix
       keyPrefix: ""
+      # 加载数据时，是否加锁
+      lock: false
       # 加载数据时是调用tryLock()，还是lock()，true表示使用tryLock()
       tryLock: true
       # 缓存过期时间(ms)
@@ -69,9 +71,13 @@ l2cache:
       # 最大缓存数
       maxSize: 200
       # 是否启用副本，以redis内存空间来降低单分片压力
-      isDuplicate: true
-      # 副本数量
-      duplicateSize: 3
+      duplicate: true
+      # 默认副本数量
+      defaultDuplicateSize: 3
+      duplicateCacheNameMap:
+        redisCache: 3
+      duplicateKeyMap:
+        redisCache:key_loader123: 3
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
       # 缓存同步策略配置

@@ -66,7 +66,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     public Object buildKey(Object key) {
         if (redis.isDuplicate()) {
             // 根据 随机数 构建缓存key，用于获取缓存
-            int duplicateIndex = RandomUtil.getRandomInt(0, redis.getDuplicateSize());
+            int duplicateIndex = RandomUtil.getRandomInt(0, redis.getDefaultDuplicateSize());
             return this.buildKeyByDuplicate(key.toString(), duplicateIndex);
         } else {
             return this.buildKeyBase(key);
@@ -205,7 +205,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         }
         // key复制品处理
         if (redis.isDuplicate()) {
-            this.duplicatePut(key, value, redis.getDuplicateSize());
+            this.duplicatePut(key, value, redis.getDefaultDuplicateSize());
         }
     }
 
@@ -230,7 +230,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         }
         // key复制品处理
         if (rslt && redis.isDuplicate()) {
-            this.duplicateTrySet(key, value, redis.getDuplicateSize());
+            this.duplicateTrySet(key, value, redis.getDefaultDuplicateSize());
         }
         return fromStoreValue(oldValue);
     }
@@ -242,7 +242,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         logger.info("[RedissonRBucketCache] evict cache, cacheName={}, key={}, result={}", this.getCacheName(), cacheKey, result);
         // key复制品处理
         if (redis.isDuplicate()) {
-            this.duplicateEvict(key, redis.getDuplicateSize());
+            this.duplicateEvict(key, redis.getDefaultDuplicateSize());
         }
     }
 
@@ -318,7 +318,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             }
             // key复制品处理
             if (redis.isDuplicate()) {
-                this.duplicatePutBuild(entry.getKey(), value, batch, redis.getDuplicateSize());
+                this.duplicatePutBuild(entry.getKey(), value, batch, redis.getDefaultDuplicateSize());
             }
         });
         BatchResult result = batch.execute();
@@ -441,6 +441,16 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return false;
         }
         return true;
+    }
+
+    private int getDuplicateSize(String cacheKey) {
+        if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
+            return redis.getDuplicateKeyMap().get(cacheKey);
+        }
+        if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
+            return redis.getDuplicateCacheNameMap().get(cacheKey);
+        }
+        return -1;
     }
 
     /**

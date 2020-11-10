@@ -250,12 +250,24 @@ public class CacheConfig {
          * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
          * 以redis内存空间来降低单分片压力。
          */
-        private boolean isDuplicate = false;
+        private boolean duplicate = false;
 
         /**
-         * 副本数量
+         * 默认副本数量
          */
-        private int duplicateSize = 10;
+        private int defaultDuplicateSize = 10;
+
+        /**
+         * 副本缓存名字集合
+         * <cacheName,副本数量>
+         */
+        private Map<String, Integer> duplicateCacheNameMap = new HashMap<>();
+
+        /**
+         * 副本缓存key集合
+         * <key,副本数量>
+         */
+        private Map<String, Integer> duplicateKeyMap = new HashMap<>();
 
         /**
          * Redisson 的yaml配置文件

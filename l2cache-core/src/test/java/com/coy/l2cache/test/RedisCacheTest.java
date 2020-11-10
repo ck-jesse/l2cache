@@ -52,6 +52,9 @@ public class RedisCacheTest {
         cache = builder.build("redisCache");
 //        cache = builder.build("redisCache2");
 
+        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
+        cacheConfig.getRedis().getDuplicateKeyMap();
+
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
 
