@@ -474,8 +474,8 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return true;
         }
         if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
-            int duplicateSize = redis.getDuplicateKeyMap().get(cacheKey);
-            if (duplicateSize <= 0) {
+            Integer duplicateSize = redis.getDuplicateKeyMap().get(cacheKey);
+            if (null == duplicateSize || duplicateSize <= 0) {
                 logger.warn("[RedissonRBucketCache] checkDuplicateKey key, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
                 return false;
             }
@@ -483,8 +483,8 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return true;
         }
         if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
-            int duplicateSize = redis.getDuplicateCacheNameMap().get(cacheKey);
-            if (duplicateSize <= 0) {
+            Integer duplicateSize = redis.getDuplicateCacheNameMap().get(this.getCacheName());
+            if (null == duplicateSize || duplicateSize <= 0) {
                 logger.warn("[RedissonRBucketCache] checkDuplicateKey cacheName, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
                 return false;
             }
@@ -515,12 +515,12 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * 副本数量的优先级：单个key维度 > cacheName维度 > 默认副本数量
      */
     private int getDuplicateSize(String cacheKey) {
+        Integer duplicateSize = redis.getDefaultDuplicateSize();
         if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
-            return redis.getDuplicateKeyMap().get(cacheKey);
+            duplicateSize = redis.getDuplicateKeyMap().get(cacheKey);
+        } else if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
+            duplicateSize = redis.getDuplicateCacheNameMap().get(this.getCacheName());
         }
-        if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
-            return redis.getDuplicateCacheNameMap().get(this.getCacheName());
-        }
-        return redis.getDefaultDuplicateSize();
+        return duplicateSize;
     }
 }

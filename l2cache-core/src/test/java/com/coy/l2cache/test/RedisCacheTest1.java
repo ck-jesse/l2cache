@@ -33,8 +33,8 @@ public class RedisCacheTest1 {
                 .getRedis()
                 .setExpireTime(300000)
                 .setLock(true)
-                .setDuplicate(false)
-                .setDuplicateALlKey(true)
+                .setDuplicate(true)
+                .setDuplicateALlKey(false)
                 .setDefaultDuplicateSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
@@ -48,8 +48,8 @@ public class RedisCacheTest1 {
         // 构建cache
         cache = builder.build("redisCache");
 
-        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), -3);
-        cacheConfig.getRedis().getDuplicateKeyMap();
+        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
+        cacheConfig.getRedis().getDuplicateKeyMap().put("redisCache:user_key", 5);
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
@@ -90,12 +90,12 @@ public class RedisCacheTest1 {
 
     @Test
     public void putUserTest() throws InterruptedException {
-        String key = "user_key";
+        String key = "user_keybbb";
         User user = new User();
         user.setName("test");
         user.setAddr(key);
         user.setCurrTime(System.currentTimeMillis());
-        cache.put(key, null);
+        cache.put(key, user);
         printCache(key);
     }
 
