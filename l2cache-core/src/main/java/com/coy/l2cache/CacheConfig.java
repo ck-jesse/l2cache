@@ -46,7 +46,7 @@ public class CacheConfig {
      * NullValue 的最大数量，防止出现内存溢出
      * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
      */
-    private long nullValueMaxSize = 5000;
+    private long nullValueMaxSize = 3000;
 
     /**
      * NullValue 的清理频率(秒)
@@ -89,6 +89,11 @@ public class CacheConfig {
          * 二级缓存类型
          */
         private String l2CacheType = CacheType.REDIS.name();
+        /**
+         * 是否开启一级缓存，默认true开启
+         * 注：便于动态控制一二级缓存
+         */
+        private boolean startupL1Cache = true;
     }
 
     /**
@@ -109,7 +114,7 @@ public class CacheConfig {
         /**
          * 是否自动刷新过期缓存 true 表示是(默认)，false 表示否
          */
-        private boolean autoRefreshExpireCache = true;
+        private boolean autoRefreshExpireCache = false;
 
         /**
          * 缓存刷新调度线程池的大小
@@ -192,11 +197,13 @@ public class CacheConfig {
         /**
          * Whether to use the key prefix when writing to Redis.
          */
+        @Deprecated
         private boolean useKeyPrefix = true;
 
         /**
          * 缓存Key prefix.
          */
+        @Deprecated
         private String keyPrefix;
 
         /**
@@ -263,16 +270,16 @@ public class CacheConfig {
         private int defaultDuplicateSize = 10;
 
         /**
-         * 副本缓存名字集合
-         * <cacheName,副本数量>
-         */
-        private Map<String, Integer> duplicateCacheNameMap = new HashMap<>();
-
-        /**
-         * 副本缓存key集合
+         * 副本缓存key集合，针对单个key维度
          * <key,副本数量>
          */
         private Map<String, Integer> duplicateKeyMap = new HashMap<>();
+
+        /**
+         * 副本缓存名字集合，针对cacheName维度
+         * <cacheName,副本数量>
+         */
+        private Map<String, Integer> duplicateCacheNameMap = new HashMap<>();
 
         /**
          * Redisson 的yaml配置文件
