@@ -142,12 +142,12 @@
         <repository>
             <id>maven-releases</id>
             <name>youxuan-central</name>
-            <url>http://106.55.68.196/repository/maven-releases/</url>
+            <url>http://nexus.weeget.cn/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>maven-snapshots</id>
             <name>youxuan-central</name>
-            <url>http://106.55.68.196/repository/maven-snapshots/</url>
+            <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
