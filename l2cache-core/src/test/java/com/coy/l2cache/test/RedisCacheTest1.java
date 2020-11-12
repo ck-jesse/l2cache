@@ -104,7 +104,11 @@ public class RedisCacheTest1 {
         String key = "key";
         String value = "valueaaaaaa";
 
-        // 1 put and get
+        cacheConfig.getRedis().setDuplicate(false);
+        cache.put(key, value);
+        printCache(key);
+
+        cacheConfig.getRedis().setDuplicate(false);
         cache.put(key, value);
         printCache(key);
 
@@ -112,6 +116,7 @@ public class RedisCacheTest1 {
         System.out.println(String.format("get key=%s, value=%s", key, value));
         System.out.println();
 
+        cacheConfig.getRedis().setDuplicate(false);
         // 2 put and get(key, type)
         String key1 = "key111";
         cache.put(key1, "NullValue.INSTANCEaaaaaa");
@@ -130,23 +135,26 @@ public class RedisCacheTest1 {
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
 
+        cacheConfig.getRedis().setDuplicate(false);
         System.out.println(cache.get(key));
     }
 
     @Test
     public void putIfAbsentTest() throws InterruptedException {
-        String key = "key1";
-        String value = "value1";
+        String key = "key2";
+        String value = "value2";
+        cacheConfig.getRedis().setDuplicate(true);
         cache.put(key, value);
         printCache(key);
 
+        cacheConfig.getRedis().setDuplicate(false);
         // key1 已经存在，所有putIfAbsent失败，并返回已经存在的值value1
         Object oldValue = cache.putIfAbsent(key, "value123");
         System.out.println(String.format("putIfAbsent key=%s, oldValue=%s", key, oldValue));
         System.out.println();
 
         // newkey1 不存在，putIfAbsent成功，并返回null
-        String newkey1 = "newkey1";
+        String newkey1 = "newkey2";
         oldValue = cache.putIfAbsent(newkey1, "newvalue1");
         System.out.println(String.format("putIfAbsent key=%s, oldValue=%s, value=%s", newkey1, oldValue, cache.get(newkey1)));
         System.out.println();
@@ -158,14 +166,26 @@ public class RedisCacheTest1 {
     public void evictTest() throws InterruptedException {
         String key = "key1";
         String value = "value1";
+        // 此时会有副本
+        cacheConfig.getRedis().setDuplicate(true);
         cache.put(key, value);
         System.out.println(String.format("put key=%s, value=%s", key, value));
         System.out.println();
+
+        cacheConfig.getRedis().setDuplicate(false);
 
         printCache(key);
         // 删除指定的缓存项
         cache.evict(key);
         printCache(key);
+
+        // 此时会有副本
+        cacheConfig.getRedis().setDuplicate(true);
+        cache.put(key, "valuebbbb");
+
+        // 此时副本会删除
+        cacheConfig.getRedis().setDuplicate(false);
+        cache.put(key, "valuecccc");
     }
 
     @Test
