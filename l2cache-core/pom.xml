@@ -55,6 +55,12 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-context</artifactId>
+            <version>2.1.0.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <!-- 发布到maven私服 -->
