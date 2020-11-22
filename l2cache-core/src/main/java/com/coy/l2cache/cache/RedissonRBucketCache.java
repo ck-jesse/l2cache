@@ -154,7 +154,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         RBucket<Object> bucket = getBucket(cacheKey);
         Object value = bucket.get();
         if (value != null) {
-            logger.info("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+            logger.debug("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
