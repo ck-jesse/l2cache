@@ -5,7 +5,10 @@ import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -52,18 +55,20 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public Object get(Object key) {
-        // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
-        if (level1Cache.isLoadingCache()) {
-            return level1Cache.get(key);
+        Object value = null;
+        // 是否开启一级缓存
+        if (ifL1Open(key)) {
+            // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
+            if (level1Cache.isLoadingCache()) {
+                return level1Cache.get(key);
+            }
+            // 从L1获取缓存
+            value = level1Cache.get(key);
+            if (value != null) {
+                logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                return value;
+            }
         }
-
-        // 从L1获取缓存
-        Object value = level1Cache.get(key);
-        if (value != null) {
-            logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
-            return value;
-        }
-
         // 从L2获取缓存
         value = level2Cache.get(key);
         if (value != null) {
@@ -75,13 +80,22 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
-        // LoadFunction.apply()中封装了L2获取缓存的逻辑，所以此处只需要调用level1Cache.get(key, valueLoader)
-        return level1Cache.get(key, valueLoader);
+        // 是否开启一级缓存
+        if (ifL1Open(key)) {
+            T t = level1Cache.get(key, valueLoader);
+            if (null != t) {
+                return t;
+            }
+        }
+        return level2Cache.get(key, valueLoader);
     }
 
     @Override
     public void put(Object key, Object value) {
-        level2Cache.put(key, value);
+        // 是否开启一级缓存
+        if (ifL1Open(key)) {
+            level2Cache.put(key, value);
+        }
         level1Cache.put(key, value);
     }
 
@@ -89,7 +103,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     public void evict(Object key) {
         logger.debug("[CompositeCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
-        level2Cache.evict(key);
+        // 是否开启一级缓存
+        if (ifL1Open(key)) {
+            level2Cache.evict(key);
+        }
         level1Cache.evict(key);
     }
 
@@ -118,5 +135,32 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     public Level2Cache getLevel2Cache() {
         return level2Cache;
+    }
+
+    /**
+     * 查询是否开启一级缓存
+     *
+     * @param key 缓存key
+     * @return
+     */
+    private boolean ifL1Open(Object key) {
+        // 是否启用一级缓存
+        if (composite.isL1AllOpen()) {
+            return true;
+        }
+        // 是否使用手动匹配开关
+        if (composite.isL2Manual()) {
+            // 手动匹配缓存名字集合，针对cacheName维度
+            Set<String> l1ManualCacheNameSet = composite.getL1ManualCacheNameSet();
+            if (!CollectionUtils.isEmpty(l1ManualCacheNameSet) && l1ManualCacheNameSet.contains(this.getCacheName())) {
+                return true;
+            }
+            // 手动匹配缓存key集合，针对单个key维度
+            Set<String> l1ManualKeySet = composite.getL1ManualKeySet();
+            if (!CollectionUtils.isEmpty(l1ManualKeySet) && l1ManualKeySet.contains(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

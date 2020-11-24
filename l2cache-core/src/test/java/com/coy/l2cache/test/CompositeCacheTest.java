@@ -36,7 +36,9 @@ public class CompositeCacheTest {
                 .setAllowNullValues(true)
                 .getComposite()
                 .setL1CacheType(CacheType.CAFFEINE.name())
-                .setL2CacheType(CacheType.REDIS.name());
+                .setL2CacheType(CacheType.REDIS.name())
+                .setL1AllOpen(false)
+        ;
         cacheConfig.getCaffeine()
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10s,recordStats")
                 .setAutoRefreshExpireCache(true);

@@ -13,9 +13,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author chenck
@@ -95,6 +93,25 @@ public class CacheConfig {
          * 注：当 cacheType = composite时，便于动态控制一二级缓存的切换
          */
         private String l1CacheRange = CacheRange.ENABLE.name();
+        /**
+         * 是否启用一级缓存，默认false
+         */
+        private boolean l1AllOpen = false;
+
+        /**
+         * 是否使用手动匹配开关，默认false
+         */
+        private boolean l2Manual = false;
+
+        /**
+         * 手动匹配缓存key集合，针对单个key维度
+         */
+        private Set<String> l1ManualKeySet = new HashSet<>();
+
+        /**
+         * 手动匹配缓存名字集合，针对cacheName维度
+         */
+        private Set<String> l1ManualCacheNameSet = new HashSet<>();
     }
 
     /**
