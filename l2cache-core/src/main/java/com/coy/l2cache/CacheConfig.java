@@ -101,7 +101,7 @@ public class CacheConfig {
         /**
          * 是否使用手动匹配开关，默认false
          */
-        private boolean l2Manual = false;
+        private boolean l1Manual = false;
 
         /**
          * 手动匹配缓存key集合，针对单个key维度

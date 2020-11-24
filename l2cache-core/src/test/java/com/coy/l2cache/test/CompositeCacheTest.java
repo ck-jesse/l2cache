@@ -11,8 +11,11 @@ import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.api.RMap;
+import org.redisson.misc.Hash;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,6 +34,13 @@ public class CompositeCacheTest {
 
     @Before
     public void before() {
+        Set<String> l1ManualKeySet = new HashSet<>();
+        l1ManualKeySet.add("actLimitMarkupCache:11_2");
+
+        Set<String> L1ManualCacheNameSet = new HashSet<>();
+        L1ManualCacheNameSet.add("goodsSpecCache");
+
+
         // 组合缓存 CAFFEINE + REDIS 测试
         cacheConfig.setCacheType(CacheType.COMPOSITE.name())
                 .setAllowNullValues(true)
@@ -38,7 +48,9 @@ public class CompositeCacheTest {
                 .setL1CacheType(CacheType.CAFFEINE.name())
                 .setL2CacheType(CacheType.REDIS.name())
                 .setL1AllOpen(false)
-        ;
+                .setL1Manual(true)
+                .setL1ManualKeySet(l1ManualKeySet)
+                .setL1ManualCacheNameSet(L1ManualCacheNameSet);
         cacheConfig.getCaffeine()
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10s,recordStats")
                 .setAutoRefreshExpireCache(true);

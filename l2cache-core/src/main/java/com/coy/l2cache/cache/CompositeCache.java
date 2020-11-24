@@ -149,10 +149,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             return true;
         }
         // 是否使用手动匹配开关
-        if (composite.isL2Manual()) {
+        if (composite.isL1Manual()) {
             // 手动匹配缓存名字集合，针对cacheName维度
             Set<String> l1ManualCacheNameSet = composite.getL1ManualCacheNameSet();
-            if (!CollectionUtils.isEmpty(l1ManualCacheNameSet) && l1ManualCacheNameSet.contains(this.getCacheName())) {
+            if (!CollectionUtils.isEmpty(l1ManualCacheNameSet) && composite.getL1ManualCacheNameSet().contains(this.getCacheName())) {
                 return true;
             }
             // 手动匹配缓存key集合，针对单个key维度
