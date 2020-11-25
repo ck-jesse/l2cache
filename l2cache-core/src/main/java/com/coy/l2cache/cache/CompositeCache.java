@@ -93,22 +93,22 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void put(Object key, Object value) {
+        level2Cache.put(key, value);
         // 是否开启一级缓存
         if (ifL1Open(key)) {
             level1Cache.put(key, value);
         }
-        level2Cache.put(key, value);
     }
 
     @Override
     public void evict(Object key) {
         logger.debug("[CompositeCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
+        level2Cache.evict(key);
         // 是否开启一级缓存
         if (ifL1Open(key)) {
             level1Cache.evict(key);
         }
-        level2Cache.evict(key);
     }
 
     @Override
