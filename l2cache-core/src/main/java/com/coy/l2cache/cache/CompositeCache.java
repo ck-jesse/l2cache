@@ -57,7 +57,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     public Object get(Object key) {
         Object value = null;
         // 是否开启一级缓存
-        if (ifL1Open(key)) {
+        boolean ifL1Open = ifL1Open(key);
+        if (ifL1Open) {
             // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
             if (level1Cache.isLoadingCache()) {
                 return level1Cache.get(key);
@@ -71,7 +72,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
         // 从L2获取缓存
         value = level2Cache.get(key);
-        if (value != null) {
+        if (value != null && ifL1Open) {
             logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             level1Cache.put(key, value);
         }
@@ -94,9 +95,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     public void put(Object key, Object value) {
         // 是否开启一级缓存
         if (ifL1Open(key)) {
-            level2Cache.put(key, value);
+            level1Cache.put(key, value);
         }
-        level1Cache.put(key, value);
+        level2Cache.put(key, value);
     }
 
     @Override
@@ -105,9 +106,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         // 是否开启一级缓存
         if (ifL1Open(key)) {
-            level2Cache.evict(key);
+            level1Cache.evict(key);
         }
-        level1Cache.evict(key);
+        level2Cache.evict(key);
     }
 
     @Override
@@ -120,7 +121,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public boolean isExists(Object key) {
-        if (level1Cache.isExists(key)) {
+        if (ifL1Open(key) && level1Cache.isExists(key)) {
             return true;
         }
         if (level2Cache.isExists(key)) {
