@@ -38,7 +38,7 @@ l2cache:
       # 是否启用一级缓存
       l1AllOpen: false
       # 是否使用手动匹配开关
-      l2Manual: false
+      l1Manual: false
       # 手动匹配缓存key集合
       l1ManualKeySet:
         - a
