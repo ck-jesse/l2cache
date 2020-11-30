@@ -5,9 +5,11 @@ import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.util.NullValueUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 定义公共缓存操作的接口
@@ -129,38 +131,40 @@ public interface Cache {
 
     /**
      * 批量get
+     * 注：可以应对不同的类型入参与出参查询
      * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
      */
-    default List<Object> batchGet(List<Object> keyList) {
-        List<Object> list = new ArrayList<>();
+    default Map<Object, Object> batchGetObject(List<Object> keyList) {
+        Map<Object, Object> resultMap = new HashMap<>();
         if (null == keyList || keyList.size() == 0) {
-            return list;
+            return resultMap;
         }
         keyList.forEach(key -> {
-            list.add(get(key));
+            resultMap.put(key, null);
         });
-        return list;
+        return resultMap;
     }
 
     /**
      * 批量get
+     * 注：只能用于相同的入参与出能类型查询
      * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
      */
-    default <T> List<T> batchGet(List<Object> keyList, Class<T> type) {
-        List<T> list = new ArrayList<>();
+    default <R, T> Map<R, T> batchGet(List<R> keyList) {
+        Map<R, T> resultMap = new HashMap<>();
         if (null == keyList || keyList.size() == 0) {
-            return list;
+            return resultMap;
         }
         keyList.forEach(key -> {
-            list.add(get(key, type));
+            resultMap.put(key, (T) get(key));
         });
-        return list;
+        return resultMap;
     }
 
     /**
      * 批量put
      */
-    default <T> void batchPut(Map<Object, T> dataMap) {
+        default <R, T> void batchPut(Map<R, T> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }

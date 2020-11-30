@@ -6,19 +6,14 @@ import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
-import org.redisson.api.BatchResult;
-import org.redisson.api.RBatch;
-import org.redisson.api.RBucket;
-import org.redisson.api.RLock;
-import org.redisson.api.RMap;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -286,46 +281,48 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     }
 
     @Override
-    public List<Object> batchGet(List<Object> keyList) {
+    public Map<Object, Object> batchGetObject(List<Object> keyList) {
+        // 获取查询结果
+        Map<Object, Object> resultMap = new ConcurrentHashMap<>();
         if (null == keyList || keyList.size() == 0) {
-            return new ArrayList<>();
+            return resultMap;
         }
         RBatch batch = redissonClient.createBatch();
         // 生成完整的key
         List<String> keyListStr = new ArrayList<>();
+        // key转换Map,用于原始入参与出参的对应关系
+        Map<String, Object> buildKeyMap = new HashMap<>();
         keyList.forEach(key -> {
-            keyListStr.add((String) buildKey(key));
+            String buildKey = (String) buildKey(key);
+            keyListStr.add(buildKey);
+            buildKeyMap.put(buildKey, key);
         });
-        // 添加获取缓存值的命令
+
         keyListStr.forEach(key -> {
-            batch.getBucket(key).getAsync();
+            RFuture<Object> async = batch.getBucket(key).getAsync();
+            async.onComplete((value, exception) -> {
+                // 没有异常且返回值不为空
+                if (exception == null && !ObjectUtils.isEmpty(value)) {
+                    resultMap.put(buildKeyMap.get(key), value);
+                }
+            });
         });
-        BatchResult result = batch.execute();
-        List<Object> response = result.getResponses();
-        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyListStr, response);
-        if (null == response) {
-            return new ArrayList<>();
-        }
-        List<Object> list = new ArrayList<>();
-        response.forEach(value -> {
-            if (null != fromStoreValue(value)) {
-                list.add(value);
-            }
-        });
-        return list;
+        batch.execute();
+        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyListStr, resultMap);
+        return resultMap;
     }
 
     @Override
-    public <T> List<T> batchGet(List<Object> keyList, Class<T> type) {
-        List<Object> list = batchGet(keyList);
-        if (null == list || list.size() == 0) {
-            return (List<T>) list;
+    public <R, T> Map<R, T> batchGet(List<R> keyList) {
+        Map<R, T> resultMap = (Map<R, T>) batchGetObject((List<Object>) keyList);
+        if (resultMap == null) {
+            return new HashMap<>();
         }
-        return (List<T>) list;
+        return resultMap;
     }
 
     @Override
-    public <T> void batchPut(Map<Object, T> dataMap) {
+    public <R, T> void batchPut(Map<R, T> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }

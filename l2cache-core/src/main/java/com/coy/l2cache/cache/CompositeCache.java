@@ -21,6 +21,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CompositeCache.class);
 
+    private static final String SPLIT = ":";
+
     private final CacheConfig.Composite composite;
     /**
      * 一级缓存
@@ -158,10 +160,23 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             }
             // 手动匹配缓存key集合，针对单个key维度
             Set<String> l1ManualKeySet = composite.getL1ManualKeySet();
-            if (!CollectionUtils.isEmpty(l1ManualKeySet) && l1ManualKeySet.contains(key)) {
+            if (!CollectionUtils.isEmpty(l1ManualKeySet) && l1ManualKeySet.contains(buildKeyBase(key))) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * 构建基础缓存key
+     * 注：用于操作基本的缓存key
+     */
+    private Object buildKeyBase(Object key) {
+        if (key == null || "".equals(key)) {
+            throw new IllegalArgumentException("key不能为空");
+        }
+        StringBuilder sb = new StringBuilder(this.getCacheName()).append(SPLIT);
+        sb.append(key.toString());
+        return sb.toString();
     }
 }

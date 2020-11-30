@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.redisson.Redisson;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -270,21 +269,21 @@ public class CaffeineCacheTest {
 
         // key 完全匹配
         List<Object> keyList = new ArrayList<>(map.keySet());
-        List<Object> list1 = cache.batchGet(keyList);
+        Map<Object, Object> list1 = cache.batchGetObject(keyList);
         System.out.println(list1);
 
         // key 完全匹配
-        List<String> list2 = cache.batchGet(keyList, String.class);
+        Map<Object, Object> list2 = cache.batchGetObject(keyList);
         System.out.println(list2);
 
         // key 全部存在(少于缓存中的key)
         keyList.remove(1);
-        list1 = cache.batchGet(keyList);
+        list1 = cache.batchGetObject(keyList);
         System.out.println(list1);
 
         // key 部分存在缓存，部分不存在缓存
         keyList.add("other");
-        list1 = cache.batchGet(keyList);
+        list1 = cache.batchGetObject(keyList);
         System.out.println(list1);
     }
 

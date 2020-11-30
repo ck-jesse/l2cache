@@ -9,12 +9,8 @@ import org.junit.Test;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -80,7 +76,8 @@ public class RedisCacheTest {
 //        });
 //        System.out.println();
     }
-//
+
+    //
     private void printCache(Object key) {
         Object value = cache.get(key);
         System.out.println(String.format("L2 缓存值 key=%s, value=%s", key, value));
@@ -206,7 +203,7 @@ public class RedisCacheTest {
 
     @Test
     public void batchPut() {
-        Map<Object, User> map = new HashMap<>();
+        Map<String, User> map = new HashMap<>();
         for (int i = 0; i < 5; i++) {
             map.put("user" + i, new User("name" + i, "addr" + i));
         }
@@ -216,12 +213,12 @@ public class RedisCacheTest {
         cache.batchPut(map);
 
         // key 完全匹配
-        List<Object> keyList = new ArrayList<>(map.keySet());
-        List<Object> list1 = cache.batchGet(keyList);
+        List<String> keyList = new ArrayList<>(map.keySet());
+        Map<String, User> list1 = cache.batchGet(keyList);
         System.out.println("batch get 1" + list1);
 
         // key 完全匹配
-        List<String> list2 = cache.batchGet(keyList, String.class);
+        Map<String, User> list2 = cache.batchGet(new ArrayList<>(map.keySet()));
         System.out.println("batch get 2" + list2);
 
         // key 全部存在(少于缓存中的key)
@@ -230,6 +227,7 @@ public class RedisCacheTest {
         System.out.println("batch get 3" + list1);
 
         // key 部分存在缓存，部分不存在缓存
+        keyList.clear();
         keyList.add("other");
         list1 = cache.batchGet(keyList);
         System.out.println("batch get 4" + list1);
