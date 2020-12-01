@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +40,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
      * 以下情况可能造成本地缓存与redis缓存不一致的情况 : 开启本地缓存，更新用户数据后，关闭本地缓存,更新用户信息到redis，开启本地缓存
      * 解决方法：put、evict的情况下，判断配置中心一级缓存开关已关闭且本地一级缓存开关已开启的情况下，清除一级缓存
      */
-    private AtomicBoolean openedLocalCache = new AtomicBoolean();
+    private AtomicBoolean openedL1Cache = new AtomicBoolean();
 
     public CompositeCache(String cacheName, CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache) {
         super(cacheName, cacheConfig);
@@ -162,7 +161,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     private boolean ifL1Open(Object key) {
         // 判断是否开启过本地缓存
         if(composite.isL1AllOpen() || composite.isL1Manual()) {
-            openedLocalCache.compareAndSet(false, true);
+            openedL1Cache.compareAndSet(false, true);
         }
         // 是否启用一级缓存
         if (composite.isL1AllOpen()) {
@@ -205,7 +204,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         // 是否关闭配置中心一级缓存开关
         boolean ifCloseLocalCache = !composite.isL1AllOpen() && !composite.isL1Manual();
         // 已关闭配置中心一级缓存开关，但曾经开启过本地一级缓存开关
-        if(ifCloseLocalCache && openedLocalCache.get()) {
+        if(ifCloseLocalCache && openedL1Cache.get()) {
             logger.debug("[CompositeCache]  evict l1Cache , cacheName={}, key={}", this.getCacheName(), key);
             level1Cache.evict(key);
         }
