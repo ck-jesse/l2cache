@@ -93,12 +93,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     public <T> T get(Object key, Callable<T> valueLoader) {
         // 是否开启一级缓存
         if (ifL1Open(key)) {
-            T t = level1Cache.get(key, valueLoader);
-            if (null != t) {
-                return t;
-            }
+            return level1Cache.get(key, valueLoader);
+        } else {
+            return level2Cache.get(key, valueLoader);
         }
-        return level2Cache.get(key, valueLoader);
     }
 
     @Override
@@ -160,7 +158,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
      */
     private boolean ifL1Open(Object key) {
         // 判断是否开启过本地缓存
-        if(composite.isL1AllOpen() || composite.isL1Manual()) {
+        if (composite.isL1AllOpen() || composite.isL1Manual()) {
             openedL1Cache.compareAndSet(false, true);
         }
         // 是否启用一级缓存
@@ -198,14 +196,15 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     /**
      * 是否需要清除一级缓存
+     *
      * @return
      */
-    private void ifEvictL1Cache(Object key){
+    private void ifEvictL1Cache(Object key) {
         // 是否关闭配置中心一级缓存开关
         boolean ifCloseLocalCache = !composite.isL1AllOpen() && !composite.isL1Manual();
         // 已关闭配置中心一级缓存开关，但曾经开启过本地一级缓存开关
-        if(ifCloseLocalCache && openedL1Cache.get()) {
-            logger.debug("[CompositeCache]  evict l1Cache , cacheName={}, key={}", this.getCacheName(), key);
+        if (ifCloseLocalCache && openedL1Cache.get()) {
+            logger.debug("[CompositeCache] evict l1Cache, cacheName={}, key={}", this.getCacheName(), key);
             level1Cache.evict(key);
         }
     }
