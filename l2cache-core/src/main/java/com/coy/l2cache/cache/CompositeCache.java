@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 组合缓存器
@@ -33,6 +34,14 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
      * 二级缓存
      */
     private final Level2Cache level2Cache;
+
+    /**
+     * 记录是否启用过一级缓存，只要启用过，则记录为true
+     * <p>
+     * 以下情况可能造成本地缓存与redis缓存不一致的情况 : 开启本地缓存，更新用户数据后，关闭本地缓存,更新用户信息到redis，开启本地缓存
+     * 解决方法：put、evict的情况下，判断配置中心一级缓存开关已关闭且本地一级缓存开关已开启的情况下，清除一级缓存
+     */
+    private AtomicBoolean openedLocalCache = new AtomicBoolean();
 
     public CompositeCache(String cacheName, CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache) {
         super(cacheName, cacheConfig);
@@ -100,6 +109,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         if (ifL1Open(key)) {
             level1Cache.put(key, value);
         }
+        // 是否需要清除一级缓存
+        this.ifEvictL1Cache(key);
     }
 
     @Override
@@ -111,6 +122,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         if (ifL1Open(key)) {
             level1Cache.evict(key);
         }
+        // 是否需要清除一级缓存
+        this.ifEvictL1Cache(key);
     }
 
     @Override
@@ -147,6 +160,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
      * @return
      */
     private boolean ifL1Open(Object key) {
+        // 判断是否开启过本地缓存
+        if(composite.isL1AllOpen() || composite.isL1Manual()) {
+            openedLocalCache.compareAndSet(false, true);
+        }
         // 是否启用一级缓存
         if (composite.isL1AllOpen()) {
             return true;
@@ -178,5 +195,19 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         StringBuilder sb = new StringBuilder(this.getCacheName()).append(SPLIT);
         sb.append(key.toString());
         return sb.toString();
+    }
+
+    /**
+     * 是否需要清除一级缓存
+     * @return
+     */
+    private void ifEvictL1Cache(Object key){
+        // 是否关闭配置中心一级缓存开关
+        boolean ifCloseLocalCache = !composite.isL1AllOpen() && !composite.isL1Manual();
+        // 已关闭配置中心一级缓存开关，但曾经开启过本地一级缓存开关
+        if(ifCloseLocalCache && openedLocalCache.get()) {
+            logger.debug("[CompositeCache]  evict l1Cache , cacheName={}, key={}", this.getCacheName(), key);
+            level1Cache.evict(key);
+        }
     }
 }
