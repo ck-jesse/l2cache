@@ -83,8 +83,14 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
 
     @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
-        if (null == valueLoaderCache.getIfPresent(key)) {
+        ValueLoaderWarpper warpper = valueLoaderCache.getIfPresent(key);
+        if (null == warpper) {
             valueLoaderCache.put(key, ValueLoaderWarpper.newInstance(this.cacheName, key, valueLoader));
+        } else {
+            if (null == warpper.getValueLoader()) {
+                logger.info("[CustomCacheLoader]ValueLoaderWarpper.valueLoader is null reset, cacheName={}, key={}, valueLoader={}", cacheName, key, valueLoader);
+                warpper.setValueLoader(valueLoader);
+            }
         }
     }
 

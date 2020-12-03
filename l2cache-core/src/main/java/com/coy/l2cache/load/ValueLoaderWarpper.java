@@ -69,6 +69,14 @@ public class ValueLoaderWarpper implements Callable {
         return this.waitRefreshNum.get();
     }
 
+    public Callable<?> getValueLoader() {
+        return this.valueLoader;
+    }
+
+    public void setValueLoader(Callable<?> valueLoader) {
+        this.valueLoader = valueLoader;
+    }
+
     /**
      * 创建ValueLoaderWarpper实例
      */
