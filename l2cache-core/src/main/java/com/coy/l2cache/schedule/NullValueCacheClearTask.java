@@ -26,6 +26,9 @@ public class NullValueCacheClearTask implements Runnable {
     public void run() {
         long clearBeforeSize = nullValueCache.estimatedSize();
         try {
+            if (clearBeforeSize <= 0) {
+                return;
+            }
             // cleanUp 会触发 expireAfterWrite 的过期淘汰和基于大小的淘汰
             nullValueCache.cleanUp();
             if (clearBeforeSize > 0) {

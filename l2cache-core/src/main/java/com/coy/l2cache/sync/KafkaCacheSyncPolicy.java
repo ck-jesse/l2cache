@@ -80,7 +80,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
         CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getCacheConfig().getCacheSyncPolicy();
         try {
             String messageStr = ObjectMapperUtil.toJson(message);
-            logger.debug("[KafkaCacheSyncPolicy] publish cache sync message, message={}", messageStr);
+            logger.info("[KafkaCacheSyncPolicy] publish cache sync message, message={}", messageStr);
 
             // 异步发送，采用回调接收结果
             if (cacheSyncPolicy.isAsync()) {
@@ -97,7 +97,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
             }
             // 同步发送消息
             RecordMetadata recordMetadata = producer.send(new ProducerRecord<>(cacheSyncPolicy.getTopic(), null, messageStr)).get();
-            logger.debug("[KafkaCacheSyncPolicy] publish topic={}, RecordMetadata={}", cacheSyncPolicy.getTopic(), recordMetadata.toString());
+            logger.info("[KafkaCacheSyncPolicy] publish topic={}, RecordMetadata={}", cacheSyncPolicy.getTopic(), recordMetadata.toString());
         } catch (Exception e) {
             logger.error("[KafkaCacheSyncPolicy] publish cache sync message error", e);
         }

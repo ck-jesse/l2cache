@@ -42,9 +42,9 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
     @Override
     public void publish(CacheMessage message) {
         try {
-            logger.debug("[RedisCacheSyncPolicy] publish cache sync message, message={}", message.toString());
+            logger.info("[RedisCacheSyncPolicy] publish cache sync message, message={}", message.toString());
             long receivedMsgClientNum = this.topic.publish(message);
-            logger.debug("[RedisCacheSyncPolicy] receivedMsgClientNum={}", receivedMsgClientNum);
+            logger.info("[RedisCacheSyncPolicy] receivedMsgClientNum={}", receivedMsgClientNum);
         } catch (Exception e) {
             logger.error("[RedisCacheSyncPolicy] publish cache sync message error", e);
         }
