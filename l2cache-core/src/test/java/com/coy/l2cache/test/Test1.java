@@ -1,5 +1,9 @@
 package com.coy.l2cache.test;
 
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -18,5 +22,6 @@ public class Test1 {
         System.out.println("获取：" + waitRefreshNum.get());
         System.out.println(waitRefreshNum.getAndSet(0));
         System.out.println("获取：" + waitRefreshNum.get());
+
     }
 }

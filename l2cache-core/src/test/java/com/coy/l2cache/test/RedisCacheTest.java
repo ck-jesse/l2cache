@@ -4,23 +4,28 @@ import com.coy.l2cache.cache.RedissonRBucketCache;
 import com.coy.l2cache.builder.RedisCacheBuilder;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * RedissonCache 中各个方法的单元测试
  */
+@Slf4j
 public class RedisCacheTest {
 
     CacheConfig cacheConfig = new CacheConfig();
     RedissonRBucketCache cache;
     Callable<String> callable;
+    RedissonClient redissonClient;
 
     @Before
     public void before() {
@@ -35,7 +40,7 @@ public class RedisCacheTest {
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient
-        RedissonClient redissonClient = Redisson.create(cacheConfig.getRedis().getRedissonConfig());
+        redissonClient = Redisson.create(cacheConfig.getRedis().getRedissonConfig());
 
         RedisCacheBuilder builder = (RedisCacheBuilder) new RedisCacheBuilder()
                 .setCacheConfig(cacheConfig)
@@ -84,7 +89,8 @@ public class RedisCacheTest {
         System.out.println(String.format("L2 缓存值 key=%s, value=%s", key, value));
         System.out.println();
     }
-//
+
+    //
 //    @Test
 //    public void test() {
 //        System.out.println(TimeUnit.MILLISECONDS.toMillis(5000));
@@ -238,5 +244,34 @@ public class RedisCacheTest {
         keyList.add("other");
         list1 = cache.batchGet(keyList);
         System.out.println("batch get 4" + list1);
+    }
+
+    @Test
+    public void trylock() throws InterruptedException {
+        String lockkey = "lock:key";
+
+        for (int i = 0; i < 3; i++) {
+            int finalI = i;
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+            RLock lock = redissonClient.getLock(lockkey);
+            try {
+                if (!lock.tryLock(0, 500, TimeUnit.MILLISECONDS)) {
+                    log.warn(finalI + " lock fail");
+                } else {
+                    log.info(finalI + " lock succ");
+                }
+                log.info(finalI + " HoldCount=" + lock.getHoldCount());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+//                }
+//            }).start();
+        }
+
+        while (true) {
+
+        }
     }
 }

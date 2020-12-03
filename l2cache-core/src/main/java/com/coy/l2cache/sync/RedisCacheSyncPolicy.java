@@ -1,12 +1,18 @@
 package com.coy.l2cache.sync;
 
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.content.RedissonSupport;
+import com.coy.l2cache.util.RunnableWarpper;
+import com.coy.l2cache.util.ThreadPoolSupport;
+import org.redisson.api.RLock;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -21,6 +27,11 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     AtomicBoolean start = new AtomicBoolean(false);
     private RTopic topic;
+
+    /**
+     * 定义静态线程池，避免高并发情况下，造成锁的竞争
+     */
+    private static final ThreadPoolExecutor poolExecutor = ThreadPoolSupport.getPool("publish_redis_msg");
 
     @Override
     public void connnect() {
@@ -41,13 +52,32 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     @Override
     public void publish(CacheMessage message) {
-        try {
-            logger.info("[RedisCacheSyncPolicy] publish cache sync message, message={}", message.toString());
-            long receivedMsgClientNum = this.topic.publish(message);
-            logger.info("[RedisCacheSyncPolicy] receivedMsgClientNum={}", receivedMsgClientNum);
-        } catch (Exception e) {
-            logger.error("[RedisCacheSyncPolicy] publish cache sync message error", e);
-        }
+        poolExecutor.execute(new RunnableWarpper(() -> {
+            try {
+                Long publishMsgPeriodMilliSeconds = this.getCacheConfig().getCaffeine().getPublishMsgPeriodMilliSeconds();
+                RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
+                RLock lock = redissonClient.getLock(buildLockKey(message));
+                // 限制同一个key多长时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
+                if (!lock.tryLock(0, publishMsgPeriodMilliSeconds, TimeUnit.MILLISECONDS)) {
+                    logger.warn("[RedisCacheSyncPolicy] trylock fail, not publish cache sync message, message={}", message.toString());
+                    return;
+                }
+
+                // 重入锁的数量(同一个线程可以重入)
+                int lockHoldCount = lock.getHoldCount();
+                if (lockHoldCount > 1) {
+                    logger.warn("[RedisCacheSyncPolicy] trylock succ, not publish cache sync message, lockHoldCount={}, message={}", lockHoldCount, message.toString());
+                    return;
+                }
+
+                logger.info("[RedisCacheSyncPolicy] publish start, message={}", message.getCacheName(), message.getKey(), message.toString());
+                long receivedMsgClientNum = this.topic.publish(message);
+                logger.info("[RedisCacheSyncPolicy] publish succ, cacheName={}, key={}, receivedMsgClientNum={}", message.getCacheName(), message.getKey(), receivedMsgClientNum);
+            } catch (Exception e) {
+                logger.error("[RedisCacheSyncPolicy] publish cache sync message error, cacheName=" + message.getCacheName() + ", key=" + message.getKey(), e);
+            }
+
+        }, message));
     }
 
     @Override
@@ -66,4 +96,12 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
         return RedissonSupport.getRedisson(cacheConfig);
     }
 
+    private String buildLockKey(CacheMessage message) {
+        return new StringBuilder("lock")
+                .append(CacheConsts.SPLIT)
+                .append(message.getCacheName())
+                .append(CacheConsts.SPLIT)
+                .append(message.getKey())
+                .toString();
+    }
 }

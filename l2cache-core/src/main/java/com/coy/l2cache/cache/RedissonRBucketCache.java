@@ -127,7 +127,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     public Object get(Object key) {
         String cacheKey = (String) buildKey(key);
         Object value = getBucket(cacheKey).get();
-        logger.debug("[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+        logger.info("[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
         return fromStoreValue(value);
     }
 
@@ -149,7 +149,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         RBucket<Object> bucket = getBucket(cacheKey);
         Object value = bucket.get();
         if (value != null) {
-            logger.debug("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+            logger.info("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
@@ -196,7 +196,8 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         String cacheKey = (String) buildKeyBase(key);
         RBucket<Object> bucket = getBucket(cacheKey);
         if (!isAllowNullValues() && value == null) {
-            bucket.delete();
+            boolean flag = bucket.delete();
+            logger.warn("[RedissonRBucketCache] delete cache, cacheName={}, key={}, value={}, delete={}", this.getCacheName(), cacheKey, value, flag);
             return;
         }
 
@@ -283,6 +284,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     /**
      * 通过批量key获取 value集合
+     *
      * @param keyList
      * @param <T>
      * @return

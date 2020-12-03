@@ -222,21 +222,20 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             // LoadingCache.refresh() 为异步执行方法，若有同一个key的大量refresh请求，ForkJoinPool线程池处理不过来时，在线程池队列中会堆积大量的refresh任务，随着时间推移最终导致OOM。
             // 此处对valueLoader进行包装，通过一个key维度的原子性计数器，来控制同一时刻一个key只会存在一个refresh任务，而该任务在等待执行或者执行过程中，新来的refresh任务将会丢弃。
             ValueLoaderWarpper valueLoader = this.cacheLoader.getValueLoaderWarpper(key);
-            if (null != valueLoader) {
-                int waitRefreshNum = valueLoader.getAndIncrement();
-                if (waitRefreshNum > 0) {
-                    logger.info("[CaffeineCache][refresh] not do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
-                    return;
-                } else {
-                    logger.info("[CaffeineCache][refresh] do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
-                }
-            } else {
+            if (null == valueLoader) {
                 // 添加一个 valueLoader 为null的ValueLoaderWarpper对象
-                // 解决在 valueLoader 被gc回收后，若有大量refresh的请求，会堆积到ForkJoinPool的队列中的问题
+                // 一定程度上解决在 valueLoader 被gc回收后，若有大量refresh的请求，会堆积到ForkJoinPool的队列中的问题
                 // valueLoader=null时，可以从redis加载数据
+                logger.info("[CaffeineCache][refresh] addValueLoader null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
                 this.cacheLoader.addValueLoader(key, null);
-                logger.info("[CaffeineCache][refresh] do refresh and add a null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
+                valueLoader = this.cacheLoader.getValueLoaderWarpper(key);
             }
+            int waitRefreshNum = valueLoader.getAndIncrement();
+            if (waitRefreshNum > 0) {
+                logger.info("[CaffeineCache][refresh] not do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
+                return;
+            }
+            logger.info("[CaffeineCache][refresh] do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
             ((LoadingCache) caffeineCache).refresh(key);
         }
     }

@@ -138,6 +138,11 @@ public class CacheConfig {
         private Long refreshPeriod = 30L;
 
         /**
+         * 同一个key的发布消息频率(毫秒)
+         */
+        private Long publishMsgPeriodMilliSeconds = 500L;
+
+        /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
          */
         private String defaultSpec;
