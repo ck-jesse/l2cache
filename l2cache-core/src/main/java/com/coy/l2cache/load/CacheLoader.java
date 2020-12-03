@@ -51,4 +51,8 @@ public interface CacheLoader<K, V> {
      */
     V load(K key);
 
+    /**
+     * 获取ValueLoaderWarpper对象
+     */
+    ValueLoaderWarpper getValueLoaderWarpper(K key);
 }

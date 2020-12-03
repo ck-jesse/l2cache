@@ -34,7 +34,7 @@ public class LoadFunction implements Function<Object, Object> {
     private final String cacheName;
     private final Level2Cache level2Cache;
     private final CacheSyncPolicy cacheSyncPolicy;
-    private final Callable<?> valueLoader;// 加载数据的目标方法
+    private final ValueLoaderWarpper valueLoader;// 加载数据的目标方法
     /**
      * 是否存储空值，设置为true时，可防止缓存穿透
      */
@@ -45,7 +45,7 @@ public class LoadFunction implements Function<Object, Object> {
     private Cache<Object, Integer> nullValueCache;
 
     public LoadFunction(String instanceId, String cacheType, String cacheName,
-                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, Callable<?> valueLoader,
+                        Level2Cache level2Cache, CacheSyncPolicy cacheSyncPolicy, ValueLoaderWarpper valueLoader,
                         Boolean allowNullValues, Cache<Object, Integer> nullValueCache) {
         this.instanceId = instanceId;
         this.cacheType = cacheType;
@@ -79,9 +79,9 @@ public class LoadFunction implements Function<Object, Object> {
             }
 
             // 对 valueLoader 进行包装，以便目标方法执行完后，先put到redis，再发送缓存同步消息，此方式不会对level2Cache造成污染
-            ValueLoaderWarpper warpper = null;
+            ValueLoaderWarpperTemp warpper = null;
             if (null != valueLoader) {
-                warpper = new ValueLoaderWarpper(cacheName, key, valueLoader);
+                warpper = new ValueLoaderWarpperTemp(cacheName, key, valueLoader);
             }
             // 先从redis获取缓存，若不存在，则执行ValueLoaderWarpper从db加载数据
             Object value = level2Cache.get(key, warpper);
@@ -105,6 +105,11 @@ public class LoadFunction implements Function<Object, Object> {
         } catch (Exception ex) {
             // 将异常包装spring cache异常
             throw SpringCacheExceptionUtil.warpper(key, this.valueLoader, ex);
+        } finally {
+            if (valueLoader.getWaitRefreshNum() > 0) {
+                int beforeWaitRefreshNum = valueLoader.clearWaitRefreshNum();
+                logger.info("[LoadFunction] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+            }
         }
     }
 

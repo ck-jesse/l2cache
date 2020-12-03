@@ -27,11 +27,11 @@ public class CacheMessageListener implements MessageListener {
     public void onMessage(CacheMessage message) {
         try {
             if (this.cacheInstanceId.equalsIgnoreCase(message.getInstanceId())) {
-                logger.debug("[CacheMessageListener][SyncCache] instanceId is same no need to deal, message={}", message.toString());
+                logger.debug("[CacheMessageListener][SyncCache] instanceId is same no need to deal, currInstanceId={}, message={}", this.cacheInstanceId, message.toString());
                 return;
             }
-            logger.info("[CacheMessageListener][SyncCache] instanceId={}, cacheName={}, cacheType={}, optType={}, key={}",
-                    message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey());
+            logger.info("[CacheMessageListener][SyncCache] currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}",
+                    this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey());
 
             Level1Cache level1Cache = getLevel1Cache(message);
             if (null == level1Cache) {
@@ -43,7 +43,7 @@ public class CacheMessageListener implements MessageListener {
                 level1Cache.clearLocalCache(message.getKey());
             }
         } catch (Exception e) {
-            logger.error("[CacheMessageListener][SyncCache] error", e);
+            logger.error("[CacheMessageListener][SyncCache] error, currInstanceId=" + this.cacheInstanceId, e);
         }
     }
 

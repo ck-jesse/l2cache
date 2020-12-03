@@ -30,7 +30,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
      * 注：由 ConcurrentReferenceHashMap 优化为 Caffeine.Cache，并设置最大元素梳理，避免元素过多占用内存过多，导致频繁的gc
      * Caffeine 基于大小的淘汰机制，因为是异步线程池的方式来执行的清理任务，所以在大量不同key访问的情况下，清理任务可能出现堆积的情况，也就是说极端情况下也会出现缓存未被及时清理掉占用大量内存的情况出现
      */
-    private Cache<Object, Callable<?>> valueLoaderCache;
+    private Cache<Object, ValueLoaderWarpper> valueLoaderCache;
     private String instanceId;
     private String cacheType;
     private String cacheName;
@@ -84,7 +84,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     @Override
     public void addValueLoader(Object key, Callable<?> valueLoader) {
         if (null == valueLoaderCache.getIfPresent(key)) {
-            valueLoaderCache.put(key, valueLoader);
+            valueLoaderCache.put(key, ValueLoaderWarpper.newInstance(this.cacheName, key, valueLoader));
         }
     }
 
@@ -96,14 +96,15 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     @Override
     public Object load(Object key) {
         // 直接返回null，目的是使spring cache后续逻辑去执行具体的加载数据方法，然后put到缓存
-        Callable<?> valueLoader = valueLoaderCache.getIfPresent(key);
-        /*if (null == valueLoader) {
-            logger.debug("[CustomCacheLoader] valueLoader is null direct return null, key={}", key);
-            return null;
-        }*/
+        ValueLoaderWarpper valueLoader = valueLoaderCache.getIfPresent(key);
 
         LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, this.allowNullValues, this.nullValueCache);
         return loadFunction.apply(key);
+    }
+
+    @Override
+    public ValueLoaderWarpper getValueLoaderWarpper(Object key) {
+        return valueLoaderCache.getIfPresent(key);
     }
 
 }

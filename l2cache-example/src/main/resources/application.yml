@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: 8080
   #servlet:
   #  context-path: /l2cache-example
 
@@ -30,9 +30,9 @@ l2cache:
       # 一级缓存类型
       l1CacheType: caffeine
       # 二级缓存类型
-      l2CacheType:
+      l2CacheType: redis
       # 是否启用一级缓存
-      l1AllOpen: false
+      l1AllOpen: true
       # 是否使用手动匹配开关
       l1Manual: true
       # 手动匹配缓存key集合
@@ -49,7 +49,7 @@ l2cache:
       # 是否构建异步Caffeine true 是 false 否
       asyncCache: false
       # 是否自动刷新过期缓存 true 是 false 否
-      autoRefreshExpireCache: true
+      autoRefreshExpireCache: false
       # 缓存刷新调度线程池的大小
       refreshPoolSize: 2
       # 缓存刷新的频率(秒)

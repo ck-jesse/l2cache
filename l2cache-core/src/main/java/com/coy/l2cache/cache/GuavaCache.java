@@ -6,6 +6,7 @@ import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.LoadFunction;
+import com.coy.l2cache.load.ValueLoaderWarpper;
 import com.coy.l2cache.schedule.NullValueClearSupport;
 import com.coy.l2cache.schedule.NullValueCacheClearTask;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
@@ -147,7 +148,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
             Object value = this.guavaCache.get(key, () -> {
                 LoadFunction loadFunction = new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
-                        null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues(), this.nullValueCache);
+                        null, this.getCacheSyncPolicy(), ValueLoaderWarpper.newInstance(this.getCacheName(), key, valueLoader), this.isAllowNullValues(), this.nullValueCache);
                 return loadFunction.apply(key);
             });
             logger.debug("GuavaCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);

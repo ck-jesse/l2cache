@@ -7,6 +7,7 @@ import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.LoadFunction;
+import com.coy.l2cache.load.ValueLoaderWarpper;
 import com.coy.l2cache.schedule.NullValueClearSupport;
 import com.coy.l2cache.schedule.NullValueCacheClearTask;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
@@ -142,7 +143,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
         // 同步加载数据，仅一个线程加载数据，其他线程均阻塞
         Object value = this.caffeineCache.get(key, new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
-                null, this.getCacheSyncPolicy(), valueLoader, this.isAllowNullValues(), this.nullValueCache));
+                null, this.getCacheSyncPolicy(), ValueLoaderWarpper.newInstance(this.getCacheName(), key, valueLoader), this.isAllowNullValues(), this.nullValueCache));
         logger.debug("[CaffeineCache] Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         return (T) fromStoreValue(value);
     }
@@ -218,7 +219,24 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     @Override
     public void refresh(Object key) {
         if (isLoadingCache()) {
-            logger.debug("[CaffeineCache] refresh cache, cacheName={}, key={}", this.getCacheName(), key);
+            // LoadingCache.refresh() 为异步执行方法，若有同一个key的大量refresh请求，ForkJoinPool线程池处理不过来时，在线程池队列中会堆积大量的refresh任务，随着时间推移最终导致OOM。
+            // 此处对valueLoader进行包装，通过一个key维度的原子性计数器，来控制同一时刻一个key只会存在一个refresh任务，而该任务在等待执行或者执行过程中，新来的refresh任务将会丢弃。
+            ValueLoaderWarpper valueLoader = this.cacheLoader.getValueLoaderWarpper(key);
+            if (null != valueLoader) {
+                int waitRefreshNum = valueLoader.getAndIncrement();
+                if (waitRefreshNum > 0) {
+                    logger.info("[CaffeineCache][refresh] not do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
+                    return;
+                } else {
+                    logger.info("[CaffeineCache][refresh] do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
+                }
+            } else {
+                // 添加一个 valueLoader 为null的ValueLoaderWarpper对象
+                // 解决在 valueLoader 被gc回收后，若有大量refresh的请求，会堆积到ForkJoinPool的队列中的问题
+                // valueLoader=null时，可以从redis加载数据
+                this.cacheLoader.addValueLoader(key, null);
+                logger.info("[CaffeineCache][refresh] do refresh and add a null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
+            }
             ((LoadingCache) caffeineCache).refresh(key);
         }
     }
@@ -229,7 +247,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
                 logger.debug("[CaffeineCache] refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
-                loadingCache.refresh(key);
+                this.refresh(key);
             }
         }
     }

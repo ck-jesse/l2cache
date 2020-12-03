@@ -4,9 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 对 valueLoader 进行包装，以便目标方法执行完后，先put到redis，再发送缓存同步消息，此方式不会对level2Cache造成污染
+ * 对 valueLoader 进行包装，通过 waitRefreshNum 过滤并发执行同一个key的refresh操作
  *
  * @author chenck
  * @date 2020/9/23 11:14
@@ -18,9 +19,11 @@ public class ValueLoaderWarpper implements Callable {
     private final String cacheName;
     private final Object key;
     /**
-     * 记录是否被调用
+     * 等待refresh的计数器
+     * 大于0：表示有等待执行或正在执行的refresh操作，不执行
+     * 等于0：表示可以执行refresh操作
      */
-    private boolean call;
+    private AtomicInteger waitRefreshNum = new AtomicInteger();
 
     private Callable<?> valueLoader;
 
@@ -32,20 +35,45 @@ public class ValueLoaderWarpper implements Callable {
 
     @Override
     public Object call() throws Exception {
-        if (null == valueLoader) {
-            logger.warn("[ValueLoaderWarpper] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
-            return null;
+        try {
+            if (null == valueLoader) {
+                logger.warn("[ValueLoaderWarpper] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
+                return null;
+            }
+            return valueLoader.call();
+        } finally {
+            // 用于过滤并发执行同一个key的refresh操作
+            if (getWaitRefreshNum() > 0) {
+                int beforeWaitRefreshNum = this.clearWaitRefreshNum();
+                logger.debug("[ValueLoaderWarpper] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+            }
         }
-        Object tempValue = valueLoader.call();
-        call = true;
-        logger.debug("[ValueLoaderWarpper] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
-        return tempValue;
     }
 
     /**
-     * 是否被调用
+     * 递增
+     * 注：过滤并发执行同一个key的refresh操作，保证同一个key只有一个refresh操作在执行
      */
-    public boolean isCall() {
-        return this.call;
+    public int getAndIncrement() {
+        return this.waitRefreshNum.getAndIncrement();
     }
+
+    /**
+     * 清理掉等待refresh的计数器
+     */
+    public int clearWaitRefreshNum() {
+        return this.waitRefreshNum.getAndSet(0);
+    }
+
+    public int getWaitRefreshNum() {
+        return this.waitRefreshNum.get();
+    }
+
+    /**
+     * 创建ValueLoaderWarpper实例
+     */
+    public static ValueLoaderWarpper newInstance(String cacheName, Object key, Callable<?> valueLoader) {
+        return new ValueLoaderWarpper(cacheName, key, valueLoader);
+    }
+
 }
