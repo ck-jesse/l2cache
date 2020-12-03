@@ -129,29 +129,15 @@ public interface Cache {
 
     // ----- 批量操作
 
-    /**
-     * 批量get
-     * 注：可以应对不同的类型入参与出参查询
-     * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
-     */
-    default Map<Object, Object> batchGetObject(List<Object> keyList) {
-        Map<Object, Object> resultMap = new HashMap<>();
-        if (null == keyList || keyList.size() == 0) {
-            return resultMap;
-        }
-        keyList.forEach(key -> {
-            resultMap.put(key, null);
-        });
-        return resultMap;
-    }
+
 
     /**
      * 批量get
      * 注：只能用于相同的入参与出能类型查询
      * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
      */
-    default <R, T> Map<R, T> batchGet(List<R> keyList) {
-        Map<R, T> resultMap = new HashMap<>();
+    default <T> Map<String, T> batchGet(List<String> keyList) {
+        Map<String, T> resultMap = new HashMap<>();
         if (null == keyList || keyList.size() == 0) {
             return resultMap;
         }

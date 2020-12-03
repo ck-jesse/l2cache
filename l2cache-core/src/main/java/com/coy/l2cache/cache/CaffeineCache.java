@@ -273,8 +273,8 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
      * 因为 CaffeineCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
      */
     @Override
-    public Map<Object, Object> batchGetObject(List<Object> keyList) {
-        Map<Object, Object> resultMap = new HashMap<>();
+    public <T> Map<String, T> batchGet(List<String> keyList) {
+        Map<String, T> resultMap = new HashMap<>();
         if (null == keyList || keyList.size() == 0) {
             return resultMap;
         }
@@ -282,19 +282,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             Object value = this.caffeineCache.getIfPresent(key);
             logger.debug("[CaffeineCache] batchGet, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             if (null != fromStoreValue(value)) {
-                resultMap.put(key, fromStoreValue(value));
+                resultMap.put(key, (T) fromStoreValue(value));
             }
         });
         return resultMap;
     }
-
-    /**
-     * 因为 CaffeineCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
-     */
-    @Override
-    public <R, T> Map<R, T> batchGet(List<R> keyList) {
-        Map<R, T> resultMap = (Map<R, T>) batchGetObject((List<Object>) keyList);
-        return resultMap;
-    }
-
 }

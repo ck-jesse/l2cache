@@ -280,44 +280,33 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         return rslt;
     }
 
+
+    /**
+     * 通过批量key获取 value集合
+     * @param keyList
+     * @param <T>
+     * @return
+     */
     @Override
-    public Map<Object, Object> batchGetObject(List<Object> keyList) {
+    public <T> Map<String, T> batchGet(List<String> keyList) {
         // 获取查询结果
-        Map<Object, Object> resultMap = new ConcurrentHashMap<>();
+        Map<String, T> resultMap = new ConcurrentHashMap<>();
         if (null == keyList || keyList.size() == 0) {
             return resultMap;
         }
         RBatch batch = redissonClient.createBatch();
-        // 生成完整的key
-        List<String> keyListStr = new ArrayList<>();
-        // key转换Map,用于原始入参与出参的对应关系
-        Map<String, Object> buildKeyMap = new HashMap<>();
         keyList.forEach(key -> {
-            String buildKey = (String) buildKey(key);
-            keyListStr.add(buildKey);
-            buildKeyMap.put(buildKey, key);
-        });
-
-        keyListStr.forEach(key -> {
-            RFuture<Object> async = batch.getBucket(key).getAsync();
+            String buildKey = key + "";
+            RFuture<Object> async = batch.getBucket(buildKey).getAsync();
             async.onComplete((value, exception) -> {
                 // 没有异常且返回值不为空
                 if (exception == null && !ObjectUtils.isEmpty(value)) {
-                    resultMap.put(buildKeyMap.get(key), value);
+                    resultMap.put(buildKey, (T) value);
                 }
             });
         });
         batch.execute();
-        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyListStr, resultMap);
-        return resultMap;
-    }
-
-    @Override
-    public <R, T> Map<R, T> batchGet(List<R> keyList) {
-        Map<R, T> resultMap = (Map<R, T>) batchGetObject((List<Object>) keyList);
-        if (resultMap == null) {
-            return new HashMap<>();
-        }
+        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyList, resultMap);
         return resultMap;
     }
 
