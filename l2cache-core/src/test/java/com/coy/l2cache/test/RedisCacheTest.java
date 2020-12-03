@@ -31,7 +31,7 @@ public class RedisCacheTest {
                 .setLock(true)
 //                .setMaxIdleTime(2000)
 //                .setMaxSize(20)
-                .setDuplicate(true)
+                .setDuplicate(false)
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient
@@ -55,9 +55,10 @@ public class RedisCacheTest {
 
             @Override
             public String call() throws Exception {
-                String result = "loader_value" + count.getAndAdd(1);
-                System.out.println("loader value from valueLoader, return " + result);
-                return result;
+//                String result = "loader_value" + count.getAndAdd(1);
+//                System.out.println("loader value from valueLoader, return " + result);
+//                return result;
+                return null;
             }
         };
 
@@ -97,8 +98,12 @@ public class RedisCacheTest {
 //        System.out.println(cache.get(key));
 //    }
 //
-//    @Test
-//    public void putUserTest() throws InterruptedException {
+    @Test
+    public void putUserTest() throws InterruptedException {
+
+        String key = "user_key";
+        System.out.println(cache.get(key));
+
 //        String key = "user_key";
 //        User user = new User();
 //        user.setName("test");
@@ -107,7 +112,7 @@ public class RedisCacheTest {
 //        cache.put(key, user);
 //        printCache(key);
 //        System.out.println(cache.get(key));
-//    }
+    }
 
     @Test
     public void putAndGetTest() throws InterruptedException {
@@ -138,6 +143,8 @@ public class RedisCacheTest {
         // 3 get and load from Callable
         String key = "key_loader123";
         String value = cache.get(key, callable);
+        System.out.println(String.format("get key=%s, value=%s", key, value));
+        value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
     }
 

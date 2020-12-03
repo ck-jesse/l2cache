@@ -67,7 +67,7 @@ public class CaffeineCacheTest {
             @Override
             public String call() throws Exception {
 //                String result = "loader_value" + count.getAndAdd(1);
-//                System.out.println("loader value from valueLoader, return " + result);
+                System.out.println("loader value from valueLoader, return " + count.getAndAdd(1));
 //                return result;
                 return null;
             }
@@ -129,13 +129,25 @@ public class CaffeineCacheTest {
     @Test
     public void getAndLoadTest() throws InterruptedException {
         // 3 get and load from Callable
-        String key = "key_loader";
+        /*String key = "key_loader";
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
         while (true) {
             Thread.sleep(2000);
             System.out.println(String.format("get key=%s, value=%s", key, cache.get(key)));
             System.out.println(String.format("get callable key=%s, value=%s", key, cache.get(key, callable)));
+        }*/
+
+        for (int i = 0; i < 3; i++) {
+            new Thread(() -> {
+
+                String key = "key_loader";
+                String value = cache.get(key, callable);
+                System.out.println(String.format("get key=%s, value=%s", key, value));
+            }).start();
+        }
+        while (true) {
+
         }
     }
 
@@ -206,8 +218,12 @@ public class CaffeineCacheTest {
         cache.get(key1, callable);
         printAllCache();
 
-        cache.refresh(key1);
-        printAllCache();
+        for (int i = 0; i < 3; i++) {
+            new Thread(() -> {
+                cache.refresh(key1);
+                printAllCache();
+            }).start();
+        }
     }
 
     @Test

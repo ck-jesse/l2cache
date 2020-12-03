@@ -47,7 +47,7 @@ public class CompositeCacheTest {
                 .getComposite()
                 .setL1CacheType(CacheType.CAFFEINE.name())
                 .setL2CacheType(CacheType.REDIS.name())
-                .setL1AllOpen(false)
+                .setL1AllOpen(true)
                 .setL1Manual(true)
                 .setL1ManualKeySet(l1ManualKeySet)
                 .setL1ManualCacheNameSet(L1ManualCacheNameSet);
@@ -71,9 +71,10 @@ public class CompositeCacheTest {
 
             @Override
             public String call() throws Exception {
-                String result = "loader_value" + count.getAndAdd(1);
+               /* String result = "loader_value" + count.getAndAdd(1);
                 System.out.println("loader value from valueLoader, return " + result);
-                return result;
+                return result;*/
+                return null;
             }
         };
 
@@ -158,7 +159,13 @@ public class CompositeCacheTest {
 
     @Test
     public void getAndLoadTest() throws InterruptedException {
-        // 3 get and load from Callable
+        String key = "ck123";
+        String value = cache.get(key, callable);
+        System.out.println(String.format("get key=%s, value=%s", key, value));
+        value = cache.get(key, callable);
+        System.out.println(String.format("get key=%s, value=%s", key, value));
+
+        /*// 3 get and load from Callable
         String key = "key_loader";
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
@@ -166,7 +173,7 @@ public class CompositeCacheTest {
         while (true) {
             Thread.sleep(2000);
             System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, callable)));
-        }
+        }*/
     }
 
     @Test
