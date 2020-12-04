@@ -85,7 +85,7 @@ public class LoadFunction implements Function<Object, Object> {
             }
             // 先从redis获取缓存，若不存在，则执行ValueLoaderWarpper从db加载数据
             Object value = level2Cache.get(key, warpper);
-            if (null != warpper && warpper.isCall()) {
+            if (null != warpper && warpper.isPublishMsg()) {
                 // 必须在redis.put()之后再发送消息，否则，消息消费方从redis中获取不到缓存，会继续加载值，若程序刚启动，而没有valueLoader,则redis会被设置为null值
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH));

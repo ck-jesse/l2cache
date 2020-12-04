@@ -29,10 +29,10 @@ public class ThreadPoolSupport {
     private final static Map<String, ThreadPoolExecutor> POOL_MAP = new ConcurrentHashMap<>(16);
 
     private final static String DEF_POOL_NAME = "custom_pool";
-    private final static int DEF_CORE_POOL_SIZE = 2;
-    private final static int DEF_MAXIMUM_POOL_SIZE = 2;
+    private final static int DEF_CORE_POOL_SIZE = 10;
+    private final static int DEF_MAXIMUM_POOL_SIZE = 32;
     private final static long DEF_KEEPALIVE_TIME_SECONDS = 60;
-    private final static int DEF_QUEUE_CAPACITY = 2;
+    private final static int DEF_QUEUE_CAPACITY = 3000;
 
     /**
      * 获取 ThreadPoolExecutor 实例

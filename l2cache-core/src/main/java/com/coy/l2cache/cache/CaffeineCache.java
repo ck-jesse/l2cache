@@ -226,7 +226,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 // 添加一个 valueLoader 为null的ValueLoaderWarpper对象
                 // 一定程度上解决在 valueLoader 被gc回收后，若有大量refresh的请求，会堆积到ForkJoinPool的队列中的问题
                 // valueLoader=null时，可以从redis加载数据
-                logger.info("[CaffeineCache][refresh] addValueLoader null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
+                logger.info("[CaffeineCache][refresh] add a null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
                 this.cacheLoader.addValueLoader(key, null);
                 valueLoader = this.cacheLoader.getValueLoaderWarpper(key);
             }

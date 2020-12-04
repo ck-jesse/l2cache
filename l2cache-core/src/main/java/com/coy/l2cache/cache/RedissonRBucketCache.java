@@ -4,6 +4,7 @@ import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
+import com.coy.l2cache.load.ValueLoaderWarpperTemp;
 import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import org.redisson.api.*;
@@ -178,6 +179,12 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 logger.debug("[RedissonRBucketCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), cacheKey, redis.isLock());
                 value = valueLoader.call();
                 logger.debug("[RedissonRBucketCache] rlock, cacheName={}, key={}, value={}, isLock={}", this.getCacheName(), cacheKey, value, redis.isLock());
+
+                // redis和db都为null，那么不发送消息，减少不必要的通信
+                if (value == null && valueLoader instanceof ValueLoaderWarpperTemp) {
+                    ((ValueLoaderWarpperTemp) valueLoader).setPublishMsg(false);
+                    logger.warn("[RedissonRBucketCache] redis and db load value both  is null, no need to publish message, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+                }
                 this.put(key, value);
             }
         } catch (Exception ex) {
@@ -205,11 +212,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         // 过期时间处理
         long expireTime = this.expireTimeDeal(value);
         if (expireTime > 0) {
-            bucket.set(value, expireTime, TimeUnit.MILLISECONDS);
-            logger.info("[RedissonRBucketCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, cacheKey, value);
+            //bucket.set(value, expireTime, TimeUnit.MILLISECONDS);
+            Object oldValue = bucket.getAndSet(value, expireTime, TimeUnit.MILLISECONDS);
+            logger.info("[RedissonRBucketCache] put cache, cacheName={}, expireTime={} ms, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, cacheKey, value, oldValue);
         } else {
-            bucket.set(value);
-            logger.info("[RedissonRBucketCache] put cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+            //bucket.set(value);
+            Object oldValue = bucket.getAndSet(value);
+            logger.info("[RedissonRBucketCache] put cache, cacheName={}, key={}, value={}, oldValue={}", this.getCacheName(), cacheKey, value, oldValue);
         }
 
         // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate

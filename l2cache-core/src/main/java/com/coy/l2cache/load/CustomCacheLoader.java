@@ -88,7 +88,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
             valueLoaderCache.put(key, ValueLoaderWarpper.newInstance(this.cacheName, key, valueLoader));
         } else {
             if (null == warpper.getValueLoader()) {
-                logger.info("[CustomCacheLoader]ValueLoaderWarpper.valueLoader is null reset, cacheName={}, key={}, valueLoader={}", cacheName, key, valueLoader);
+                logger.info("[CustomCacheLoader]ValueLoaderWarpper.valueLoader is null and set a new valueLoader, cacheName={}, key={}, valueLoader={}", cacheName, key, valueLoader);
                 warpper.setValueLoader(valueLoader);
             }
         }

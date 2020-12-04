@@ -22,6 +22,12 @@ public class ValueLoaderWarpperTemp implements Callable {
      */
     private boolean call;
 
+    /**
+     * 是否发送消息，默认true发送消息
+     * 注：call=true 且 publishMsg=true 时，才发送消息
+     */
+    private boolean publishMsg = true;
+
     private Callable<?> valueLoader;
 
     public ValueLoaderWarpperTemp(String cacheName, Object key, Callable<?> valueLoader) {
@@ -47,5 +53,24 @@ public class ValueLoaderWarpperTemp implements Callable {
      */
     public boolean isCall() {
         return this.call;
+    }
+
+    /**
+     * 设置是否发布消息
+     */
+    public boolean setPublishMsg(boolean publishMsg) {
+        return this.publishMsg = publishMsg;
+    }
+
+    /**
+     * 是否发布消息
+     * 注：call=true 且 publishMsg=true 时，才发送消息
+     * 说明：call=true 表示执行了加载数据逻辑
+     */
+    public boolean isPublishMsg() {
+        if (this.call && this.publishMsg) {
+            return true;
+        }
+        return false;
     }
 }
