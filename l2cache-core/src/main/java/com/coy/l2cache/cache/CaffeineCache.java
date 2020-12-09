@@ -171,7 +171,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void evict(Object key) {
-        logger.debug("[CaffeineCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("[CaffeineCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
         caffeineCache.invalidate(key);
         if (null != nullValueCache) {
             nullValueCache.invalidate(key);
@@ -183,7 +183,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void clear() {
-        logger.debug("[CaffeineCache] clear cache, cacheName={}", this.getCacheName());
+        logger.info("[CaffeineCache] clear cache, cacheName={}", this.getCacheName());
         caffeineCache.invalidateAll();
         if (null != nullValueCache) {
             nullValueCache.invalidateAll();
