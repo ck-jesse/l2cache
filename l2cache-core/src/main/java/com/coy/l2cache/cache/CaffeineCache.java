@@ -131,6 +131,11 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     }
 
     @Override
+    public Object getIfPresent(Object key) {
+        return fromStoreValue(this.caffeineCache.getIfPresent(key));
+    }
+
+    @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
         if (isLoadingCache()) {
             // 将Callable设置到自定义CacheLoader中，以便在load()中执行具体的业务方法来加载数据

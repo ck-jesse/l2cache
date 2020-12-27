@@ -52,8 +52,17 @@ public interface Cache {
 
     /**
      * 获取指定key的缓存项
+     * 注：本地缓存在loadingCache模式下，若缓存项不存在，则会加载缓存项并put到本地缓存
      */
     Object get(Object key);
+
+    /**
+     * 获取指定key的缓存项（如果存在，则获取并返回）
+     * 注：仅仅只是获取，缓存项不存在，则不会加载
+     */
+    default Object getIfPresent(Object key) {
+        return get(key);
+    }
 
     /**
      * 获取指定key的缓存项，并返回指定类型的返回值
@@ -150,7 +159,7 @@ public interface Cache {
     /**
      * 批量put
      */
-        default <R, T> void batchPut(Map<R, T> dataMap) {
+    default <R, T> void batchPut(Map<R, T> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }

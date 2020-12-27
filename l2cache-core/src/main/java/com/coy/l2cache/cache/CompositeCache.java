@@ -90,6 +90,28 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     }
 
     @Override
+    public Object getIfPresent(Object key) {
+        Object value = null;
+        // 是否开启一级缓存
+        boolean ifL1Open = ifL1Open(key);
+        if (ifL1Open) {
+            // 从L1获取缓存
+            value = level1Cache.getIfPresent(key);
+            if (value != null) {
+                logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                return value;
+            }
+        }
+        // 从L2获取缓存
+        value = level2Cache.getIfPresent(key);
+        if (value != null && ifL1Open) {
+            logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            level1Cache.put(key, value);
+        }
+        return value;
+    }
+
+    @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
         // 是否开启一级缓存
         if (ifL1Open(key)) {
