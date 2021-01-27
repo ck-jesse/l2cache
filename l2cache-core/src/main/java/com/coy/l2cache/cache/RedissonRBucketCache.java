@@ -306,6 +306,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         if (null == keyList || keyList.size() == 0) {
             return resultMap;
         }
+        // TODO 批量获取分页
         RBatch batch = redissonClient.createBatch();
         keyList.forEach(key -> {
             String buildKey = key + "";
@@ -327,6 +328,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
+        // TODO 批量获取分页
         RBatch batch = redissonClient.createBatch();
         dataMap.entrySet().forEach(entry -> {
             String cacheKey = (String) buildKeyBase(entry.getKey());
