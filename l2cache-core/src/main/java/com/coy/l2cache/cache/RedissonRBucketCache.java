@@ -7,6 +7,7 @@ import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.load.ValueLoaderWarpperTemp;
 import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
+import org.checkerframework.checker.units.qual.K;
 import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -322,7 +323,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     }
 
     @Override
-    public <R, T> void batchPut(Map<R, T> dataMap) {
+    public <K, V> void batchPut(Map<K, V> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
@@ -339,12 +340,14 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 batch.getBucket(cacheKey).setAsync(value);
                 logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             }
+            // TODO 副本的逻辑需要去掉
             // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
             if (this.checkDuplicateKey(cacheKey)) {
-                this.duplicatePutBuild(entry.getKey(), value, batch, getDuplicateSize(cacheKey));
+                int duplicateSize = getDuplicateSize(cacheKey);
+                this.duplicatePutBuild(entry.getKey(), value, batch, duplicateSize);
                 // 用于记录开启过副本
                 if (openedDuplicate.compareAndSet(false, true)) {
-                    logger.info("[RedissonRBucketCache] batchPut openedDuplicate set true, cacheName={}, key={}", this.getCacheName(), cacheKey);
+                    logger.info("[RedissonRBucketCache] batchPut openedDuplicate set true, cacheName={}, key={}, duplicateSize={}", this.getCacheName(), cacheKey, duplicateSize);
                 }
             } else if (openedDuplicate.get()) {
                 logger.warn("[RedissonRBucketCache] 只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 batchPut cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
@@ -391,7 +394,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
         // 用于记录开启过副本
         if (openedDuplicate.compareAndSet(false, true)) {
-            logger.info("[RedissonRBucketCache] duplicatePut openedDuplicate set true, cacheName={}, key={}", this.getCacheName(), cacheKey);
+            logger.info("[RedissonRBucketCache] duplicatePut openedDuplicate set true, cacheName={}, key={}, duplicateSize={}", this.getCacheName(), cacheKey, duplicateSize);
         }
         BatchResult result = batch.execute();
         logger.info("[RedissonRBucketCache] duplicatePut put succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), cacheKey, result.getResponses().size(), result.getSyncedSlaves());
