@@ -11,6 +11,7 @@ import org.checkerframework.checker.units.qual.K;
 import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.*;
@@ -321,6 +322,30 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         batch.execute();
         logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyList, resultMap);
         return resultMap;
+    }
+
+    @Override
+    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
+        Map<K, V> hitMap = new HashMap<>();// 命中列表
+        if (CollectionUtils.isEmpty(keyMap)) {
+            return hitMap;
+        }
+        // TODO 批量获取分页
+        RBatch batch = redissonClient.createBatch();
+        keyMap.forEach((k, cacheKey) -> {
+            String cacheKeyNew = (String) buildKeyBase(cacheKey);
+            RFuture<V> async = (RFuture<V>) batch.getBucket(cacheKeyNew).getAsync();
+            async.onComplete((value, exception) -> {
+                // 没有异常且返回值不为空
+                if (exception == null && !ObjectUtils.isEmpty(value)) {
+                    hitMap.put(k, value);
+                }
+            });
+        });
+        batch.execute();
+        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyMap={}, hitMap={}", this.getCacheName(), keyMap, hitMap);
+        return hitMap;
+
     }
 
     @Override

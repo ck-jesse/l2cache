@@ -182,11 +182,11 @@ public interface Cache {
      * @param keyMap 将List<K>转换后的 cacheKey Map
      * @see Cache#batchGetOrLoad(java.util.List, java.util.function.Function, java.util.function.Function)
      */
-    default <K, R> Map<K, R> batchGet(Map<K, Object> keyMap) {
-        Map<K, R> hitMap = new HashMap<>();// 命中列表
+    default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
+        Map<K, V> hitMap = new HashMap<>();// 命中列表
 
         keyMap.forEach((o, cacheKey) -> {
-            R value = (R) this.getIfPresent(cacheKey);// 仅仅获取
+            V value = (V) this.getIfPresent(cacheKey);// 仅仅获取
             if (null != value) {
                 hitMap.put(o, value);
             }
@@ -243,10 +243,9 @@ public interface Cache {
             // 合并数据
             hitMap.putAll(notHitDataMap);
 
-            // TODO 将notHitDataMap的数据put到缓存
-            logger.info("batchGetOrLoad batch put not hit cache data start, cacheName={}, notHitKeyMap={}", this.getCacheName(), notHitKeyMap);
+            // 将未命中缓存的数据put到缓存
             this.batchPut(notHitDataMap);
-            logger.info("batchGetOrLoad batch put not hit cache data end, cacheName={}", this.getCacheName());
+            logger.info("batchGetOrLoad batch put not hit cache data, cacheName={}, notHitKeyMap={}", this.getCacheName(), notHitKeyMap);
 
             // 处理没有查询到数据的key，缓存空值
             if (notHitDataMap.size() != notHitKeyMap.size()) {
