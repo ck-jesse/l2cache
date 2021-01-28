@@ -1,13 +1,15 @@
 package com.coy.l2cache.cache;
 
+import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.consts.ColletConsts;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.load.ValueLoaderWarpperTemp;
 import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
-import org.checkerframework.checker.units.qual.K;
+import com.google.common.collect.Lists;
 import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -294,95 +296,91 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
 
     /**
-     * 通过批量key获取 value集合
+     * 批量get
+     * 实现抽像方法
      *
-     * @param keyList
-     * @param <T>
-     * @return
+     * @param keyMap 将List<K>转换后的 cacheKey Map
+     * @see Cache#batchGetOrLoad(java.util.List, java.util.function.Function, java.util.function.Function)
      */
     @Override
-    public <T> Map<String, T> batchGet(List<String> keyList) {
-        // 获取查询结果
-        Map<String, T> resultMap = new ConcurrentHashMap<>();
-        if (null == keyList || keyList.size() == 0) {
-            return resultMap;
-        }
-        // TODO 批量获取分页
-        RBatch batch = redissonClient.createBatch();
-        keyList.forEach(key -> {
-            String buildKey = key + "";
-            RFuture<Object> async = batch.getBucket(buildKey).getAsync();
-            async.onComplete((value, exception) -> {
-                // 没有异常且返回值不为空
-                if (exception == null && !ObjectUtils.isEmpty(value)) {
-                    resultMap.put(buildKey, (T) value);
-                }
-            });
-        });
-        batch.execute();
-        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}", this.getCacheName(), keyList, resultMap);
-        return resultMap;
-    }
-
-    @Override
     public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
-        Map<K, V> hitMap = new HashMap<>();// 命中列表
+        // 命中列表
+        Map<K, V> hitMap = new HashMap<>();
+
+        // 查询参数为空
         if (CollectionUtils.isEmpty(keyMap)) {
+            logger.debug("[RedissonRBucketCache] batchGet cache params is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
             return hitMap;
         }
-        // TODO 批量获取分页
-        RBatch batch = redissonClient.createBatch();
-        keyMap.forEach((k, cacheKey) -> {
-            String cacheKeyNew = (String) buildKeyBase(cacheKey);
-            RFuture<V> async = (RFuture<V>) batch.getBucket(cacheKeyNew).getAsync();
-            async.onComplete((value, exception) -> {
-                // 没有异常且返回值不为空
-                if (exception == null && !ObjectUtils.isEmpty(value)) {
-                    hitMap.put(k, value);
-                }
-            });
-        });
-        batch.execute();
-        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyMap={}, hitMap={}", this.getCacheName(), keyMap, hitMap);
-        return hitMap;
 
+        // 补全redisKey的CacheName
+        keyMap.forEach((key, value) -> keyMap.put(key, buildKeyBase(value)));
+
+        // 集合切分
+        List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), ColletConsts.BATCH_CACHE_COLLECT_SPLIT);
+
+        // for循环分执行batch,减少瞬间redisson的netty堆外内存溢出
+        keyListCollect.forEach(keyList -> {
+            RBatch batch = redissonClient.createBatch();
+            keyList.forEach(key -> {
+                Object cacheKey = buildKeyBase(keyMap.get(key));
+                String buildKey = cacheKey + "";
+                RFuture<Object> async = batch.getBucket(buildKey).getAsync();
+                async.onComplete((value, exception) -> {
+                    // 没有异常且返回值不为空
+                    if (exception == null && !ObjectUtils.isEmpty(value)) {
+                        hitMap.put(key, (V) value);
+                    }
+                });
+            });
+            BatchResult result = batch.execute();
+            logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}, syncedSlaves={}", this.getCacheName(), keyList, hitMap, result.getSyncedSlaves());
+        });
+        return hitMap;
     }
 
+
+
     @Override
-    public <K, V> void batchPut(Map<K, V> dataMap) {
+    public <V> void batchPut(Map<Object, V> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
-        // TODO 批量获取分页
-        RBatch batch = redissonClient.createBatch();
-        dataMap.entrySet().forEach(entry -> {
-            String cacheKey = (String) buildKeyBase(entry.getKey());
-            Object value = toStoreValue(entry.getValue());
-            // 过期时间处理
-            long expireTime = this.expireTimeDeal(value);
-            if (expireTime > 0) {
-                batch.getBucket(cacheKey).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
-                logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, cacheKey, value);
-            } else {
-                batch.getBucket(cacheKey).setAsync(value);
-                logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
-            }
-            // TODO 副本的逻辑需要去掉
-            // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
-            if (this.checkDuplicateKey(cacheKey)) {
-                int duplicateSize = getDuplicateSize(cacheKey);
-                this.duplicatePutBuild(entry.getKey(), value, batch, duplicateSize);
-                // 用于记录开启过副本
-                if (openedDuplicate.compareAndSet(false, true)) {
-                    logger.info("[RedissonRBucketCache] batchPut openedDuplicate set true, cacheName={}, key={}, duplicateSize={}", this.getCacheName(), cacheKey, duplicateSize);
+        // 集合切分
+        List<List<Object>> keyListCollect = Lists.partition(new ArrayList<>(dataMap.keySet()), ColletConsts.BATCH_CACHE_COLLECT_SPLIT);
+
+        // for循环分执行batch,减少瞬间redisson的netty堆外内存溢出
+        keyListCollect.forEach(keyList -> {
+            RBatch batch = redissonClient.createBatch();
+            keyList.forEach(key -> {
+                String cacheKey = (String) buildKeyBase(key);
+                Object value = toStoreValue(dataMap.get(key));
+                // 过期时间处理
+                long expireTime = this.expireTimeDeal(value);
+                if (expireTime > 0) {
+                    batch.getBucket(cacheKey).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
+                    logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, cacheKey, value);
+                } else {
+                    batch.getBucket(cacheKey).setAsync(value);
+                    logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
                 }
-            } else if (openedDuplicate.get()) {
-                logger.warn("[RedissonRBucketCache] 只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 batchPut cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
-                this.duplicateEvictBuild(entry.getKey(), batch, getDuplicateSize(cacheKey));
-            }
+                // TODO 副本的逻辑需要去掉
+                // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
+                if (this.checkDuplicateKey(cacheKey)) {
+                    int duplicateSize = getDuplicateSize(cacheKey);
+                    this.duplicatePutBuild(key, value, batch, duplicateSize);
+                    // 用于记录开启过副本
+                    if (openedDuplicate.compareAndSet(false, true)) {
+                        logger.info("[RedissonRBucketCache] batchPut openedDuplicate set true, cacheName={}, key={}, duplicateSize={}", this.getCacheName(), cacheKey, duplicateSize);
+                    }
+                } else if (openedDuplicate.get()) {
+                    logger.warn("[RedissonRBucketCache] 只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 batchPut cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
+                    this.duplicateEvictBuild(key, batch, getDuplicateSize(cacheKey));
+                }
+            });
+            BatchResult result = batch.execute();
+            logger.debug("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
         });
-        BatchResult result = batch.execute();
-        logger.debug("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), result.getSyncedSlaves());
     }
 
     // ----------下面为私有方法
@@ -608,4 +606,6 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         }
         return redis.getDefaultDuplicateSize();
     }
+
+
 }

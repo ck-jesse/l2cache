@@ -183,10 +183,12 @@ public interface Cache {
      * @see Cache#batchGetOrLoad(java.util.List, java.util.function.Function, java.util.function.Function)
      */
     default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
-        Map<K, V> hitMap = new HashMap<>();// 命中列表
+        // 命中列表
+        Map<K, V> hitMap = new HashMap<>();
 
         keyMap.forEach((o, cacheKey) -> {
-            V value = (V) this.getIfPresent(cacheKey);// 仅仅获取
+            // 仅仅获取
+            V value = (V) this.getIfPresent(cacheKey);
             if (null != value) {
                 hitMap.put(o, value);
             }
@@ -244,7 +246,9 @@ public interface Cache {
             hitMap.putAll(notHitDataMap);
 
             // 将未命中缓存的数据put到缓存
-            this.batchPut(notHitDataMap);
+            Map<Object, V> batchPutDataMap = new HashMap<>();
+            notHitDataMap.forEach((k, v) -> batchPutDataMap.put(keyBuilder.apply(k), v));
+            this.batchPut(batchPutDataMap);
             logger.info("batchGetOrLoad batch put not hit cache data, cacheName={}, notHitKeyMap={}", this.getCacheName(), notHitKeyMap);
 
             // 处理没有查询到数据的key，缓存空值
@@ -266,7 +270,7 @@ public interface Cache {
     /**
      * 批量put
      */
-    default <K, V> void batchPut(Map<K, V> dataMap) {
+    default <V> void batchPut(Map<Object, V> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }

@@ -223,7 +223,7 @@ public class RedisCacheTest {
         System.out.println("batch put " + map);
 
         // 批量put
-        cache.batchPut(map);
+//        cache.batchPut(map);
 
         // key 完全匹配
         List<String> keyList = new ArrayList<>(map.keySet());

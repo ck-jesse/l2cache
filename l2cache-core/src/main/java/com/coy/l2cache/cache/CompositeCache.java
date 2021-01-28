@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -229,5 +229,31 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             logger.debug("[CompositeCache] evict l1Cache, cacheName={}, key={}", this.getCacheName(), key);
             level1Cache.evict(key);
         }
+    }
+
+    @Override
+    public <T> Map<String, T> batchGet(List<String> keyList) {
+        Map<String, T> resultMap = new HashMap<>();
+        Set<String> keySet = new HashSet<>(keyList);
+        // 查找一级缓存
+        keyList.forEach(key -> {
+            if (this.ifL1Open(key)) {
+                Object value = level1Cache.getIfPresent(key);
+                if (value != null) {
+                    resultMap.put(key, (T) value);
+                    keySet.remove(key);
+                }
+            }
+        });
+        // 一级缓存找到全部结果
+        if (CollectionUtils.isEmpty(keySet)) {
+            return resultMap;
+        }
+        // 查找二级缓存
+        Map<String, Object> l2ResultMap = level2Cache.batchGet(new ArrayList<>(keySet));
+        if (l2ResultMap != null && l2ResultMap.size() > 0) {
+            l2ResultMap.forEach((key, value) -> resultMap.put(key, (T) value));
+        }
+        return resultMap;
     }
 }
