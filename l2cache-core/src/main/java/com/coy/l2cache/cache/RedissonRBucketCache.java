@@ -313,9 +313,6 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return hitMap;
         }
 
-        // 补全redisKey的CacheName
-        keyMap.forEach((key, value) -> keyMap.put(key, buildKeyBase(value)));
-
         // 集合切分
         List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), ColletConsts.BATCH_CACHE_COLLECT_SPLIT);
 
