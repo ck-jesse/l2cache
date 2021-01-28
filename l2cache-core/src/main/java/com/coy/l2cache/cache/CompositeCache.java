@@ -289,11 +289,6 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     }
 
     @Override
-    public <K, V> Map<K, V> batchGet(List<K> keyList, Function<Object, K> keyBuilder) {
-        return this.batchGetOrLoad(keyList, keyBuilder, null);
-    }
-
-    @Override
     public <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<Object, K> keyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO，结构 <K, cacheKey>
         Map<K, Object> keyMap = new HashMap<>();
