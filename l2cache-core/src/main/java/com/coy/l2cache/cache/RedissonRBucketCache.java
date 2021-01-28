@@ -320,13 +320,14 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         keyListCollect.forEach(keyList -> {
             RBatch batch = redissonClient.createBatch();
             keyList.forEach(key -> {
-                Object cacheKey = buildKeyBase(keyMap.get(key));
-                String buildKey = cacheKey + "";
-                RFuture<Object> async = batch.getBucket(buildKey).getAsync();
+                String cacheKey = (String) buildKeyBase(keyMap.get(key));
+                RFuture<Object> async = batch.getBucket(cacheKey).getAsync();
                 async.onComplete((value, exception) -> {
                     // 没有异常且返回值不为空
                     if (exception == null && !ObjectUtils.isEmpty(value)) {
                         hitMap.put(key, (V) value);
+                    } else {
+                        logger.warn("[RedissonRBucketCache] batchGet cache fail, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception);
                     }
                 });
             });
@@ -335,7 +336,6 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         });
         return hitMap;
     }
-
 
 
     @Override
@@ -376,7 +376,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 }
             });
             BatchResult result = batch.execute();
-            logger.debug("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
+            logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
         });
     }
 
