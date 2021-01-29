@@ -162,7 +162,7 @@ public interface Cache {
      * @param keyList         业务维度的key集合（K可能是自定义DTO）
      * @param cacheKeyBuilder 自定义的cacheKey构建器
      */
-    default <K, R> Map<K, R> batchGet(List<K> keyList, Function<Object, K> cacheKeyBuilder) {
+    default <K, R> Map<K, R> batchGet(List<K> keyList, Function<K, Object> cacheKeyBuilder) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
         if (null != cacheKeyBuilder) {
@@ -211,7 +211,7 @@ public interface Cache {
      * @param cacheKeyBuilder 自定义的cacheKey构建器
      * @param valueLoader     值加载器
      */
-    default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<Object, K> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
+    default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<K, Object> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
         if (null != cacheKeyBuilder) {
@@ -297,7 +297,7 @@ public interface Cache {
      * @param dataMap         缓存数据集合（K可能是自定义DTO）
      * @param cacheKeyBuilder 自定义的cacheKey构建器
      */
-    default <K, V> void batchPut(Map<K, V> dataMap, Function<Object, K> cacheKeyBuilder) {
+    default <K, V> void batchPut(Map<K, V> dataMap, Function<K, Object> cacheKeyBuilder) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }

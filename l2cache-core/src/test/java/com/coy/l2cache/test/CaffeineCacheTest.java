@@ -10,6 +10,7 @@ import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.sync.CacheMessageListener;
 import com.coy.l2cache.sync.RedisCacheSyncPolicy;
+import org.checkerframework.checker.units.qual.K;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /**
  * CaffeineCache 中各个方法的单元测试
@@ -38,7 +40,7 @@ public class CaffeineCacheTest {
                 .setAllowNullValues(true)
                 .getCaffeine()
                 //.setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
-                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats")
+                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=60s,recordStats")
                 .setAutoRefreshExpireCache(false)
                 .setRefreshPoolSize(3)
                 .setRefreshPeriod(5L)
@@ -284,23 +286,54 @@ public class CaffeineCacheTest {
         cache.batchPut(map);
 
         // key 完全匹配
-//        List<Object> keyList = new ArrayList<>(map.keySet());
-//        Map<Object, Object> list1 = cache.batchGetObject(keyList);
-//        System.out.println(list1);
-//
-//        // key 完全匹配
-//        Map<Object, Object> list2 = cache.batchGetObject(keyList);
-//        System.out.println(list2);
-//
-//        // key 全部存在(少于缓存中的key)
-//        keyList.remove(1);
-//        list1 = cache.batchGetObject(keyList);
-//        System.out.println(list1);
-//
-//        // key 部分存在缓存，部分不存在缓存
-//        keyList.add("other");
-//        list1 = cache.batchGetObject(keyList);
-//        System.out.println(list1);
+        List<Object> keyList = new ArrayList<>(map.keySet());
+        Map<Object, Object> list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+
+        // key 完全匹配
+        Map<Object, Object> list2 = cache.batchGet(keyList);
+        System.out.println(list2);
+
+        // key 全部存在(少于缓存中的key)
+        keyList.remove(1);
+        list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+
+        // key 部分存在缓存，部分不存在缓存
+        keyList.add("other");
+        list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+    }
+
+
+    @Test
+    public void batchPutBuilderCacheKey() {
+        // 模拟数据(业务key为DTO)
+        Map<UserDTO, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+
+        // 自定义cacheKey的构建方式
+        Function<UserDTO, Object> cacheKeyBuilder = new Function<UserDTO, Object>() {
+            @Override
+            public Object apply(UserDTO userDTO) {
+                return userDTO.getName() + userDTO.getUserId();
+            }
+        };
+        // 批量put
+        cache.batchPut(map, cacheKeyBuilder);
+
+        // 批量get
+        List<UserDTO> keyList = new ArrayList<>(map.keySet());
+        Map<UserDTO, User> getMap = cache.batchGet(keyList, cacheKeyBuilder);
+        System.out.println(getMap);
+
+        // 通过参数DTO可以直接获取到对应的数据
+        keyList.forEach(userDTO -> {
+            System.out.println("key=" + userDTO + ", value=" + getMap.get(userDTO));
+        });
     }
 
     @Test

@@ -106,7 +106,7 @@ public class LoadFunction implements Function<Object, Object> {
             // 将异常包装spring cache异常
             throw SpringCacheExceptionUtil.warpper(key, this.valueLoader, ex);
         } finally {
-            if (valueLoader.getWaitRefreshNum() > 0) {
+            if (null != valueLoader && valueLoader.getWaitRefreshNum() > 0) {
                 int beforeWaitRefreshNum = valueLoader.clearWaitRefreshNum();
                 logger.info("[LoadFunction] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
             }
