@@ -182,12 +182,12 @@ public interface Cache {
         // 命中列表
         Map<K, V> hitMap = new HashMap<>();
 
-        keyMap.forEach((o, cacheKey) -> {
+        keyMap.forEach((k, cacheKey) -> {
             // 仅仅获取
             V value = (V) this.getIfPresent(cacheKey);
             logger.debug("batchGet, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             if (null != value) {
-                hitMap.put(o, value);
+                hitMap.put(k, value);
             }
         });
         return hitMap;
@@ -248,11 +248,12 @@ public interface Cache {
             });
 
             // 全部命中，直接返回
-            if (CollectionUtils.isEmpty(notHitKeyMap)) {
+            if (CollectionUtils.isEmpty(notHitKeyMap) && !CollectionUtils.isEmpty(hitMap)) {
                 logger.info("batchGetOrLoad all_hit, cacheName={}, notHitKey={}", this.getCacheName(), notHitKeyMap);
                 return hitMap;
             }
 
+            // TODO 此处有问题，需要调整
             Map<K, V> notHitDataMap = valueLoader.apply(new ArrayList<>(notHitKeyMap.keySet()));
 
             // 一个都没有命中，直接返回

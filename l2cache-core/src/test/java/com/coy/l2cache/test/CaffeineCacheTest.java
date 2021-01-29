@@ -337,9 +337,27 @@ public class CaffeineCacheTest {
     }
 
     @Test
-    public void batchGet() {
-        List<Object> keyList = new ArrayList<>();
+    public void batchGetOrLoad() {
+        // 模拟数据(业务key为DTO)
+        Map<UserDTO, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+        List<UserDTO> keyList = new ArrayList<>(map.keySet());
 
+        Function<List<UserDTO>, Map<UserDTO, User>> valueLoader = new Function<List<UserDTO>, Map<UserDTO, User>>() {
+            @Override
+            public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
+                Map<UserDTO, User> newMap = new HashMap<>();
+                for (int i = 0; i < 5; i++) {
+                    newMap.put(new UserDTO("new_name" + i, "" + i), new User("new_name" + i, "addr" + i));
+                }
+                return newMap;
+            }
+        };
+        Map<UserDTO, User> mapNew = cache.batchGetOrLoad(keyList, valueLoader);
+        System.out.println(mapNew);
     }
 
 }
