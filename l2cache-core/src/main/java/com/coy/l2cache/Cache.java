@@ -159,14 +159,14 @@ public interface Cache {
      * 批量get
      * 注：支持批量get时的灵活定义cacheKey的构建
      *
-     * @param keyList    业务维度的key集合（K可能是自定义DTO）
-     * @param keyBuilder 自定义的cacheKey构建器
+     * @param keyList         业务维度的key集合（K可能是自定义DTO）
+     * @param cacheKeyBuilder 自定义的cacheKey构建器
      */
-    default <K, R> Map<K, R> batchGet(List<K> keyList, Function<Object, K> keyBuilder) {
+    default <K, R> Map<K, R> batchGet(List<K> keyList, Function<Object, K> cacheKeyBuilder) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
-        if (null != keyBuilder) {
-            keyList.forEach(key -> keyMap.put(key, keyBuilder.apply(key)));
+        if (null != cacheKeyBuilder) {
+            keyList.forEach(key -> keyMap.put(key, cacheKeyBuilder.apply(key)));
         } else {
             keyList.forEach(key -> keyMap.put(key, key));
         }
@@ -207,15 +207,15 @@ public interface Cache {
     /**
      * 批量get或load
      *
-     * @param keyList     业务维度的key集合（K可能是自定义DTO）
-     * @param keyBuilder  自定义的cacheKey构建器
-     * @param valueLoader 值加载器
+     * @param keyList         业务维度的key集合（K可能是自定义DTO）
+     * @param cacheKeyBuilder 自定义的cacheKey构建器
+     * @param valueLoader     值加载器
      */
-    default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<Object, K> keyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
+    default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<Object, K> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
-        if (null != keyBuilder) {
-            keyList.forEach(key -> keyMap.put(key, keyBuilder.apply(key)));
+        if (null != cacheKeyBuilder) {
+            keyList.forEach(key -> keyMap.put(key, cacheKeyBuilder.apply(key)));
         } else {
             keyList.forEach(key -> keyMap.put(key, key));
         }
@@ -234,6 +234,11 @@ public interface Cache {
             // 获取命中列表
             Map<K, V> hitMap = this.batchGet(keyMap);
 
+            if (null == valueLoader) {
+                logger.info("batchGetOrLoad valueLoader is null return hitMap, cacheName={}, cacheKeyList={}", this.getCacheName(), keyMap.values());
+                return hitMap;
+            }
+
             // 过滤未命中key列表
             Map<K, Object> notHitKeyMap = new HashMap<>();
             keyMap.forEach((k, cacheKey) -> {
@@ -248,10 +253,6 @@ public interface Cache {
                 return hitMap;
             }
 
-            if (null == valueLoader) {
-                logger.info("batchGetOrLoad valueLoader is null return hitMap, cacheName={}, notHitKey={}", this.getCacheName(), notHitKeyMap);
-                return hitMap;
-            }
             Map<K, V> notHitDataMap = valueLoader.apply(new ArrayList<>(notHitKeyMap.keySet()));
 
             // 一个都没有命中，直接返回
@@ -292,14 +293,37 @@ public interface Cache {
 
     /**
      * 批量put
+     *
+     * @param dataMap         缓存数据集合（K可能是自定义DTO）
+     * @param cacheKeyBuilder 自定义的cacheKey构建器
      */
-    default <V> void batchPut(Map<Object, V> dataMap) {
+    default <K, V> void batchPut(Map<K, V> dataMap, Function<Object, K> cacheKeyBuilder) {
+        if (null == dataMap || dataMap.size() == 0) {
+            return;
+        }
+        if (null == cacheKeyBuilder) {
+            this.batchPut(dataMap);
+            return;
+        }
+        Map<Object, V> dataMapTemp = new HashMap<>();
+        dataMap.forEach((key, value) -> {
+            // 将 key 转换为cacheKey，因K可能是自定义DTO
+            dataMapTemp.put(cacheKeyBuilder.apply(key), value);
+        });
+        this.batchPut(dataMapTemp);
+    }
+
+    /**
+     * 批量put
+     *
+     * @param dataMap 缓存数据集合（K可能是自定义DTO）
+     */
+    default <K, V> void batchPut(Map<K, V> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
         dataMap.forEach((key, value) -> {
-            put(key, value);
+            this.put(key, value);
         });
     }
-
 }
