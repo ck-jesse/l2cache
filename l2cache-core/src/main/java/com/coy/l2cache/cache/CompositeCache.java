@@ -263,71 +263,87 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     }
 
     @Override
-    public <T> Map<String, T> batchGet(List<String> keyList) {
-        Map<String, T> resultMap = new HashMap<>();
-        Set<String> keySet = new HashSet<>(keyList);
-        // 查找一级缓存
-        keyList.forEach(key -> {
-            if (this.ifL1Open(key)) {
-                Object value = level1Cache.getIfPresent(key);
-                if (value != null) {
-                    resultMap.put(key, (T) value);
-                    keySet.remove(key);
-                }
-            }
-        });
-        // 一级缓存找到全部结果
-        if (CollectionUtils.isEmpty(keySet)) {
-            return resultMap;
-        }
-        // 查找二级缓存
-        Map<String, Object> l2ResultMap = level2Cache.batchGet(new ArrayList<>(keySet));
-        if (l2ResultMap != null && l2ResultMap.size() > 0) {
-            l2ResultMap.forEach((key, value) -> resultMap.put(key, (T) value));
-        }
-        return resultMap;
-    }
-
-    @Override
-    public <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<Object, K> keyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
-        // 将keyList 转换为cacheKey，因K可能是自定义DTO，结构 <K, cacheKey>
-        Map<K, Object> keyMap = new HashMap<>();
-        keyList.forEach(key -> keyMap.put(key, keyBuilder.apply(key)));
-
-        // 获取到一级缓存中查询的key
+    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
+        // 获取走一级缓存的key
         Map<K, Object> l1KeyMap = new HashMap<>();
         if (ifL1Open()) {
             l1KeyMap.putAll(keyMap);
+            logger.info("[CompositeCache] batchGet 全部key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1KeyMap);
         } else {
             keyMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getValue())).forEach(entry -> l1KeyMap.put(entry.getKey(), entry.getValue()));
+            logger.info("[CompositeCache] batchGet 部分key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1KeyMap);
         }
 
         // 缓存命中列表
-        Map<K, V> hitMap = Maps.newHashMap();
+        Map<K, V> hitMap = new HashMap<>();
         // 未命中列表
         Map<K, Object> notHitKeyMap = new HashMap<>();
 
         // 一级缓存批量查询
         if (!CollectionUtils.isEmpty(l1KeyMap)) {
-            Map<K, V> l1HitMap = level1Cache.batchGetOrLoad(keyList, keyBuilder, valueLoader);
+            Map<K, V> l1HitMap = level1Cache.batchGet(l1KeyMap);
             hitMap.putAll(l1HitMap);
             // 获取未命中列表
             keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> notHitKeyMap.put(entry.getKey(), entry.getValue()));
-            logger.info("[CompositeCache] batchGetOrLoad l1Cache, cacheName={}, l1KeyMap={}, l1HitMap={},  l1NotHitMap={}", this.getCacheName(), l1KeyMap, hitMap, notHitKeyMap);
+            logger.info("[CompositeCache] batchGet l1Cache, cacheName={}, l1KeyMap={}, l1HitMap={},  l1NotHitKeyMap={}", this.getCacheName(), l1KeyMap, hitMap, notHitKeyMap);
         } else {
             // 获取未命中列表
             notHitKeyMap.putAll(keyMap);
-            logger.info("[CompositeCache] batchGetOrLoad l1Cache not hit, cacheName={}, notHitKeyMap={}", this.getCacheName(), l1KeyMap);
+            logger.info("[CompositeCache] batchGet l1Cache not hit, cacheName={}, notHitKeyMap={}", this.getCacheName(), notHitKeyMap);
         }
 
         // 一级缓存全部命中
         if (CollectionUtils.isEmpty(notHitKeyMap)) {
-            logger.info("[CompositeCache] batchGetOrLoad l1Cache all hit, cacheName={}, KeyMap={}, l1HitMap={}", this.getCacheName(), keyMap, hitMap);
+            logger.info("[CompositeCache] batchGet l1Cache all hit, cacheName={}, KeyMap={}, hitMap={}", this.getCacheName(), keyMap, hitMap);
             return hitMap;
         }
 
         // 二级缓存批量查询
-        Map<K, V> l2HitMap = level2Cache.batchGetOrLoad(new ArrayList<>(notHitKeyMap.keySet()), keyBuilder, valueLoader);
+        Map<K, V> l2HitMap = level2Cache.batchGet(notHitKeyMap);
+        logger.info("[CompositeCache] batchGet l2Cache, cacheName={}, l2KeyMap={}, l2HitMap={}", this.getCacheName(), notHitKeyMap.keySet(), l2HitMap);
+        hitMap.putAll(l2HitMap);
+        logger.info("[CompositeCache] batchGet, cacheName={}, KeyMap={}, keyMapSize={}, hitMap={}, hitMapSize={}", this.getCacheName(), keyMap, keyMap.size(), hitMap, hitMap.size());
+        return hitMap;
+    }
+
+    @Override
+    public <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader) {
+        // 获取走一级缓存的key
+        Map<K, Object> l1KeyMap = new HashMap<>();
+        if (ifL1Open()) {
+            l1KeyMap.putAll(keyMap);
+            logger.info("[CompositeCache] batchGetOrLoad 全部key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1KeyMap);
+        } else {
+            keyMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getValue())).forEach(entry -> l1KeyMap.put(entry.getKey(), entry.getValue()));
+            logger.info("[CompositeCache] batchGetOrLoad 部分key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1KeyMap);
+        }
+
+        // 缓存命中列表
+        Map<K, V> hitMap = new HashMap<>();
+        // 未命中列表
+        Map<K, Object> notHitKeyMap = new HashMap<>();
+
+        // 一级缓存批量查询
+        if (!CollectionUtils.isEmpty(l1KeyMap)) {
+            Map<K, V> l1HitMap = level1Cache.batchGetOrLoad(l1KeyMap, valueLoader);
+            hitMap.putAll(l1HitMap);
+            // 获取未命中列表
+            keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> notHitKeyMap.put(entry.getKey(), entry.getValue()));
+            logger.info("[CompositeCache] batchGetOrLoad l1Cache, cacheName={}, l1KeyMap={}, l1HitMap={},  l1NotHitKeyMap={}", this.getCacheName(), l1KeyMap, hitMap, notHitKeyMap);
+        } else {
+            // 获取未命中列表
+            notHitKeyMap.putAll(keyMap);
+            logger.info("[CompositeCache] batchGetOrLoad l1Cache not hit, cacheName={}, notHitKeyMap={}", this.getCacheName(), notHitKeyMap);
+        }
+
+        // 一级缓存全部命中
+        if (CollectionUtils.isEmpty(notHitKeyMap)) {
+            logger.info("[CompositeCache] batchGetOrLoad l1Cache all hit, cacheName={}, KeyMap={}, hitMap={}", this.getCacheName(), keyMap, hitMap);
+            return hitMap;
+        }
+
+        // 二级缓存批量查询
+        Map<K, V> l2HitMap = level2Cache.batchGetOrLoad(notHitKeyMap, valueLoader);
         logger.info("[CompositeCache] batchGetOrLoad l2Cache, cacheName={}, l2KeyMap={}, l2HitMap={}", this.getCacheName(), notHitKeyMap.keySet(), l2HitMap);
         hitMap.putAll(l2HitMap);
         logger.info("[CompositeCache] batchGetOrLoad, cacheName={}, KeyMap={}, keyMapSize={}, hitMap={}, hitMapSize={}", this.getCacheName(), keyMap, keyMap.size(), hitMap, hitMap.size());

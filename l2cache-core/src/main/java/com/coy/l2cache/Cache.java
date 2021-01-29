@@ -145,23 +145,14 @@ public interface Cache {
 
     // ----- 批量操作
 
-
     /**
      * 批量get
-     * 注：只能用于相同的入参与出能类型查询
-     * 注：仅仅获取缓存，缓存数据不存在时，不会加载。
-     * 注：Deprecated by chenck，因该方法不够通用，在上层业务中需要将cacheKey构建好，使用时很麻烦，所以废弃
+     * 注：支持批量get时的灵活定义cacheKey的构建
+     *
+     * @param keyList 业务维度的key集合（K可能是自定义DTO）
      */
-    @Deprecated
-    default <T> Map<String, T> batchGet(List<String> keyList) {
-        Map<String, T> resultMap = new HashMap<>();
-        if (null == keyList || keyList.size() == 0) {
-            return resultMap;
-        }
-        keyList.forEach(key -> {
-            resultMap.put(key, (T) get(key));
-        });
-        return resultMap;
+    default <K, R> Map<K, R> batchGet(List<K> keyList) {
+        return this.batchGet(keyList, null);
     }
 
     /**
@@ -172,15 +163,20 @@ public interface Cache {
      * @param keyBuilder 自定义的cacheKey构建器
      */
     default <K, R> Map<K, R> batchGet(List<K> keyList, Function<Object, K> keyBuilder) {
-        return this.batchGetOrLoad(keyList, keyBuilder, null);
+        // 将keyList 转换为cacheKey，因K可能是自定义DTO
+        Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
+        if (null != keyBuilder) {
+            keyList.forEach(key -> keyMap.put(key, keyBuilder.apply(key)));
+        } else {
+            keyList.forEach(key -> keyMap.put(key, key));
+        }
+        return this.batchGet(keyMap);
     }
 
     /**
      * 批量get
-     * 注：等同于抽象类中的抽象方法，因增加抽象类会导致所有实现类需要变动，所以在改接口中定义该抽象方法。
      *
      * @param keyMap 将List<K>转换后的 cacheKey Map
-     * @see Cache#batchGetOrLoad(java.util.List, java.util.function.Function, java.util.function.Function)
      */
     default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
         // 命中列表
@@ -189,6 +185,7 @@ public interface Cache {
         keyMap.forEach((o, cacheKey) -> {
             // 仅仅获取
             V value = (V) this.getIfPresent(cacheKey);
+            logger.debug("batchGet, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             if (null != value) {
                 hitMap.put(o, value);
             }
@@ -201,19 +198,44 @@ public interface Cache {
      * 批量get或load
      *
      * @param keyList     业务维度的key集合（K可能是自定义DTO）
+     * @param valueLoader 值加载器
+     */
+    default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<List<K>, Map<K, V>> valueLoader) {
+        return this.batchGetOrLoad(keyList, null, valueLoader);
+    }
+
+    /**
+     * 批量get或load
+     *
+     * @param keyList     业务维度的key集合（K可能是自定义DTO）
      * @param keyBuilder  自定义的cacheKey构建器
      * @param valueLoader 值加载器
      */
     default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<Object, K> keyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
-        try {
-            // 将keyList 转换为cacheKey，因K可能是自定义DTO
-            Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
-            keyList.forEach(key -> {
-                keyMap.put(key, keyBuilder.apply(key));
-            });
+        // 将keyList 转换为cacheKey，因K可能是自定义DTO
+        Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
+        if (null != keyBuilder) {
+            keyList.forEach(key -> keyMap.put(key, keyBuilder.apply(key)));
+        } else {
+            keyList.forEach(key -> keyMap.put(key, key));
+        }
+        return this.batchGetOrLoad(keyMap, valueLoader);
+    }
 
-            Map<K, V> hitMap = this.batchGet(keyMap);// 命中列表
-            Map<K, Object> notHitKeyMap = new HashMap<>();// 未命中列表
+    /**
+     * 批量get或load
+     * 注：调用方自己组装好参数
+     *
+     * @param keyMap      将List<K>转换后的 cacheKey Map
+     * @param valueLoader 值加载器
+     */
+    default <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader) {
+        try {
+            // 获取命中列表
+            Map<K, V> hitMap = this.batchGet(keyMap);
+
+            // 过滤未命中key列表
+            Map<K, Object> notHitKeyMap = new HashMap<>();
             keyMap.forEach((k, cacheKey) -> {
                 if (hitMap.containsKey(k)) {
                     notHitKeyMap.put(k, cacheKey);
@@ -245,9 +267,10 @@ public interface Cache {
             // 合并数据
             hitMap.putAll(notHitDataMap);
 
-            // 将未命中缓存的数据put到缓存
+            // 将未命中缓存的数据按照cacheKey的方式来组装以便put到缓存
             Map<Object, V> batchPutDataMap = new HashMap<>();
-            notHitDataMap.forEach((k, v) -> batchPutDataMap.put(keyBuilder.apply(k), v));
+            keyMap.entrySet().stream().filter(entry -> notHitDataMap.containsKey(entry.getKey())).forEach(entry -> batchPutDataMap.put(entry.getValue(), notHitDataMap.get(entry.getKey())));
+            // 将未命中缓存的数据put到缓存
             this.batchPut(batchPutDataMap);
             logger.info("batchGetOrLoad batch put not hit cache data, cacheName={}, notHitKeyMap={}", this.getCacheName(), notHitKeyMap);
 
@@ -262,7 +285,7 @@ public interface Cache {
             }
             return hitMap;
         } catch (Exception e) {
-            logger.error("batchGetOrLoad error, keyList={}", keyList, e);
+            logger.error("batchGetOrLoad error, keyList={}", keyMap.values(), e);
             throw new L2CacheException("batchGetOrLoad error," + e.getMessage());
         }
     }

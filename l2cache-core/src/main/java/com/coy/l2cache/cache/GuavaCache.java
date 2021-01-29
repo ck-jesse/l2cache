@@ -280,24 +280,4 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                 .setOptType(optType);
     }
 
-
-
-    /**
-     * 因为 GuavaCache 默认采用LoaderCache异步加载数据，所以此处重写，仅仅只获取不加载
-     */
-    @Override
-    public <T> Map<String, T> batchGet(List<String> keyList) {
-        Map<String, T> resultMap = new HashMap<>();
-        if (null == keyList || keyList.size() == 0) {
-            return resultMap;
-        }
-        keyList.forEach(key -> {
-            Object value = this.guavaCache.getIfPresent(key);
-            logger.debug("[GuavaCache] batchGet, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
-            if (null != fromStoreValue(value)) {
-                resultMap.put(key, (T) fromStoreValue(value));
-            }
-        });
-        return resultMap;
-    }
 }
