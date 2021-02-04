@@ -303,7 +303,9 @@ public interface Cache {
             return;
         }
         if (null == cacheKeyBuilder) {
-            this.batchPut(dataMap);
+            Map<Object,V> batchMap = new HashMap<>();
+            dataMap.forEach((key,value) -> batchMap.put(key,value));
+            this.batchPut(batchMap);
             return;
         }
         Map<Object, V> dataMapTemp = new HashMap<>();
@@ -319,8 +321,8 @@ public interface Cache {
      *
      * @param dataMap 缓存数据集合（K可能是自定义DTO）
      */
-    default <K, V> void batchPut(Map<K, V> dataMap) {
-        if (null == dataMap || dataMap.size() == 0) {
+    default <V> void batchPut(Map<Object, V> dataMap) {
+        if (CollectionUtils.isEmpty(dataMap)) {
             return;
         }
         dataMap.forEach((key, value) -> {

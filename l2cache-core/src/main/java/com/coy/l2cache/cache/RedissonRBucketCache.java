@@ -339,7 +339,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
 
     @Override
-    public <K, V> void batchPut(Map<K, V> dataMap) {
+    public <V> void batchPut(Map<Object, V> dataMap) {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
