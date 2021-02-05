@@ -329,7 +329,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         l1NotHitKeyMap.entrySet().stream().filter(entry -> !l2HitMap.containsKey(entry.getKey())).forEach(entry -> l2NotHitKeyMap.put(entry.getKey(), entry.getValue()));
 
         // 数据加载命中列表
-        Map<K, V> valueLoaderHitMap = valueLoader.apply(new ArrayList<>(l2NotHitKeyMap.keySet()));
+        Map<K, V> valueLoaderHitMap = new HashMap<>();
+        if (null != valueLoader) {
+            valueLoaderHitMap = valueLoader.apply(new ArrayList<>(l2NotHitKeyMap.keySet()));
+        }
         // 数据加载一个都没有命中，直接返回
         if (CollectionUtils.isEmpty(valueLoaderHitMap)) {
             // 对未命中的key缓存空值，防止缓存穿透
@@ -349,12 +352,12 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
         // 处理没有查询到数据的key，缓存空值
         if (valueLoaderHitMap.size() != l2NotHitKeyMap.size()) {
-            l2NotHitKeyMap.forEach((k, cacheKey) -> {
-                if (!valueLoaderHitMap.containsKey(k)) {
-                    logger.info("[CompositeCache] {} valueLoaderHitMap size not equal l2NotHitKeyMap size, put null, cacheName={}, cacheKey={}", methodName, this.getCacheName(), cacheKey);
-                    this.put(cacheKey, null);
+            for (Map.Entry<K, Object> entry : l2NotHitKeyMap.entrySet()) {
+                if (!valueLoaderHitMap.containsKey(entry.getKey())) {
+                    logger.info("[CompositeCache] {} valueLoaderHitMap size not equal l2NotHitKeyMap size, put null, cacheName={}, cacheKey={}", methodName, this.getCacheName(), entry.getValue());
+                    this.put(entry.getValue(), null);
                 }
-            });
+            }
         }
         logger.info("[CompositeCache] {}, cacheName={}, KeyMap={}, keyMapSize={}, hitMap={}, hitMapSize={}", methodName, this.getCacheName(), keyMap, keyMap.size(), hitMap, hitMap.size());
         return hitMap;

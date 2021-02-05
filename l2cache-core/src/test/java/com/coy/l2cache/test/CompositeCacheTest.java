@@ -13,12 +13,11 @@ import org.junit.Test;
 import org.redisson.api.RMap;
 import org.redisson.misc.Hash;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /**
  * CompositeCache 中各个方法的单元测试
@@ -226,4 +225,56 @@ public class CompositeCacheTest {
         System.out.println("clear后：缓存中所有的元素");
         printAllCache();
     }
+
+    @Test
+    public void batchGet1(){
+        List<Integer> keyList = new ArrayList<>();
+        keyList.add(1);
+        keyList.add(2);
+        keyList.add(3);
+        Map<Integer, Object> resultMap = cache.batchGet(keyList);
+
+        System.out.println(resultMap);
+    }
+
+    @Test
+    public void batchGetOrLoad(){
+        Map<Integer,String> dbQueryMap = new HashMap<>();
+        dbQueryMap.put(1,"1");
+        dbQueryMap.put(2,"2");
+        dbQueryMap.put(3,"3");
+
+
+
+        List<Integer> keyList = new ArrayList<>();
+        keyList.add(1);
+        keyList.add(2);
+        keyList.add(3);
+
+        Function cacheKeyBuilder = new Function<Integer, Object>() {
+            @Override
+            public Object apply(Integer integer) {
+                return integer;
+            }
+        };
+
+        Function valueLoader = new Function<List<Integer>, Map<Integer, String>>() {
+            @Override
+            public Map<Integer, String> apply(List<Integer> integers) {
+                Map<Integer,String> resultMap = new HashMap<>();
+                for (Integer integer : integers) {
+                    String s = dbQueryMap.get(integer);
+                    if(s != null){
+                        resultMap.put(integer,s);
+                    }
+                }
+                return resultMap;
+            }
+        };
+        Map<Integer, Object> resultMap = cache.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
+
+        System.out.println(resultMap);
+    }
+
+
 }
