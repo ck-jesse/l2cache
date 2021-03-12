@@ -3,6 +3,7 @@ package com.coy.l2cache.cache;
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheType;
+import org.checkerframework.checker.units.qual.K;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -280,7 +281,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         Map<K, Object> l1KeyMap = this.getL1KeyMap(keyMap, methodName);
 
         // 缓存命中列表
-        Map<K, V> hitMap = new HashMap<>();
+        Map<K, V> hitCacheMap = new HashMap<>();
         // 未命中列表
         Map<K, Object> l1NotHitKeyMap = new HashMap<>();
 
@@ -288,10 +289,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         if (!CollectionUtils.isEmpty(l1KeyMap)) {
             Map<K, V> l1HitMap = level1Cache.batchGet(l1KeyMap);
             // 合并数据
-            hitMap.putAll(l1HitMap);
+            hitCacheMap.putAll(l1HitMap);
             // 获取未命中列表
             keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> l1NotHitKeyMap.put(entry.getKey(), entry.getValue()));
-            logger.info("[CompositeCache] {} l1Cache batchGet, cacheName={}, l1KeyMap={}, l1HitMap={},  l1NotHitKeyMap={}", methodName, this.getCacheName(), l1KeyMap, hitMap, l1NotHitKeyMap);
+            logger.info("[CompositeCache] {} l1Cache batchGet, cacheName={}, l1KeyMap={}, l1HitMap={},  l1NotHitKeyMap={}", methodName, this.getCacheName(), l1KeyMap, hitCacheMap, l1NotHitKeyMap);
         } else {
             // 获取未命中列表
             l1NotHitKeyMap.putAll(keyMap);
@@ -300,8 +301,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
         // 一级缓存全部命中
         if (CollectionUtils.isEmpty(l1NotHitKeyMap)) {
-            logger.info("[CompositeCache] {} l1Cache all hit, cacheName={}, KeyMap={}, hitMap={}", methodName, this.getCacheName(), keyMap, hitMap);
-            return hitMap;
+            logger.info("[CompositeCache] {} l1Cache all hit, cacheName={}, KeyMap={}, hitMap={}", methodName, this.getCacheName(), keyMap, hitCacheMap);
+            return hitCacheMap;
         }
 
         // 二级缓存批量查询
@@ -309,7 +310,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         logger.info("[CompositeCache] {} l2Cache batchGet, cacheName={}, l2KeyMap={}, l2HitMap={}", methodName, this.getCacheName(), l1NotHitKeyMap, l2HitMap);
 
         // 合并数据
-        hitMap.putAll(l2HitMap);
+        hitCacheMap.putAll(l2HitMap);
 
         // 二级缓存同步到一级缓存
         if (!CollectionUtils.isEmpty(l1KeyMap)) {
@@ -318,9 +319,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
         // 一级缓存与二级缓存全部命中
-        if (hitMap.size() == keyMap.size()) {
+        if (hitCacheMap.size() == keyMap.size()) {
             logger.info("[CompositeCache] {} l1Cache and l2Cache all hit, cacheName={}", methodName, this.getCacheName());
-            return hitMap;
+            return hitCacheMap;
         }
 
         // 二级缓存未命中列表
@@ -328,39 +329,48 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         // 获取二级缓存未命中列表
         l1NotHitKeyMap.entrySet().stream().filter(entry -> !l2HitMap.containsKey(entry.getKey())).forEach(entry -> l2NotHitKeyMap.put(entry.getKey(), entry.getValue()));
 
-        // 数据加载命中列表
-        Map<K, V> valueLoaderHitMap = new HashMap<>();
-        if (null != valueLoader) {
-            valueLoaderHitMap = valueLoader.apply(new ArrayList<>(l2NotHitKeyMap.keySet()));
+        if (null == valueLoader) {
+            logger.info("[CompositeCache] {} l1Cache and l2Cache, valueLoader is null return hitCacheMap, cacheName={}, l2NotHitKeyList={}", methodName, this.getCacheName(), l2NotHitKeyMap.values());
+            return hitCacheMap;
         }
+
+        // 数据加载命中列表
+        Map<K, V> valueLoaderHitMap = valueLoader.apply(new ArrayList<>(l2NotHitKeyMap.keySet()));
         // 数据加载一个都没有命中，直接返回
         if (CollectionUtils.isEmpty(valueLoaderHitMap)) {
             // 对未命中的key缓存空值，防止缓存穿透
+            Map<Object, V> nullValueMap = new HashMap<>();
             l2NotHitKeyMap.forEach((k, cacheKey) -> {
-                logger.info("[CompositeCache] {} valueLoaderHitMap is empty, put null, cacheName={}, cacheKey={}", methodName, this.getCacheName(), cacheKey);
-                this.put(cacheKey, null);
+                nullValueMap.put(cacheKey, null);
             });
-            return hitMap;
+            this.batchPut(nullValueMap);
+            logger.info("[CompositeCache] {} valueLoaderHitMap is empty, put null, cacheName={}, cacheKey={}", methodName, this.getCacheName(), nullValueMap.keySet());
+            return hitCacheMap;
         }
 
         // 合并数据
-        hitMap.putAll(valueLoaderHitMap);
+        hitCacheMap.putAll(valueLoaderHitMap);
 
-        // 数据加载数据同步到一级缓存与二级缓存
-        this.batchPut(this.getKeyMap(keyMap, valueLoaderHitMap));
+        // 数据加载数据同步到一级缓存与二级缓存 TODO 此处要验证
+        Map<Object, V> batchPutDataMap = l2NotHitKeyMap.entrySet().stream()
+                .filter(entry -> valueLoaderHitMap.containsKey(entry.getKey()))
+                .collect(Collectors.toMap(entry -> entry.getValue(), entry -> valueLoaderHitMap.get(entry.getKey())));
+        this.batchPut(batchPutDataMap);
         logger.info("[CompositeCache] {} batchGetOrLoad batch put not hit cache data, cacheName={}, notHitKeyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap);
 
-        // 处理没有查询到数据的key，缓存空值
+        // 处理没有查询到数据的key，缓存空值，防止缓存穿透
         if (valueLoaderHitMap.size() != l2NotHitKeyMap.size()) {
-            for (Map.Entry<K, Object> entry : l2NotHitKeyMap.entrySet()) {
-                if (!valueLoaderHitMap.containsKey(entry.getKey())) {
-                    logger.info("[CompositeCache] {} valueLoaderHitMap size not equal l2NotHitKeyMap size, put null, cacheName={}, cacheKey={}", methodName, this.getCacheName(), entry.getValue());
-                    this.put(entry.getValue(), null);
+            Map<Object, V> nullValueMap = new HashMap<>();
+            l2NotHitKeyMap.forEach((k, cacheKey) -> {
+                if (!valueLoaderHitMap.containsKey(k)) {
+                    nullValueMap.put(cacheKey, null);
                 }
-            }
+            });
+            this.batchPut(nullValueMap);
+            logger.info("[CompositeCache] {} valueLoaderHitMap size not equal l2NotHitKeyMap size(key is not exist), put null, cacheName={}, cacheKey={}", methodName, this.getCacheName(), nullValueMap.keySet());
         }
-        logger.info("[CompositeCache] {}, cacheName={}, KeyMap={}, keyMapSize={}, hitMap={}, hitMapSize={}", methodName, this.getCacheName(), keyMap, keyMap.size(), hitMap, hitMap.size());
-        return hitMap;
+        logger.info("[CompositeCache] {}, cacheName={}, KeyMap={}, keyMapSize={}, hitMap={}, hitMapSize={}", methodName, this.getCacheName(), keyMap, keyMap.size(), hitCacheMap, hitCacheMap.size());
+        return hitCacheMap;
     }
 
     /**
@@ -384,7 +394,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     /**
      * 获取batchPut数据集合
-     * @param keyMap key集合
+     *
+     * @param keyMap  key集合
      * @param dataMap 数据集合
      * @return
      */
@@ -406,6 +417,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             l1CacheMap.putAll(dataMap);
             logger.info("[CompositeCache] batchPut 全部key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1CacheMap);
         } else {
+            // TODO 此处逻辑 forEach 后是否有过滤掉具体的值，要确认
             dataMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getKey())).forEach(entry -> l1CacheMap.put(entry.getKey(), entry.getValue()));
             logger.info("[CompositeCache] batchPut 部分key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1CacheMap);
         }

@@ -350,13 +350,42 @@ public class CaffeineCacheTest {
             @Override
             public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
                 Map<UserDTO, User> newMap = new HashMap<>();
-                for (int i = 0; i < 5; i++) {
-                    newMap.put(new UserDTO("new_name" + i, "" + i), new User("new_name" + i, "addr" + i));
+                int i = 0;
+                for (UserDTO userDTO : userDTOS) {
+                    newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
+                    i++;
                 }
                 return newMap;
             }
         };
+
+        Function<List<UserDTO>, Map<UserDTO, User>> valueLoader2 = new Function<List<UserDTO>, Map<UserDTO, User>>() {
+            @Override
+            public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
+                // 模拟从DB获取数据，部分获取到，部分没有获取到
+                Map<UserDTO, User> newMap = new HashMap<>();
+                int i = 0;
+                for (UserDTO userDTO : userDTOS) {
+                    newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
+                    i++;
+                    break;
+                }
+                return newMap;
+
+                // 模拟从DB获取数据，一个都没有命中的场景
+                // return null;
+            }
+        };
         Map<UserDTO, User> mapNew = cache.batchGetOrLoad(keyList, valueLoader);
+        System.out.println(mapNew);
+
+        // 模拟增加一个不存在的key
+        keyList.add(new UserDTO("name60", "60"));
+        keyList.add(new UserDTO("name70", "70"));
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+        System.out.println(mapNew);
+
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
         System.out.println(mapNew);
     }
 

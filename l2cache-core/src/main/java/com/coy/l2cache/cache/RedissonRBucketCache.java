@@ -325,14 +325,14 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 async.onComplete((value, exception) -> {
                     // 没有异常且返回值不为空
                     if (exception == null && !ObjectUtils.isEmpty(value)) {
-                        hitMap.put(key, (V) value);
+                        hitMap.put(key, (V) fromStoreValue(value));
                     } else {
                         logger.warn("[RedissonRBucketCache] batchGet cache fail, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception);
                     }
                 });
             });
             BatchResult result = batch.execute();
-            logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, valueList={}, syncedSlaves={}", this.getCacheName(), keyList, hitMap, result.getSyncedSlaves());
+            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, hitMap={}, batchResult={}", this.getCacheName(), keyList, hitMap, result.toString());
         });
         return hitMap;
     }
