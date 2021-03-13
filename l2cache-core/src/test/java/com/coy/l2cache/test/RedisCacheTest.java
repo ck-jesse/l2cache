@@ -216,22 +216,22 @@ public class RedisCacheTest {
 
     @Test
     public void batchPut() {
-        Map<String, User> map = new HashMap<>();
+        Map<Object, User> map = new HashMap<>();
         for (int i = 0; i < 5; i++) {
-            map.put("user" + i, new User("name" + i, "addr" + i));
+            map.put("key" + i, new User("name" + i, "addr" + i));
         }
-        System.out.println("batch put " + map);
+        System.out.println(map);
 
         // 批量put
-//        cache.batchPut(map);
+        cache.batchPut(map);
 
         // key 完全匹配
-        List<String> keyList = new ArrayList<>(map.keySet());
-        Map<String, User> list1 = cache.batchGet(keyList);
+        List<Object> keyList = new ArrayList<>(map.keySet());
+        Map<Object, Object> list1 = cache.batchGet(keyList);
         System.out.println("batch get 1" + list1);
 
         // key 完全匹配
-        Map<String, User> list2 = cache.batchGet(new ArrayList<>(map.keySet()));
+        Map<Object, Object> list2 = cache.batchGet(keyList);
         System.out.println("batch get 2" + list2);
 
         // key 全部存在(少于缓存中的key)

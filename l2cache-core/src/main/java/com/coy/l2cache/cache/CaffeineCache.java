@@ -291,4 +291,34 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 .setOptType(optType);
     }
 
+    @Override
+    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap, boolean returnNullValueKey) {
+        // 命中列表
+        Map<K, V> hitMap = new HashMap<>();
+
+        keyMap.forEach((key, cacheKey) -> {
+            // 仅仅获取
+            Object value = this.caffeineCache.getIfPresent(cacheKey);
+            logger.debug("[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+
+            // value=null表示key不存在，则不将key包含在返回数据中
+            if (value == null) {
+                return;
+            }
+            V warpValue = (V) fromStoreValue(value);
+            if (warpValue != null) {
+                hitMap.put(key, warpValue);
+                return;
+            }
+            // value=NullValue，且returnNullValueKey=true，则将key包含在返回数据中
+            // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
+            if (returnNullValueKey) {
+                hitMap.put(key, null);
+                logger.warn("[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                return;
+            }
+        });
+        logger.info("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
+        return hitMap;
+    }
 }

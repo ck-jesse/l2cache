@@ -417,7 +417,6 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             l1CacheMap.putAll(dataMap);
             logger.info("[CompositeCache] batchPut 全部key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1CacheMap);
         } else {
-            // TODO 此处逻辑 forEach 后是否有过滤掉具体的值，要确认
             dataMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getKey())).forEach(entry -> l1CacheMap.put(entry.getKey(), entry.getValue()));
             logger.info("[CompositeCache] batchPut 部分key先走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1CacheMap);
         }

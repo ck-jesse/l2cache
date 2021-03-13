@@ -3,11 +3,12 @@ package com.coy.l2cache.test;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Data
 @EqualsAndHashCode // 方式一：通过lombok注解重写 hashCode() 和 equals()
-public class UserDTO {
+public class UserDTO implements Serializable {
 
     public UserDTO() {
     }

@@ -187,7 +187,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 // redis和db都为null，那么不发送消息，减少不必要的通信
                 if (value == null && valueLoader instanceof ValueLoaderWarpperTemp) {
                     ((ValueLoaderWarpperTemp) valueLoader).setPublishMsg(false);
-                    logger.warn("[RedissonRBucketCache] redis and db load value both  is null, no need to publish message, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+                    logger.warn("[RedissonRBucketCache] redis and db load value both is null, not need to publish message, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
                 }
                 this.put(key, value);
             }
@@ -299,11 +299,12 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * 批量get
      * 实现抽像方法
      *
-     * @param keyMap 将List<K>转换后的 cacheKey Map
+     * @param keyMap             将List<K>转换后的 cacheKey Map
+     * @param returnNullValueKey true 把key的value为NullValue时转换为null后返回
      * @see Cache#batchGetOrLoad(java.util.List, java.util.function.Function, java.util.function.Function)
      */
     @Override
-    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
+    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap, boolean returnNullValueKey) {
         // 命中列表
         Map<K, V> hitMap = new HashMap<>();
 
@@ -323,16 +324,32 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 String cacheKey = (String) buildKeyBase(keyMap.get(key));
                 RFuture<Object> async = batch.getBucket(cacheKey).getAsync();
                 async.onComplete((value, exception) -> {
-                    // 没有异常且返回值不为空
-                    if (exception == null && !ObjectUtils.isEmpty(value)) {
-                        hitMap.put(key, (V) fromStoreValue(value));
-                    } else {
-                        logger.warn("[RedissonRBucketCache] batchGet cache fail, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception);
+                    if (exception != null) {
+                        logger.warn("[RedissonRBucketCache] batchGet cache error, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception);
+                        return;
+                    }
+                    logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+
+                    // value=null表示key不存在，则不将key包含在返回数据中
+                    if (value == null) {
+                        return;
+                    }
+                    V warpValue = (V) fromStoreValue(value);
+                    if (warpValue != null) {
+                        hitMap.put(key, warpValue);
+                        return;
+                    }
+                    // value=NullValue，且returnNullValueKey=true，则将key包含在返回数据中
+                    // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
+                    if (returnNullValueKey) {
+                        hitMap.put(key, null);
+                        logger.warn("[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                        return;
                     }
                 });
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, keyList={}, hitMap={}, batchResult={}", this.getCacheName(), keyList, hitMap, result.toString());
+            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}, batchResult={}", this.getCacheName(), keyMap.values(), hitMap, result.toString());
         });
         return hitMap;
     }

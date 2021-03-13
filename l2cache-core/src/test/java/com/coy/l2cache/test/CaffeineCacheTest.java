@@ -385,6 +385,7 @@ public class CaffeineCacheTest {
         mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
         System.out.println(mapNew);
 
+        // 模拟获取一个不存在的key
         mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
         System.out.println(mapNew);
     }

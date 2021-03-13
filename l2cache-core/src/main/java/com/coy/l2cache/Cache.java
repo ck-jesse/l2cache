@@ -180,18 +180,18 @@ public interface Cache {
      * @param keyMap 将List<K>转换后的 cacheKey Map
      */
     default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
-        // 命中列表
-        Map<K, V> hitMap = new HashMap<>();
+        return this.batchGet(keyMap, false);
+    }
 
-        keyMap.forEach((k, cacheKey) -> {
-            // 仅仅获取
-            V value = (V) this.getIfPresent(cacheKey);
-            logger.debug("batchGet, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
-            if (null != value) {
-                hitMap.put(k, value);
-            }
-        });
-        return hitMap;
+    /**
+     * 批量get
+     * 参数 returnNullValueKey=true 的作用：在batchGetOrLoad中调用batchGet时，把值为NullValue的key返回，表示该key存在缓存中，无需往下执行，防止缓存穿透到下层
+     *
+     * @param keyMap             将List<K>转换后的 cacheKey Map
+     * @param returnNullValueKey true 表示把value=NullValue的key包含在Map中返回
+     */
+    default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap, boolean returnNullValueKey) {
+        return new HashMap<>();
     }
 
 
@@ -234,11 +234,11 @@ public interface Cache {
     default <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader) {
         try {
             // 获取命中缓存的数据列表
-            // TODO 此处对于缓存了NullValue的key，会获取到null，导致继续往下执行，相当于会存在缓存穿透，所以需要看怎么修改 this.batchGet(keyMap)
-            Map<K, V> hitCacheMap = this.batchGet(keyMap);
+            // returnNullValueKey=true，表示把值为NullValue的key返回，也就是说该key存在缓存中，无需从下层加载，防止缓存穿透到下层
+            Map<K, V> hitCacheMap = this.batchGet(keyMap, true);
 
             if (null == valueLoader) {
-                logger.info("batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyList={}", this.getCacheName(), keyMap.values());
+                logger.info("[{}] batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values());
                 return hitCacheMap;
             }
 
@@ -247,9 +247,11 @@ public interface Cache {
                     .filter(entry -> !hitCacheMap.containsKey(entry.getKey()))
                     .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 
+            hitCacheMap.entrySet().stream().filter(entry -> null != entry.getValue());
+
             // 全部命中缓存，直接返回
             if (CollectionUtils.isEmpty(notHitCacheKeyMap) && !CollectionUtils.isEmpty(hitCacheMap)) {
-                logger.info("batchGetOrLoad all_hit cache, cacheName={}, notHitCacheKeyList={}", this.getCacheName(), notHitCacheKeyMap.values());
+                logger.info("[{}] batchGetOrLoad all_hit cache, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), notHitCacheKeyMap.values());
                 return hitCacheMap;
             }
 
@@ -263,7 +265,7 @@ public interface Cache {
                     nullValueMap.put(cacheKey, null);
                 });
                 this.batchPut(nullValueMap);
-                logger.info("batchGetOrLoad all key is not exist, put null, cacheName={}, cacheKey={}", this.getCacheName(), nullValueMap.keySet());
+                logger.info("[{}] batchGetOrLoad all key is not exist, put null, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
                 return hitCacheMap;
             }
 
@@ -276,7 +278,7 @@ public interface Cache {
                     .filter(entry -> valueLoaderHitMap.containsKey(entry.getKey()))
                     .collect(Collectors.toMap(entry -> entry.getValue(), entry -> valueLoaderHitMap.get(entry.getKey())));
             this.batchPut(batchPutDataMap);
-            logger.info("batchGetOrLoad batch put hit db data, cacheName={}, notHitCacheKeyList={}", this.getCacheName(), batchPutDataMap.keySet());
+            logger.info("[{}] batchGetOrLoad batch put hit db data, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), batchPutDataMap.keySet());
 
             // 处理没有查询到数据的key，缓存空值，防止缓存穿透
             if (valueLoaderHitMap.size() != notHitCacheKeyMap.size()) {
@@ -287,11 +289,11 @@ public interface Cache {
                     }
                 });
                 this.batchPut(nullValueMap);
-                logger.info("batchGetOrLoad key is not exist, put null, cacheName={}, cacheKey={}", this.getCacheName(), nullValueMap.keySet());
+                logger.info("[{}] batchGetOrLoad key is not exist, put null, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
             }
             return hitCacheMap;
         } catch (Exception e) {
-            logger.error("batchGetOrLoad error, keyList={}", keyMap.values(), e);
+            logger.error("[{}] batchGetOrLoad error, keyList={}", this.getClass().getSimpleName(), keyMap.values(), e);
             throw new L2CacheException("batchGetOrLoad error," + e.getMessage());
         }
     }
@@ -332,5 +334,6 @@ public interface Cache {
         dataMap.forEach((key, value) -> {
             this.put(key, value);
         });
+        logger.info("[{}] batchPut cache, cacheName={}, size={}", this.getClass().getSimpleName(), this.getCacheName(), dataMap.size());
     }
 }
