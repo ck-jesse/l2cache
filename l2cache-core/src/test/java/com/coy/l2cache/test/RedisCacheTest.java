@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /**
  * RedissonCache 中各个方法的单元测试
@@ -32,7 +33,7 @@ public class RedisCacheTest {
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .setAllowNullValues(true)
                 .getRedis()
-                .setExpireTime(300000)
+                .setExpireTime(3000000)
                 .setLock(true)
 //                .setMaxIdleTime(2000)
 //                .setMaxSize(20)
@@ -247,31 +248,87 @@ public class RedisCacheTest {
     }
 
     @Test
-    public void trylock() throws InterruptedException {
-        String lockkey = "lock:key";
+    public void batchPutBuilderCacheKey() {
+        // 模拟数据(业务key为DTO)
+        Map<UserDTO, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
 
-        for (int i = 0; i < 3; i++) {
-            int finalI = i;
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-            RLock lock = redissonClient.getLock(lockkey);
-            try {
-                if (!lock.tryLock(0, 500, TimeUnit.MILLISECONDS)) {
-                    log.warn(finalI + " lock fail");
-                } else {
-                    log.info(finalI + " lock succ");
-                }
-                log.info(finalI + " HoldCount=" + lock.getHoldCount());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        // 自定义cacheKey的构建方式
+        Function<UserDTO, Object> cacheKeyBuilder = new Function<UserDTO, Object>() {
+            @Override
+            public Object apply(UserDTO userDTO) {
+                return userDTO.getName() + userDTO.getUserId();
             }
-//                }
-//            }).start();
-        }
+        };
+        // 批量put
+        cache.batchPut(map, cacheKeyBuilder);
 
-        while (true) {
+        // 批量get
+        List<UserDTO> keyList = new ArrayList<>(map.keySet());
+        Map<UserDTO, User> getMap = cache.batchGet(keyList, cacheKeyBuilder);
+        System.out.println(getMap);
 
-        }
+        // 通过参数DTO可以直接获取到对应的数据
+        keyList.forEach(userDTO -> {
+            System.out.println("key=" + userDTO + ", value=" + getMap.get(userDTO));
+        });
     }
+
+    @Test
+    public void batchGetOrLoad() {
+        // 模拟数据(业务key为DTO)
+        Map<UserDTO, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+        List<UserDTO> keyList = new ArrayList<>(map.keySet());
+
+        Function<List<UserDTO>, Map<UserDTO, User>> valueLoader = new Function<List<UserDTO>, Map<UserDTO, User>>() {
+            @Override
+            public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
+                Map<UserDTO, User> newMap = new HashMap<>();
+                int i = 0;
+                for (UserDTO userDTO : userDTOS) {
+                    newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
+                    i++;
+                }
+                return newMap;
+            }
+        };
+
+        Function<List<UserDTO>, Map<UserDTO, User>> valueLoader2 = new Function<List<UserDTO>, Map<UserDTO, User>>() {
+            @Override
+            public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
+                // 模拟从DB获取数据，部分获取到，部分没有获取到
+                Map<UserDTO, User> newMap = new HashMap<>();
+                int i = 0;
+                for (UserDTO userDTO : userDTOS) {
+                    newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
+                    i++;
+                    break;
+                }
+                return newMap;
+
+                // 模拟从DB获取数据，一个都没有命中的场景
+                // return null;
+            }
+        };
+        Map<UserDTO, User> mapNew = cache.batchGetOrLoad(keyList, valueLoader);
+        System.out.println(mapNew);
+
+        // 模拟增加一个不存在的key
+        keyList.add(new UserDTO("name60", "60"));
+        keyList.add(new UserDTO("name70", "70"));
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+        System.out.println(mapNew);
+
+        // 模拟获取一个不存在的key
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+        System.out.println(mapNew);
+    }
+
 }

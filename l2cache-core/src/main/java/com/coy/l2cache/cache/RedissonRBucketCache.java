@@ -310,7 +310,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
         // 查询参数为空
         if (CollectionUtils.isEmpty(keyMap)) {
-            logger.debug("[RedissonRBucketCache] batchGet cache params is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
+            logger.info("[RedissonRBucketCache] batchGet cache keyMap is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
             return hitMap;
         }
 
@@ -343,14 +343,15 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                     // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
                     if (returnNullValueKey) {
                         hitMap.put(key, null);
-                        logger.warn("[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                        logger.warn("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
                         return;
                     }
                 });
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}, batchResult={}", this.getCacheName(), keyMap.values(), hitMap, result.toString());
+            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, keyListSize={}, hitMapSize={}", this.getCacheName(), keyList.size(), hitMap.size());
         });
+        logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
         return hitMap;
     }
 

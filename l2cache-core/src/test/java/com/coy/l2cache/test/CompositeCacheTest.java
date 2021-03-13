@@ -35,6 +35,10 @@ public class CompositeCacheTest {
     public void before() {
         Set<String> l1ManualKeySet = new HashSet<>();
         l1ManualKeySet.add("actLimitMarkupCache:11_2");
+        l1ManualKeySet.add("compositeCache:key0");
+        l1ManualKeySet.add("compositeCache:key1");
+        l1ManualKeySet.add("compositeCache:key2");
+        l1ManualKeySet.add("compositeCache:key3");
 
         Set<String> L1ManualCacheNameSet = new HashSet<>();
         L1ManualCacheNameSet.add("goodsSpecCache");
@@ -46,12 +50,12 @@ public class CompositeCacheTest {
                 .getComposite()
                 .setL1CacheType(CacheType.CAFFEINE.name())
                 .setL2CacheType(CacheType.REDIS.name())
-                .setL1AllOpen(true)
+                .setL1AllOpen(false)
                 .setL1Manual(true)
                 .setL1ManualKeySet(l1ManualKeySet)
                 .setL1ManualCacheNameSet(L1ManualCacheNameSet);
         cacheConfig.getCaffeine()
-                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10s,recordStats")
+                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10m,recordStats")
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
                 .setExpireTime(5000)
@@ -227,7 +231,7 @@ public class CompositeCacheTest {
     }
 
     @Test
-    public void batchGet1(){
+    public void batchGet1() {
         List<Integer> keyList = new ArrayList<>();
         keyList.add(1);
         keyList.add(2);
@@ -238,13 +242,127 @@ public class CompositeCacheTest {
     }
 
     @Test
-    public void batchGetOrLoad(){
-        Map<Integer,String> dbQueryMap = new HashMap<>();
-        dbQueryMap.put(1,"1");
-        dbQueryMap.put(2,"2");
-        dbQueryMap.put(3,"3");
+    public void batchPut() {
+        Map<Object, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put("key" + i, new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+
+        // 批量put
+//        cache.batchPut(map);
+
+        // key 完全匹配
+        List<Object> keyList = new ArrayList<>(map.keySet());
+        Map<Object, Object> list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+
+        // key 完全匹配
+        Map<Object, Object> list2 = cache.batchGet(keyList);
+        System.out.println(list2);
+
+        // key 全部存在(少于缓存中的key)
+        keyList.remove(1);
+        list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+
+        // key 部分存在缓存，部分不存在缓存
+        keyList.add("other");
+        list1 = cache.batchGet(keyList);
+        System.out.println(list1);
+    }
+
+    @Test
+    public void batchPutBuilderCacheKey() {
+        // 模拟数据(业务key为DTO)
+        Map<UserDTO, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+
+        // 自定义cacheKey的构建方式
+        Function<UserDTO, Object> cacheKeyBuilder = new Function<UserDTO, Object>() {
+            @Override
+            public Object apply(UserDTO userDTO) {
+                return userDTO.getName() + userDTO.getUserId();
+            }
+        };
+        // 批量put
+        cache.batchPut(map, cacheKeyBuilder);
+
+        // 批量get
+        List<UserDTO> keyList = new ArrayList<>(map.keySet());
+        Map<UserDTO, User> getMap = cache.batchGet(keyList, cacheKeyBuilder);
+        System.out.println(getMap);
+
+        // 通过参数DTO可以直接获取到对应的数据
+        keyList.forEach(userDTO -> {
+            System.out.println("key=" + userDTO + ", value=" + getMap.get(userDTO));
+        });
+    }
+
+    @Test
+    public void batchGetOrLoad() {
+        // 模拟数据(业务key为DTO)
+        Map<UserDTO, User> map = new HashMap<>();
+        for (int i = 0; i < 5; i++) {
+            map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
+        }
+        System.out.println(map);
+        List<UserDTO> keyList = new ArrayList<>(map.keySet());
+
+        Function<List<UserDTO>, Map<UserDTO, User>> valueLoader = new Function<List<UserDTO>, Map<UserDTO, User>>() {
+            @Override
+            public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
+                Map<UserDTO, User> newMap = new HashMap<>();
+                int i = 0;
+                for (UserDTO userDTO : userDTOS) {
+                    newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
+                    i++;
+                }
+                return newMap;
+            }
+        };
+
+        Function<List<UserDTO>, Map<UserDTO, User>> valueLoader2 = new Function<List<UserDTO>, Map<UserDTO, User>>() {
+            @Override
+            public Map<UserDTO, User> apply(List<UserDTO> userDTOS) {
+                // 模拟从DB获取数据，部分获取到，部分没有获取到
+                Map<UserDTO, User> newMap = new HashMap<>();
+                int i = 0;
+                for (UserDTO userDTO : userDTOS) {
+                    newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
+                    i++;
+                    break;
+                }
+                return newMap;
+
+                // 模拟从DB获取数据，一个都没有命中的场景
+                // return null;
+            }
+        };
+        Map<UserDTO, User> mapNew = cache.batchGetOrLoad(keyList, valueLoader);
+        System.out.println(mapNew);
+
+        // 模拟增加一个不存在的key
+        keyList.add(new UserDTO("name60", "60"));
+        keyList.add(new UserDTO("name70", "70"));
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+        System.out.println(mapNew);
+
+        // 模拟获取一个不存在的key
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+        System.out.println(mapNew);
+    }
 
 
+    @Test
+    public void batchGetOrLoad1() {
+        Map<Integer, String> dbQueryMap = new HashMap<>();
+        dbQueryMap.put(1, "1");
+        dbQueryMap.put(2, "2");
+        dbQueryMap.put(3, "3");
 
         List<Integer> keyList = new ArrayList<>();
         keyList.add(1);
@@ -261,11 +379,11 @@ public class CompositeCacheTest {
         Function valueLoader = new Function<List<Integer>, Map<Integer, String>>() {
             @Override
             public Map<Integer, String> apply(List<Integer> integers) {
-                Map<Integer,String> resultMap = new HashMap<>();
+                Map<Integer, String> resultMap = new HashMap<>();
                 for (Integer integer : integers) {
                     String s = dbQueryMap.get(integer);
-                    if(s != null){
-                        resultMap.put(integer,s);
+                    if (s != null) {
+                        resultMap.put(integer, s);
                     }
                 }
                 return resultMap;
@@ -275,6 +393,5 @@ public class CompositeCacheTest {
 
         System.out.println(resultMap);
     }
-
 
 }

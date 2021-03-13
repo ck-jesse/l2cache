@@ -232,70 +232,7 @@ public interface Cache {
      * @param valueLoader 值加载器，返回的Map<K, V>对象中的 K 必须与传入的一致
      */
     default <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader) {
-        try {
-            // 获取命中缓存的数据列表
-            // returnNullValueKey=true，表示把值为NullValue的key返回，也就是说该key存在缓存中，无需从下层加载，防止缓存穿透到下层
-            Map<K, V> hitCacheMap = this.batchGet(keyMap, true);
-
-            if (null == valueLoader) {
-                logger.info("[{}] batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values());
-                return hitCacheMap;
-            }
-
-            // 过滤未命中缓存的key列表
-            Map<K, Object> notHitCacheKeyMap = keyMap.entrySet().stream()
-                    .filter(entry -> !hitCacheMap.containsKey(entry.getKey()))
-                    .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
-
-            hitCacheMap.entrySet().stream().filter(entry -> null != entry.getValue());
-
-            // 全部命中缓存，直接返回
-            if (CollectionUtils.isEmpty(notHitCacheKeyMap) && !CollectionUtils.isEmpty(hitCacheMap)) {
-                logger.info("[{}] batchGetOrLoad all_hit cache, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), notHitCacheKeyMap.values());
-                return hitCacheMap;
-            }
-
-            Map<K, V> valueLoaderHitMap = valueLoader.apply(new ArrayList<>(notHitCacheKeyMap.keySet()));
-
-            // 从DB获取数据，一个都没有命中，直接返回
-            if (CollectionUtils.isEmpty(valueLoaderHitMap)) {
-                // 对未命中的key缓存空值，防止缓存穿透
-                Map<Object, V> nullValueMap = new HashMap<>();
-                notHitCacheKeyMap.forEach((k, cacheKey) -> {
-                    nullValueMap.put(cacheKey, null);
-                });
-                this.batchPut(nullValueMap);
-                logger.info("[{}] batchGetOrLoad all key is not exist, put null, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
-                return hitCacheMap;
-            }
-
-            // 合并数据
-            hitCacheMap.putAll(valueLoaderHitMap);
-
-            // 将命中DB的数据按照cacheKey的方式来组装以便put到缓存
-            // 如果K是自定义DTO，且没有重写hashCode()和equals(Object)，那么通过K从hitMap中可能获取不到数据，所以要特别注意
-            Map<Object, V> batchPutDataMap = notHitCacheKeyMap.entrySet().stream()
-                    .filter(entry -> valueLoaderHitMap.containsKey(entry.getKey()))
-                    .collect(Collectors.toMap(entry -> entry.getValue(), entry -> valueLoaderHitMap.get(entry.getKey())));
-            this.batchPut(batchPutDataMap);
-            logger.info("[{}] batchGetOrLoad batch put hit db data, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), batchPutDataMap.keySet());
-
-            // 处理没有查询到数据的key，缓存空值，防止缓存穿透
-            if (valueLoaderHitMap.size() != notHitCacheKeyMap.size()) {
-                Map<Object, V> nullValueMap = new HashMap<>();
-                notHitCacheKeyMap.forEach((k, cacheKey) -> {
-                    if (!valueLoaderHitMap.containsKey(k)) {
-                        nullValueMap.put(cacheKey, null);
-                    }
-                });
-                this.batchPut(nullValueMap);
-                logger.info("[{}] batchGetOrLoad key is not exist, put null, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
-            }
-            return hitCacheMap;
-        } catch (Exception e) {
-            logger.error("[{}] batchGetOrLoad error, keyList={}", this.getClass().getSimpleName(), keyMap.values(), e);
-            throw new L2CacheException("batchGetOrLoad error," + e.getMessage());
-        }
+        return new HashMap<>();
     }
 
     /**
