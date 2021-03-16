@@ -16,6 +16,8 @@ singleServerConfig:
   retryInterval: 1500
   # 单个连接最大订阅数量，默认5
   subscriptionsPerConnection: 5
+  # 定义每个连接到Redis的PING命令发送间隔，默认0
+  pingConnectionInterval: 5000
   # 客户端名称，默认null
   clientName: null
   # 发布和订阅连接的最小空闲连接数(默认1)

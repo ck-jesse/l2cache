@@ -168,8 +168,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     }
 
     @Override
-    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
-        return this.batchGetOrLoadFromL1L2(keyMap, null, "batchGet", false);
+    public <K, V> Map<K, V> batchGet(Map<K, Object> keyMap, boolean returnNullValueKey) {
+        return this.batchGetOrLoadFromL1L2(keyMap, null, "batchGet", returnNullValueKey);
     }
 
     @Override
