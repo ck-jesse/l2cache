@@ -62,10 +62,10 @@ public abstract class AbstractAdaptingCache implements Cache {
     }
 
     @Override
-    public <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader) {
+    public <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         // 获取命中缓存的数据列表
         // returnNullValueKey=true，表示把值为NullValue的key返回，也就是说该key存在缓存中，无需从下层加载，防止缓存穿透到下层
-        Map<K, V> hitCacheMap = this.batchGet(keyMap, true);
+        Map<K, V> hitCacheMap = this.batchGet(keyMap, true);// 此处固定为true，不要修改防止缓存穿透
 
         // 获取未命中缓存的key列表
         Map<K, Object> notHitCacheKeyMap = keyMap.entrySet().stream()
@@ -73,27 +73,32 @@ public abstract class AbstractAdaptingCache implements Cache {
                 .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 
         if (null == valueLoader) {
-            logger.info("[{}] batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyMap={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values());
-            return this.filterNullValue(hitCacheMap);
+            logger.info("[{}] batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
+            return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
         // 全部命中缓存，直接返回
         if (CollectionUtils.isEmpty(notHitCacheKeyMap) && !CollectionUtils.isEmpty(hitCacheMap)) {
-            logger.info("[{}] batchGetOrLoad all_hit cache, cacheName={}, cacheKeyMap={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values());
-            return this.filterNullValue(hitCacheMap);
+            logger.info("[{}] batchGetOrLoad all_hit cache, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
+            return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
         Map<K, V> valueLoaderHitMap = this.loadAndPut(valueLoader, notHitCacheKeyMap);
         if (!CollectionUtils.isEmpty(valueLoaderHitMap)) {
             hitCacheMap.putAll(valueLoaderHitMap);// 合并数据
         }
-        return this.filterNullValue(hitCacheMap);
+        return this.filterNullValue(hitCacheMap, returnNullValueKey);
     }
 
     /**
      * 过滤掉null值
+     *
+     * @param returnNullValueKey true 表示把value=NullValue的key包含在Map中返回(实际返回null)
      */
-    protected <K, V> Map<K, V> filterNullValue(Map<K, V> hitCacheMap) {
+    protected <K, V> Map<K, V> filterNullValue(Map<K, V> hitCacheMap, boolean returnNullValueKey) {
+        if (returnNullValueKey) {
+            return hitCacheMap;
+        }
         return hitCacheMap.entrySet().stream()
                 .filter(entry -> {
                     if (null == entry.getValue()) {

@@ -202,7 +202,7 @@ public interface Cache {
      * @param valueLoader 值加载器
      */
     default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<List<K>, Map<K, V>> valueLoader) {
-        return this.batchGetOrLoad(keyList, null, valueLoader);
+        return this.batchGetOrLoad(keyList, null, valueLoader, false);
     }
 
     /**
@@ -213,6 +213,17 @@ public interface Cache {
      * @param valueLoader     值加载器
      */
     default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<K, Object> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader) {
+        return this.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader, false);
+    }
+
+    /**
+     * 批量get或load
+     *
+     * @param keyList         业务维度的key集合（K可能是自定义DTO）
+     * @param cacheKeyBuilder 自定义的cacheKey构建器
+     * @param valueLoader     值加载器
+     */
+    default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<K, Object> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
         if (null != cacheKeyBuilder) {
@@ -220,7 +231,7 @@ public interface Cache {
         } else {
             keyList.forEach(key -> keyMap.put(key, key));
         }
-        return this.batchGetOrLoad(keyMap, valueLoader);
+        return this.batchGetOrLoad(keyMap, valueLoader, returnNullValueKey);
     }
 
     /**
@@ -231,7 +242,7 @@ public interface Cache {
      * @param keyMap      将List<K>转换后的 cacheKey Map
      * @param valueLoader 值加载器，返回的Map<K, V>对象中的 K 必须与传入的一致
      */
-    default <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader) {
+    default <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         return new HashMap<>();
     }
 

@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * CompositeCache 中各个方法的单元测试
@@ -61,7 +62,7 @@ public class CompositeCacheTest {
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10m,recordStats")
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
-                .setExpireTime(5000)
+                .setExpireTime(500000)
 //                .setMaxIdleTime(5000)
 //                .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
                 .setRedissonYamlConfig("redisson.yaml");
@@ -240,7 +241,9 @@ public class CompositeCacheTest {
         keyList.add(2);
         keyList.add(3);
         Map<Integer, Object> resultMap = cache.batchGet(keyList);
+        System.out.println(resultMap);
 
+        resultMap = cache.batchGetOrLoad(keyList, null);
         System.out.println(resultMap);
     }
 
@@ -280,7 +283,7 @@ public class CompositeCacheTest {
     public void batchPutBuilderCacheKey() {
         // 模拟数据(业务key为DTO)
         Map<UserDTO, User> map = new HashMap<>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             map.put(new UserDTO("name" + i, "" + i), new User("name" + i, "addr" + i));
         }
         System.out.println(map);
@@ -293,16 +296,26 @@ public class CompositeCacheTest {
             }
         };
         // 批量put
-        cache.batchPut(map, cacheKeyBuilder);
+//        cache.batchPut(map, cacheKeyBuilder);
 
         // 批量get
         List<UserDTO> keyList = new ArrayList<>(map.keySet());
         Map<UserDTO, User> getMap = cache.batchGet(keyList, cacheKeyBuilder);
         System.out.println(getMap);
 
+        // 转换为
+        map.put(new UserDTO("name88", "88"), new User("name88", "addr88"));
+        Map<UserDTO, Object> keyMap = map.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> cacheKeyBuilder.apply(entry.getKey())));
+        getMap = cache.batchGet(keyMap, true);
+        System.out.println(getMap);
+
+        getMap = cache.batchGetOrLoad(keyMap, null, true);
+        System.out.println(getMap);
+
         // 通过参数DTO可以直接获取到对应的数据
+        Map<UserDTO, User> finalGetMap = getMap;
         keyList.forEach(userDTO -> {
-            System.out.println("key=" + userDTO + ", value=" + getMap.get(userDTO));
+            System.out.println("key=" + userDTO + ", value=" + finalGetMap.get(userDTO));
         });
     }
 
@@ -396,7 +409,7 @@ public class CompositeCacheTest {
                 return resultMap;
             }
         };
-        Map<Integer, Object> resultMap = cache.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
+        Map<Integer, Object> resultMap = cache.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader, true);
 
         resultMap = cache.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
 
