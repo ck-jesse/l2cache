@@ -39,6 +39,9 @@ public class CompositeCacheTest {
         l1ManualKeySet.add("compositeCache:key1");
         l1ManualKeySet.add("compositeCache:key2");
         l1ManualKeySet.add("compositeCache:key3");
+        l1ManualKeySet.add("compositeCache:name00");
+        l1ManualKeySet.add("compositeCache:1");
+        l1ManualKeySet.add("compositeCache:4");
 
         Set<String> L1ManualCacheNameSet = new HashSet<>();
         L1ManualCacheNameSet.add("goodsSpecCache");
@@ -250,21 +253,22 @@ public class CompositeCacheTest {
         System.out.println(map);
 
         // 批量put
-//        cache.batchPut(map);
+        cache.batchPut(map);
 
         // key 完全匹配
         List<Object> keyList = new ArrayList<>(map.keySet());
-        Map<Object, Object> list1 = cache.batchGet(keyList);
-        System.out.println(list1);
+        Map<Object, Object> list1 = new HashMap<>();
+//        list1 = cache.batchGet(keyList);
+//        System.out.println(list1);
 
         // key 完全匹配
-        Map<Object, Object> list2 = cache.batchGet(keyList);
-        System.out.println(list2);
+//        Map<Object, Object> list2 = cache.batchGet(keyList);
+//        System.out.println(list2);
 
         // key 全部存在(少于缓存中的key)
-        keyList.remove(1);
-        list1 = cache.batchGet(keyList);
-        System.out.println(list1);
+//        keyList.remove(1);
+//        list1 = cache.batchGet(keyList);
+//        System.out.println(list1);
 
         // key 部分存在缓存，部分不存在缓存
         keyList.add("other");
@@ -359,7 +363,7 @@ public class CompositeCacheTest {
 
     @Test
     public void batchGetOrLoad1() {
-        Map<Integer, String> dbQueryMap = new HashMap<>();
+        Map<Object, String> dbQueryMap = new HashMap<>();
         dbQueryMap.put(1, "1");
         dbQueryMap.put(2, "2");
         dbQueryMap.put(3, "3");
@@ -368,6 +372,9 @@ public class CompositeCacheTest {
         keyList.add(1);
         keyList.add(2);
         keyList.add(3);
+        keyList.add(4);
+
+        cache.batchPut(dbQueryMap);
 
         Function cacheKeyBuilder = new Function<Integer, Object>() {
             @Override
@@ -390,6 +397,8 @@ public class CompositeCacheTest {
             }
         };
         Map<Integer, Object> resultMap = cache.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
+
+        resultMap = cache.batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
 
         System.out.println(resultMap);
     }
