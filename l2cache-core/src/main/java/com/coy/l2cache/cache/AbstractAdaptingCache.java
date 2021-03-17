@@ -64,8 +64,7 @@ public abstract class AbstractAdaptingCache implements Cache {
     @Override
     public <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         // 获取命中缓存的数据列表
-        // returnNullValueKey=true，表示把值为NullValue的key返回，也就是说该key存在缓存中，无需从下层加载，防止缓存穿透到下层
-        Map<K, V> hitCacheMap = this.batchGet(keyMap, true);// 此处固定为true，不要修改防止缓存穿透
+        Map<K, V> hitCacheMap = this.batchGet(keyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
 
         // 获取未命中缓存的key列表
         Map<K, Object> notHitCacheKeyMap = keyMap.entrySet().stream()

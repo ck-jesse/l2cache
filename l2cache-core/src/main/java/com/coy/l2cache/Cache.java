@@ -148,7 +148,6 @@ public interface Cache {
 
     /**
      * 批量get
-     * 注：支持批量get时的灵活定义cacheKey的构建
      *
      * @param keyList 业务维度的key集合（K可能是自定义DTO）
      */
@@ -158,7 +157,6 @@ public interface Cache {
 
     /**
      * 批量get
-     * 注：支持批量get时的灵活定义cacheKey的构建
      *
      * @param keyList         业务维度的key集合（K可能是自定义DTO）
      * @param cacheKeyBuilder 自定义的cacheKey构建器
@@ -177,7 +175,7 @@ public interface Cache {
     /**
      * 批量get
      *
-     * @param keyMap 将List<K>转换后的 cacheKey Map
+     * @param keyMap 缓存key集合, Map<K=表示DTO或其他基本类型, Object=完整的cacheKey>
      */
     default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap) {
         return this.batchGet(keyMap, false);
@@ -185,9 +183,12 @@ public interface Cache {
 
     /**
      * 批量get
-     * 参数 returnNullValueKey=true 的作用：在batchGetOrLoad中调用batchGet时，把值为NullValue的key返回，表示该key存在缓存中，无需往下执行，防止缓存穿透到下层
+     * <p>
+     * 1.如果K是自定义DTO，那么必须重写hashCode()和equals()，以便后续业务逻辑中可以通过K从hitMap中获取对应的数据
+     * <p>
+     * 2.参数 returnNullValueKey=true 的作用：在batchGetOrLoad中调用batchGet时，把值为NullValue的key返回，表示该key存在缓存中，无需往下执行，防止缓存穿透到下层
      *
-     * @param keyMap             将List<K>转换后的 cacheKey Map
+     * @param keyMap             缓存key集合, Map<K=表示DTO或其他基本类型, Object=完整的cacheKey>
      * @param returnNullValueKey true 表示把value=NullValue的key包含在Map中返回
      */
     default <K, V> Map<K, V> batchGet(Map<K, Object> keyMap, boolean returnNullValueKey) {
@@ -219,9 +220,10 @@ public interface Cache {
     /**
      * 批量get或load
      *
-     * @param keyList         业务维度的key集合（K可能是自定义DTO）
-     * @param cacheKeyBuilder 自定义的cacheKey构建器
-     * @param valueLoader     值加载器
+     * @param keyList            业务维度的key集合（K可能是自定义DTO）
+     * @param cacheKeyBuilder    自定义的cacheKey构建器
+     * @param valueLoader        值加载器
+     * @param returnNullValueKey true 表示把value=NullValue的key包含在Map中返回
      */
     default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<K, Object> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
@@ -236,11 +238,14 @@ public interface Cache {
 
     /**
      * 批量get或load
-     * 注：调用方自己组装好参数
-     * 【特别注意】如果K是自定义DTO，那么必须重写hashCode()和equals(Object)，以便后续业务逻辑中可以通过K从hitMap中获取对应的数据
+     * <p>
+     * 1.如果K是自定义DTO，那么必须重写hashCode()和equals()，以便后续业务逻辑中可以通过K从hitMap中获取对应的数据
+     * <p>
+     * 2.参数 returnNullValueKey=true 的作用：在batchGetOrLoad中调用batchGet时，把值为NullValue的key返回，表示该key存在缓存中，无需往下执行，防止缓存穿透到下层
      *
-     * @param keyMap      将List<K>转换后的 cacheKey Map
-     * @param valueLoader 值加载器，返回的Map<K, V>对象中的 K 必须与传入的一致
+     * @param keyMap             缓存key集合, Map<K=表示DTO或其他基本类型, Object=完整的cacheKey>
+     * @param valueLoader        值加载器，返回的Map<K, V>对象中的 K 必须与传入的一致
+     * @param returnNullValueKey true 表示把value=NullValue的key包含在Map中返回
      */
     default <K, V> Map<K, V> batchGetOrLoad(Map<K, Object> keyMap, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         return new HashMap<>();

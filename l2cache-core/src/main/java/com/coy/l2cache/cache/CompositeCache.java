@@ -287,8 +287,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
         // 一级缓存批量查询
         if (!CollectionUtils.isEmpty(l1KeyMap)) {
-            // returnNullValueKey=true，表示把值为NullValue的key返回，也就是说该key存在缓存中，无需从下层加载，防止缓存穿透到下层
-            Map<K, V> l1HitMap = level1Cache.batchGet(l1KeyMap, true);// 此处固定为true，不要修改防止缓存穿透
+            Map<K, V> l1HitMap = level1Cache.batchGet(l1KeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
             // 合并数据
             hitCacheMap.putAll(l1HitMap);
             // 获取未命中列表（注意：此处以keyMap作为基础，过滤出来一级缓存中没有命中的key，分为两部分：一部分为不走一级缓存的key，另一部分为走一级缓存但是没有命中一级缓存的key）
@@ -307,8 +306,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
         // 二级缓存批量查询
-        // returnNullValueKey=true，表示把值为NullValue的key返回，也就是说该key存在缓存中，无需从下层加载，防止缓存穿透到下层
-        Map<K, V> l2HitMap = level2Cache.batchGet(l1NotHitKeyMap, true);// 此处固定为true，不要修改防止缓存穿透
+        Map<K, V> l2HitMap = level2Cache.batchGet(l1NotHitKeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
         logger.info("[CompositeCache] {} l2Cache batchGet, cacheName={}, l2KeyMap={}, l2HitMap={}", methodName, this.getCacheName(), l1NotHitKeyMap, l2HitMap);
 
         if (!CollectionUtils.isEmpty(l2HitMap)) {
