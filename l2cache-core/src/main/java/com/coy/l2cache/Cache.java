@@ -151,7 +151,7 @@ public interface Cache {
      *
      * @param keyList 业务维度的key集合（K可能是自定义DTO）
      */
-    default <K, R> Map<K, R> batchGet(List<K> keyList) {
+    default <K, V> Map<K, V> batchGet(List<K> keyList) {
         return this.batchGet(keyList, null);
     }
 
@@ -161,7 +161,7 @@ public interface Cache {
      * @param keyList         业务维度的key集合（K可能是自定义DTO）
      * @param cacheKeyBuilder 自定义的cacheKey构建器
      */
-    default <K, R> Map<K, R> batchGet(List<K> keyList, Function<K, Object> cacheKeyBuilder) {
+    default <K, V> Map<K, V> batchGet(List<K> keyList, Function<K, Object> cacheKeyBuilder) {
         // 将keyList 转换为cacheKey，因K可能是自定义DTO
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
         if (null != cacheKeyBuilder) {
