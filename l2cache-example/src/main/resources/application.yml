@@ -32,13 +32,17 @@ l2cache:
       # 二级缓存类型
       l2CacheType: redis
       # 是否启用一级缓存
-      l1AllOpen: true
+      l1AllOpen: false
       # 是否使用手动匹配开关
       l1Manual: true
       # 手动匹配缓存key集合
       l1ManualKeySet:
         - a
         - actLimitMarkupCache:11_2
+        - userCache:user01
+        - userCache:user02
+        - userCache:user03
+        - userCache:user04
         - "[actLimitMarkupCache:11_3]"
       # 手动匹配缓存名字集合
       l1ManualCacheNameSet:
@@ -46,8 +50,6 @@ l2cache:
         - goodsSpecCache
     # 一级缓存
     caffeine:
-      # 是否构建异步Caffeine true 是 false 否
-      asyncCache: false
       # 是否自动刷新过期缓存 true 是 false 否
       autoRefreshExpireCache: false
       # 缓存刷新调度线程池的大小
@@ -64,20 +66,19 @@ l2cache:
       defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=2m,softValues,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
-        userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=2m
-        userCacheSync: initialCapacity=10,maximumSize=2,refreshAfterWrite=2m,recordStats
+        #userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=2m
+        userCache: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
+        userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
         # 无过期时间配置
         queryUserSync: initialCapacity=10,maximumSize=20,refreshAfterWrite=1m,recordStats
     # 二级缓存
     redis:
-      # 是否启用缓存Key prefix
-      #useKeyPrefix: true
-      # 缓存Key prefix
-      #keyPrefix: ""
       # 加载数据时，是否加锁
       lock: false
       # 加锁时，true调用tryLock()，false调用lock()
       tryLock: true
+      # 批量操作的大小，可以理解为是分页
+      batchPageSize: 3
       # 缓存过期时间(ms)
       #expireTime: 30000
       # 缓存最大空闲时间(ms)

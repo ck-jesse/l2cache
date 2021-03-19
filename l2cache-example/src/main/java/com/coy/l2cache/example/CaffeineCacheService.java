@@ -1,7 +1,10 @@
 package com.coy.l2cache.example;
 
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.spring.L2CacheCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,6 +24,9 @@ public class CaffeineCacheService {
 
     private final Logger logger = LoggerFactory.getLogger(CaffeineCacheService.class);
 
+    @Autowired
+    L2CacheCacheManager cacheManager;
+
     /**
      * 用于模拟db
      */
@@ -28,8 +34,9 @@ public class CaffeineCacheService {
 
     {
         userMap.put("user01", new User("user01", "addr"));
-        userMap.put("user02", new User("user03", "addr"));
+        userMap.put("user02", new User("user02", "addr"));
         userMap.put("user03", new User("user03", "addr"));
+        userMap.put("user04", new User("user04", "addr"));
     }
 
     /**
@@ -91,5 +98,29 @@ public class CaffeineCacheService {
     @CacheEvict(value = "userCacheSync", key = "#userId")
     public String evictUserSync(String userId) {
         return userId;
+    }
+
+    /**
+     * 批量get
+     */
+    public Map<String, User> batchGetUser(List<String> userIdList) {
+        Cache l2cache = (Cache) cacheManager.getCache("userCache").getNativeCache();
+        Map<String, User> dataMap = l2cache.batchGet(userIdList);
+        return dataMap;
+    }
+
+    /**
+     * 批量get或load
+     */
+    public Map<String, User> batchGetOrLoadUser(List<String> userIdList) {
+        Cache l2cache = (Cache) cacheManager.getCache("userCache").getNativeCache();
+        Map<String, User> dataMap = l2cache.batchGetOrLoad(userIdList, notHitCacheKeyList -> {
+            Map<String, User> valueLoaderHitMap = new HashMap<>();
+            notHitCacheKeyList.forEach(key -> {
+                valueLoaderHitMap.put(key, new User("user_load_" + key, "addr"));
+            });
+            return valueLoaderHitMap;
+        });
+        return dataMap;
     }
 }

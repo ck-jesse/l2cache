@@ -7,10 +7,13 @@ import com.coy.l2cache.spring.L2CacheCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenck
@@ -86,5 +89,15 @@ public class CaffeineCacheController {
         com.coy.l2cache.Cache l2cache = (com.coy.l2cache.Cache) cacheManager.getCache("queryUserSync").getNativeCache();
         l2cache.put(userId, user);
         return "justput";
+    }
+
+    @PostMapping(value = "/batchGetUser")
+    public Map<String, User> batchGetUser(@RequestBody List<String> userIdList) {
+        return caffeineCacheService.batchGetUser(userIdList);
+    }
+
+    @RequestMapping(value = "/batchGetOrLoadUser")
+    public Map<String, User> batchGetOrLoadUser(@RequestBody List<String> userIdList) {
+        return caffeineCacheService.batchGetOrLoadUser(userIdList);
     }
 }
