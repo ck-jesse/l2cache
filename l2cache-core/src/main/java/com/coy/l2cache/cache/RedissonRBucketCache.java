@@ -313,7 +313,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         }
 
         // 集合切分
-        List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), ColletConsts.BATCH_CACHE_COLLECT_SPLIT);
+        List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), redis.getBatchPageSize());
 
         // for循环分执行batch,减少瞬间redisson的netty堆外内存溢出
         keyListCollect.forEach(keyList -> {
@@ -347,7 +347,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 });
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, keyListSize={}, hitMapSize={}", this.getCacheName(), keyList.size(), hitMap.size());
+            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
         });
         logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
         return hitMap;
@@ -360,7 +360,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return;
         }
         // 集合切分
-        List<List<Object>> keyListCollect = Lists.partition(new ArrayList<>(dataMap.keySet()), ColletConsts.BATCH_CACHE_COLLECT_SPLIT);
+        List<List<Object>> keyListCollect = Lists.partition(new ArrayList<>(dataMap.keySet()), redis.getBatchPageSize());
 
         // for循环分执行batch,减少瞬间redisson的netty堆外内存溢出
         keyListCollect.forEach(keyList -> {
@@ -392,7 +392,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 }
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, size={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
+            logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), keyList.size(), result.getSyncedSlaves());
         });
     }
 

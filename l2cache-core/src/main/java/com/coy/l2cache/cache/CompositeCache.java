@@ -396,7 +396,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             logger.info("[CompositeCache] batchPut 部分key走本地缓存, cacheName={}, l1KeyMap={}", this.getCacheName(), l1CacheMap);
         }
         // 批量插入一级缓存
-        if (!CollectionUtils.isEmpty(dataMap)) {
+        if (!CollectionUtils.isEmpty(l1CacheMap)) {
             level1Cache.batchPut(l1CacheMap);
         }
 

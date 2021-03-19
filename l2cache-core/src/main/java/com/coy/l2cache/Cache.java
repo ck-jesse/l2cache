@@ -162,7 +162,7 @@ public interface Cache {
      * @param cacheKeyBuilder 自定义的cacheKey构建器
      */
     default <K, V> Map<K, V> batchGet(List<K> keyList, Function<K, Object> cacheKeyBuilder) {
-        // 将keyList 转换为cacheKey，因K可能是自定义DTO
+        // 将keyList 转换为cacheKey，因K可能是自定义DTO，同时包含去重的能力
         Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
         if (null != cacheKeyBuilder) {
             keyList.forEach(key -> keyMap.put(key, cacheKeyBuilder.apply(key)));

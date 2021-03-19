@@ -217,6 +217,11 @@ public class CacheConfig {
         private long expireTime;
 
         /**
+         * 批量操作的大小，可以理解为是分页
+         */
+        private int batchPageSize = 50;
+
+        /**
          * 是否启用副本，默认false
          * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
          * 以redis内存空间来降低单分片压力。
