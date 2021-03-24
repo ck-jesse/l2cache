@@ -1,5 +1,6 @@
 package com.coy.l2cache;
 
+import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheRange;
 import com.coy.l2cache.consts.CacheSyncPolicyType;
 import com.coy.l2cache.consts.CacheType;
@@ -143,6 +144,11 @@ public class CacheConfig {
         private Long publishMsgPeriodMilliSeconds = 500L;
 
         /**
+         * 批量获取操作日志级别，因批量获取时，日志量非常大，而且每一条日志都是打印全量的数据，会对性能有影响，所以此参数可用于控制是否打印日志
+         */
+        private String batchGetLogLevel = CacheConsts.LOG_DEBUG;
+
+        /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.
          */
         private String defaultSpec;
@@ -220,6 +226,11 @@ public class CacheConfig {
          * 批量操作的大小，可以理解为是分页
          */
         private int batchPageSize = 50;
+
+        /**
+         * 批量获取操作日志级别，因批量获取时，日志量非常大，而且每一条日志都是打印全量的数据，会对性能有影响，所以此参数可用于控制是否打印日志
+         */
+        private String batchGetLogLevel = CacheConsts.LOG_INFO;
 
         /**
          * 是否启用副本，默认false

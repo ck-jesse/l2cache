@@ -69,7 +69,7 @@ public abstract class AbstractAdaptingCache implements Cache {
         // 获取未命中缓存的key列表
         Map<K, Object> notHitCacheKeyMap = keyMap.entrySet().stream()
                 .filter(entry -> !hitCacheMap.containsKey(entry.getKey()))
-                .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+                .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
 
         if (null == valueLoader) {
             logger.info("[{}] batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
@@ -105,7 +105,7 @@ public abstract class AbstractAdaptingCache implements Cache {
                         return false;
                     }
                     return true;
-                }).collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+                }).collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
     }
 
     /**
@@ -129,9 +129,10 @@ public abstract class AbstractAdaptingCache implements Cache {
 
             // 将命中DB的数据按照cacheKey的方式来组装以便put到缓存
             // 如果K是自定义DTO，且没有重写hashCode()和equals(Object)，那么通过K从hitMap中可能获取不到数据，所以要特别注意
+            // 由于 Collectors.toMap(key,value)中的value为null时，会报 java.util.HashMap.merge NullPointerException，所以使用该方式来处理。
             Map<Object, V> batchPutDataMap = notHitCacheKeyMap.entrySet().stream()
                     .filter(entry -> valueLoaderHitMap.containsKey(entry.getKey()))
-                    .collect(Collectors.toMap(entry -> entry.getValue(), entry -> valueLoaderHitMap.get(entry.getKey())));
+                    .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), valueLoaderHitMap.get(entry.getKey())), HashMap::putAll);
             this.batchPut(batchPutDataMap);
             logger.info("[{}] batchGetOrLoad batch put loaded data from valueLoader, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), batchPutDataMap.keySet());
 

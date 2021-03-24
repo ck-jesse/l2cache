@@ -16,4 +16,12 @@ public class CacheConsts {
      * 分隔符
      */
     public static final String SPLIT = ":";
+
+    /**
+     * 日志级别
+     */
+    public static final String LOG_DEBUG = "debug";
+    public static final String LOG_INFO = "info";
+    public static final String LOG_WARN = "warn";
+
 }

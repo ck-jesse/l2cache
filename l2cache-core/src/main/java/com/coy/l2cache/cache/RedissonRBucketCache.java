@@ -2,6 +2,7 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.consts.ColletConsts;
 import com.coy.l2cache.content.NullValue;
@@ -349,7 +350,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             BatchResult result = batch.execute();
             logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
         });
-        logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, cacheKeyMap={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), keyMap.values(), hitMap.size(), hitMap);
+        if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
+            logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
+            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
+            logger.warn("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        }
         return hitMap;
     }
 

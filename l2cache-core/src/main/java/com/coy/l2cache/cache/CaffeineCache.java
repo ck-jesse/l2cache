@@ -318,7 +318,13 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 return;
             }
         });
-        logger.info("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, cacheKeyMap={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), keyMap.values(), hitMap.size(), hitMap);
+        if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(caffeine.getBatchGetLogLevel())) {
+            logger.debug("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(caffeine.getBatchGetLogLevel())) {
+            logger.info("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(caffeine.getBatchGetLogLevel())) {
+            logger.warn("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        }
         return hitMap;
     }
 }

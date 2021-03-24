@@ -54,7 +54,7 @@ public class CompositeCacheTest {
                 .getComposite()
                 .setL1CacheType(CacheType.CAFFEINE.name())
                 .setL2CacheType(CacheType.REDIS.name())
-                .setL1AllOpen(false)
+                .setL1AllOpen(true)
                 .setL1Manual(true)
                 .setL1ManualKeySet(l1ManualKeySet)
                 .setL1ManualCacheNameSet(L1ManualCacheNameSet);
@@ -62,7 +62,7 @@ public class CompositeCacheTest {
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=10m,recordStats")
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
-                .setExpireTime(500000)
+                .setExpireTime(5000000)
 //                .setMaxIdleTime(5000)
 //                .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
                 .setRedissonYamlConfig("redisson.yaml");
@@ -337,6 +337,11 @@ public class CompositeCacheTest {
                 for (UserDTO userDTO : userDTOS) {
                     newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), new User("new_name" + i, "addr" + i));
                     i++;
+                    // 模拟从db只获取部分数据，此时未返回的应该缓存NullValue
+                    if (i == 2) {
+                        newMap.put(new UserDTO(userDTO.getName(), userDTO.getUserId()), null);
+                        break;
+                    }
                 }
                 return newMap;
             }
@@ -362,15 +367,18 @@ public class CompositeCacheTest {
         Map<UserDTO, User> mapNew = cache.batchGetOrLoad(keyList, valueLoader);
         System.out.println(mapNew);
 
-        // 模拟增加一个不存在的key
-        keyList.add(new UserDTO("name60", "60"));
-        keyList.add(new UserDTO("name70", "70"));
-        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+        mapNew = cache.batchGetOrLoad(keyList, valueLoader);
         System.out.println(mapNew);
 
-        // 模拟获取一个不存在的key
-        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
-        System.out.println(mapNew);
+//        // 模拟增加一个不存在的key
+//        keyList.add(new UserDTO("name60", "60"));
+//        keyList.add(new UserDTO("name70", "70"));
+//        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+//        System.out.println(mapNew);
+//
+//        // 模拟获取一个不存在的key
+//        mapNew = cache.batchGetOrLoad(keyList, valueLoader2);
+//        System.out.println(mapNew);
     }
 
 
