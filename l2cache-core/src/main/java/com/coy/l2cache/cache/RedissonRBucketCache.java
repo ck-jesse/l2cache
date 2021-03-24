@@ -349,7 +349,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             BatchResult result = batch.execute();
             logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
         });
-        logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
+        logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, cacheKeyMap={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), keyMap.values(), hitMap.size(), hitMap);
         return hitMap;
     }
 

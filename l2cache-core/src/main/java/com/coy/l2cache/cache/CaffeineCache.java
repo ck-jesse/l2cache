@@ -318,7 +318,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 return;
             }
         });
-        logger.info("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
+        logger.info("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, cacheKeyMap={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), keyMap.values(), hitMap.size(), hitMap);
         return hitMap;
     }
 }

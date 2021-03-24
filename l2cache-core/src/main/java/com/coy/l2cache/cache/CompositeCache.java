@@ -292,22 +292,22 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             hitCacheMap.putAll(l1HitMap);
             // 获取未命中列表（注意：此处以keyMap作为基础，过滤出来一级缓存中没有命中的key，分为两部分：一部分为不走一级缓存的key，另一部分为走一级缓存但是没有命中一级缓存的key）
             keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> l1NotHitKeyMap.put(entry.getKey(), entry.getValue()));
-            logger.info("[CompositeCache] {} l1Cache batchGet, cacheName={}, l1KeyMap={}, l1NotHitKeyMap={}, hitCacheMap={}", methodName, this.getCacheName(), l1KeyMap, l1NotHitKeyMap, hitCacheMap);
+            logger.info("[CompositeCache] {} l1Cache batchGet, cacheName={}, l1NotHitKeySize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size());
         } else {
             // 获取未命中列表
             l1NotHitKeyMap.putAll(keyMap);
-            logger.info("[CompositeCache] {} l1Cache not hit, cacheName={}, notHitKeyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap);
+            logger.info("[CompositeCache] {} no key matches l1Cache, cacheName={}, keyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap.values());
         }
 
         // 一级缓存全部命中
         if (CollectionUtils.isEmpty(l1NotHitKeyMap)) {
-            logger.info("[CompositeCache] {} l1Cache all hit, cacheName={}, keyMapSize={}, keyMap={}", methodName, this.getCacheName(), keyMap.size(), keyMap);
+            logger.info("[CompositeCache] {} l1Cache all hit, cacheName={}, keyMapSize={}", methodName, this.getCacheName(), keyMap.size());
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
         // 二级缓存批量查询
         Map<K, V> l2HitMap = level2Cache.batchGet(l1NotHitKeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
-        logger.info("[CompositeCache] {} l2Cache batchGet, cacheName={}, l2KeyMap={}, l2HitMap={}", methodName, this.getCacheName(), l1NotHitKeyMap, l2HitMap);
+        logger.info("[CompositeCache] {} l2Cache batchGet, cacheName={}, l1NotHitKeyMapSize={}, l2HitMapSize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size(), l2HitMap.size());
 
         if (!CollectionUtils.isEmpty(l2HitMap)) {
             hitCacheMap.putAll(l2HitMap);// 合并数据
@@ -320,7 +320,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                         .collect(Collectors.toMap(entry -> l1KeyMap.get(entry.getKey()), entry -> entry.getValue()));
                 if (!CollectionUtils.isEmpty(l2HitMapTemp)) {
                     level1Cache.batchPut(l2HitMapTemp);
-                    logger.info("[CompositeCache] {} l2Cache batchPut to l1Cache, cacheName={}, cacheMap={}", methodName, this.getCacheName(), l2HitMapTemp);
+                    logger.info("[CompositeCache] {} l2Cache batchPut to l1Cache, cacheName={}, cacheMapSize={}", methodName, this.getCacheName(), l2HitMapTemp.size());
                 }
             }
         }
@@ -359,10 +359,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         Map<K, Object> l1KeyMap = new HashMap<>();
         if (ifL1Open()) {
             l1KeyMap.putAll(keyMap);
-            logger.info("[CompositeCache] {} 全部key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap);
+            logger.debug("[CompositeCache] {} 全部key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap.values());
         } else {
             keyMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getValue())).forEach(entry -> l1KeyMap.put(entry.getKey(), entry.getValue()));
-            logger.info("[CompositeCache] {} 部分key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap);
+            logger.debug("[CompositeCache] {} 部分key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap.values());
         }
         return l1KeyMap;
     }
