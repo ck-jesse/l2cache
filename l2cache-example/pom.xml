@@ -5,7 +5,7 @@
     <parent>
         <artifactId>l2cache</artifactId>
         <groupId>com.coy.l2cache</groupId>
-        <version>1.0.22-SNAPSHOT</version>
+        <version>1.0.23-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.coy.l2cache</groupId>
             <artifactId>l2cache-spring-boot-starter</artifactId>
-            <version>1.0.22-SNAPSHOT</version>
+            <version>1.0.23-SNAPSHOT</version>
         </dependency>
 
         <dependency>
