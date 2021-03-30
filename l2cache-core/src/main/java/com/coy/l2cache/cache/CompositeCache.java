@@ -282,19 +282,17 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
         // 缓存命中列表
         Map<K, V> hitCacheMap = new HashMap<>();
-        // 未命中列表
+        // 未命中的key列表
         Map<K, Object> l1NotHitKeyMap = new HashMap<>();
 
         // 一级缓存批量查询
         if (!CollectionUtils.isEmpty(l1KeyMap)) {
             Map<K, V> l1HitMap = level1Cache.batchGet(l1KeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
-            // 合并数据
             hitCacheMap.putAll(l1HitMap);
             // 获取未命中列表（注意：此处以keyMap作为基础，过滤出来一级缓存中没有命中的key，分为两部分：一部分为不走一级缓存的key，另一部分为走一级缓存但是没有命中一级缓存的key）
             keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> l1NotHitKeyMap.put(entry.getKey(), entry.getValue()));
             logger.info("[CompositeCache] {} l1Cache batchGet, cacheName={}, l1NotHitKeySize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size());
         } else {
-            // 获取未命中列表
             l1NotHitKeyMap.putAll(keyMap);
             logger.info("[CompositeCache] {} no key matches l1Cache, cacheName={}, keyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap.values());
         }
