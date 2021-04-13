@@ -95,22 +95,22 @@ public class CacheConfig {
          */
         private String l1CacheRange = CacheRange.ENABLE.name();
         /**
-         * 是否启用一级缓存，默认false
+         * 是否全部启用一级缓存，默认false
          */
         private boolean l1AllOpen = false;
 
         /**
-         * 是否使用手动匹配开关，默认false
+         * 是否手动启用一级缓存，默认false
          */
         private boolean l1Manual = false;
 
         /**
-         * 手动匹配缓存key集合，针对单个key维度
+         * 手动配置走一级缓存的缓存key集合，针对单个key维度
          */
         private Set<String> l1ManualKeySet = new HashSet<>();
 
         /**
-         * 手动匹配缓存名字集合，针对cacheName维度
+         * 手动配置走一级缓存的缓存名字集合，针对cacheName维度
          */
         private Set<String> l1ManualCacheNameSet = new HashSet<>();
     }

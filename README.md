@@ -101,12 +101,24 @@ l2cache:
       l1CacheType: caffeine
       # 二级缓存类型
       l2CacheType: redis
+      # 是否全部启用一级缓存，默认false
+      l1AllOpen: false
+      # 是否手动启用一级缓存，默认false
+      l1Manual: true
+      # 手动配置走一级缓存的缓存key集合，针对单个key维度
+      l1ManualKeySet:
+        - userCache:user01
+        - userCache:user02
+      # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
+      l1ManualCacheNameSet:
+        - compositeCache
+        - goodsSpecCache
     # 一级缓存
     caffeine:
       # 是否构建异步Caffeine true 是 false 否
       asyncCache: false
       # 是否自动刷新过期缓存 true 是 false 否
-      autoRefreshExpireCache: true
+      autoRefreshExpireCache: false
       # 缓存刷新调度线程池的大小
       refreshPoolSize: 2
       # 缓存刷新的频率(秒)
@@ -125,20 +137,14 @@ l2cache:
         queryUserSync: initialCapacity=10,maximumSize=2,recordStats
     # 二级缓存
     redis:
-      # 是否启用缓存Key prefix
-      #useKeyPrefix: true
-      # 缓存Key prefix
-      #keyPrefix: ""
-      # 加载数据时，是否加锁
+      # 加载数据时，是否加锁，默认false
       lock: false
       # 加锁时，true调用tryLock()，false调用lock()
       tryLock: true
       # 缓存过期时间(ms)
+      # 注：作为默认的缓存过期时间，如果一级缓存设置了过期时间，则以一级缓存的过期时间为准。
+      # 目的是为了支持cacheName维度的缓存过期时间设置
       #expireTime: 30000
-      # 缓存最大空闲时间(ms)
-      #maxIdleTime: 30000
-      # 最大缓存数
-      #maxSize: 200
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
       # 缓存同步策略配置
@@ -149,7 +155,10 @@ l2cache:
       topic: l2cache
 ```
 
-注：通过自定义`CacheLoader`结合到`Caffeine`或`Guava`的`LoadingCache`来实现数据加载。 
+注：
+1、通过自定义`CacheLoader`结合到`Caffeine`或`Guava`的`LoadingCache`来实现数据加载。
+
+2、建议所有缓存都设置过期时间，如果有些缓存维度可以是永久，那么也建议将过期时间设置长一些即可。
 
 
 
@@ -173,7 +182,7 @@ l2cache:
     cacheType: redis
 ```
 
-3、支持同时使用一二级缓存。
+3、支持同时使用一二级缓存。（推荐该方式，因为可动态配置缓存是走本地缓存还是走redis）
 
 ```yaml
 l2cache:
@@ -184,7 +193,77 @@ l2cache:
       l2CacheType: redis
 ```
 
+4、支持配置指定缓存走本地缓存。
 
+4.1）全部缓存 走本地缓存
+```yaml
+l2cache:
+  config:
+    cacheType: composite
+    composite:
+      l1CacheType: caffeine
+      l2CacheType: redis
+      # 是否全部启用一级缓存，默认false
+      l1AllOpen: true
+```
+
+4.2）指定key 走本地缓存
+```yaml
+l2cache:
+  config:
+    cacheType: composite
+    composite:
+      l1CacheType: caffeine
+      l2CacheType: redis
+      # 是否全部启用一级缓存，默认false
+      l1AllOpen: false
+      # 是否手动启用一级缓存，默认false
+      l1Manual: true
+      # 手动配置走一级缓存的缓存key集合，针对单个key维度
+      l1ManualKeySet:
+        - userCache:user01
+        - userCache:user02
+```
+
+4.3）指定缓存名字 走本地缓存
+```yaml
+l2cache:
+  config:
+    cacheType: composite
+    composite:
+      l1CacheType: caffeine
+      l2CacheType: redis
+      # 是否全部启用一级缓存，默认false
+      l1AllOpen: false
+      # 是否手动启用一级缓存，默认false
+      l1Manual: true
+      # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
+      l1ManualCacheNameSet:
+        - compositeCache
+        - goodsSpecCache
+```
+
+4.3）指定key + 指定缓存名字 走本地缓存
+```yaml
+l2cache:
+  config:
+    cacheType: composite
+    composite:
+      l1CacheType: caffeine
+      l2CacheType: redis
+      # 是否全部启用一级缓存，默认false
+      l1AllOpen: false
+      # 是否手动启用一级缓存，默认false
+      l1Manual: true
+      # 手动配置走一级缓存的缓存key集合，针对单个key维度
+      l1ManualKeySet:
+        - userCache:user01
+        - userCache:user02
+      # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
+      l1ManualCacheNameSet:
+        - compositeCache
+        - goodsSpecCache
+```
 
 #### 3、代码中的使用
 
