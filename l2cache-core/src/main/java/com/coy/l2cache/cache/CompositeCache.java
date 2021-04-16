@@ -418,7 +418,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         } else {
             // 循环put单个缓存
             // 目的：防止batchPut中通过管道批量put时连接被长时间占用，而出现无连接可用的情况出现。
-            // 思考：1、是否可以异步？2、put中是否有必要通过分布式锁来保证并发put同一个key时只有一个是成功的？
+            // 思考：1、是否有必要异步？2、put中是否有必要通过分布式锁来保证并发put同一个key时只有一个是成功的？
             logger.info("[CompositeCache] batchPut cache start, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
             dataMap.entrySet().forEach(entry -> {
                 level2Cache.put(entry.getKey(), entry.getValue());
