@@ -412,7 +412,19 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             level1Cache.batchPut(l1CacheMap);
         }
 
-        // 批量插入二级缓存
-        level2Cache.batchPut(dataMap);
+        if (composite.isL2BatchPut()) {
+            // 批量插入二级缓存（通过管道批量put）
+            level2Cache.batchPut(dataMap);
+        } else {
+            // 循环put单个缓存
+            // 目的：防止batchPut中通过管道批量put时连接被长时间占用，而出现无连接可用的情况出现。
+            // 思考：1、是否可以异步？2、put中是否有必要通过分布式锁来保证并发put同一个key时只有一个是成功的？
+            logger.info("[CompositeCache] batchPut cache start, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
+            dataMap.entrySet().forEach(entry -> {
+                level2Cache.put(entry.getKey(), entry.getValue());
+            });
+            logger.info("[CompositeCache] batchPut cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
+        }
+
     }
 }

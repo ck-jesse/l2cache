@@ -90,10 +90,11 @@ public class CacheConfig {
          */
         private String l2CacheType = CacheType.REDIS.name();
         /**
-         * 一级缓存范围，
-         * 注：当 cacheType = composite时，便于动态控制一二级缓存的切换
+         * CompositeCache.batchPut()中往l2中是通过batchPut()还是循环put()来缓存数据，默认false
+         * true 表示调用l2的batchPut()来缓存数据
+         * false 表示循环调用l2的put()来缓存数据
          */
-        private String l1CacheRange = CacheRange.ENABLE.name();
+        private boolean l2BatchPut = false;
         /**
          * 是否全部启用一级缓存，默认false
          */

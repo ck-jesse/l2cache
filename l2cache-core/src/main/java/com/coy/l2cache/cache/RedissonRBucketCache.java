@@ -334,6 +334,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             keyList.forEach(key -> {
                 String cacheKey = (String) buildKeyBase(keyMap.get(key));
                 RFuture<Object> async = batch.getBucket(cacheKey).getAsync();
+                // 注：onComplete() 是在 batch.execute() 执行之后执行的，所以其中的操作不会增加batch操作的耗时。
                 async.onComplete((value, exception) -> {
                     if (exception != null) {
                         logger.warn("[RedissonRBucketCache] batchGet cache error, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception.getMessage());
@@ -387,6 +388,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         // for循环分执行batch,减少瞬间redisson的netty堆外内存溢出
         keyListCollect.forEach(keyList -> {
             RBatch batch = redissonClient.createBatch();
+            // 注：keyList.forEach() 是在 batch.execute() 执行之前执行的，所以其中的操作会增加batch操作的耗时。
+            // 也就是说edisConnection连接被长时间占用，在高并发情况下，会出现nettyThreads不够用的情况，导致出现如下异常：
+            // RedisTimeoutException : Command still hasn't been written into connection! Increase nettyThreads and/or retryInterval settings
+            // 方案一：增加nettyThreads（官方的方法，但很难精确到具体的值，因为压测的量不同的情况下，可能情况都不同，所以建议第二种方案）
+            // 方案二：直接单个缓存写入，不使用RBatch进行批量写入操作（但增加了交互次数）。
             keyList.forEach(key -> {
                 String cacheKey = (String) buildKeyBase(key);
                 Object value = toStoreValue(dataMap.get(key));
@@ -414,8 +420,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 }
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchPut cache end, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), keyList.size(), result.getSyncedSlaves());
+            logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), keyList.size(), result.getSyncedSlaves());
         });
+        logger.info("[RedissonRBucketCache] batchPut cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
     }
 
     // ----------下面为私有方法
