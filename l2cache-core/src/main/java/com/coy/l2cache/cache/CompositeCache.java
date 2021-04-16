@@ -79,14 +79,18 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             // 从L1获取缓存
             value = level1Cache.get(key);
             if (value != null) {
-                logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                }
                 return value;
             }
         }
         // 从L2获取缓存
         value = level2Cache.get(key);
         if (value != null && ifL1Open) {
-            logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            if (logger.isDebugEnabled()) {
+                logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            }
             level1Cache.put(key, value);
         }
         return value;
@@ -137,7 +141,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void evict(Object key) {
-        logger.debug("[CompositeCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[CompositeCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        }
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         level2Cache.evict(key);
         // 是否开启一级缓存
@@ -150,7 +156,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void clear() {
-        logger.debug("[CompositeCache] clear all cache, cacheName={}", this.getCacheName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("[CompositeCache] clear all cache, cacheName={}", this.getCacheName());
+        }
         // 先清除L2中缓存数据，然后清除L1中的缓存，避免短时间内如果先清除L1缓存后其他请求会再从L2里加载到L1中
         level2Cache.clear();
         level1Cache.clear();
@@ -268,7 +276,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         boolean ifCloseLocalCache = !composite.isL1AllOpen() && !composite.isL1Manual();
         // 已关闭配置中心一级缓存开关，但曾经开启过本地一级缓存开关
         if (ifCloseLocalCache && openedL1Cache.get()) {
-            logger.debug("[CompositeCache] evict l1Cache, cacheName={}, key={}", this.getCacheName(), key);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[CompositeCache] evict l1Cache, cacheName={}, key={}", this.getCacheName(), key);
+            }
             level1Cache.evict(key);
         }
     }
@@ -357,10 +367,14 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         Map<K, Object> l1KeyMap = new HashMap<>();
         if (ifL1Open()) {
             l1KeyMap.putAll(keyMap);
-            logger.debug("[CompositeCache] {} 全部key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap.values());
+            if (logger.isDebugEnabled()) {
+                logger.debug("[CompositeCache] {} 全部key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap.values());
+            }
         } else {
             keyMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getValue())).forEach(entry -> l1KeyMap.put(entry.getKey(), entry.getValue()));
-            logger.debug("[CompositeCache] {} 部分key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap.values());
+            if (logger.isDebugEnabled()) {
+                logger.debug("[CompositeCache] {} 部分key先走本地缓存, cacheName={}, l1KeyMap={}", methodName, this.getCacheName(), l1KeyMap.values());
+            }
         }
         return l1KeyMap;
     }

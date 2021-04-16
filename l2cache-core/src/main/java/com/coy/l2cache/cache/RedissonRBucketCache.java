@@ -179,9 +179,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 value = bucket.get();
             }
             if (value == null) {
-                logger.debug("[RedissonRBucketCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), cacheKey, redis.isLock());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[RedissonRBucketCache] rlock, load data from target method, cacheName={}, key={}, isLock={}", this.getCacheName(), cacheKey, redis.isLock());
+                }
                 value = valueLoader.call();
-                logger.debug("[RedissonRBucketCache] rlock, cacheName={}, key={}, value={}, isLock={}", this.getCacheName(), cacheKey, value, redis.isLock());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[RedissonRBucketCache] rlock, cacheName={}, key={}, value={}, isLock={}", this.getCacheName(), cacheKey, value, redis.isLock());
+                }
 
                 // redis和db都为null，那么不发送消息，减少不必要的通信
                 if (value == null && valueLoader instanceof ValueLoaderWarpperTemp) {
@@ -289,7 +293,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     public boolean isExists(Object key) {
         String cacheKey = (String) buildKeyBase(key);
         boolean rslt = getBucket(cacheKey).isExists();
-        logger.debug("[RedissonRBucketCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), cacheKey, rslt);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RedissonRBucketCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), cacheKey, rslt);
+        }
         return rslt;
     }
 
@@ -312,7 +318,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             logger.info("[RedissonRBucketCache] batchGet cache keyMap is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
             return hitMap;
         }
-
+        if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
+            logger.debug("[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
+        } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
+            logger.info("[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
+        } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
+            logger.warn("[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
+        }
         // 集合切分
         List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), redis.getBatchPageSize());
 
@@ -324,10 +336,12 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 RFuture<Object> async = batch.getBucket(cacheKey).getAsync();
                 async.onComplete((value, exception) -> {
                     if (exception != null) {
-                        logger.warn("[RedissonRBucketCache] batchGet cache error, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception);
+                        logger.warn("[RedissonRBucketCache] batchGet cache error, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception.getMessage());
                         return;
                     }
-                    logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+                    }
 
                     // value=null表示key不存在，则不将key包含在返回数据中
                     if (value == null) {
@@ -351,11 +365,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
         });
         if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.debug("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+            logger.debug("[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
         } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+            logger.info("[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
         } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.warn("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+            logger.warn("[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
         }
         return hitMap;
     }
@@ -366,6 +380,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
+        logger.info("[RedissonRBucketCache] batchPut cache start, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
         // 集合切分
         List<List<Object>> keyListCollect = Lists.partition(new ArrayList<>(dataMap.keySet()), redis.getBatchPageSize());
 
@@ -399,7 +414,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 }
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchPut cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), keyList.size(), result.getSyncedSlaves());
+            logger.info("[RedissonRBucketCache] batchPut cache end, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), keyList.size(), result.getSyncedSlaves());
         });
     }
 
@@ -569,11 +584,15 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      */
     private boolean checkDuplicateKey(String cacheKey) {
         if (!redis.isDuplicate()) {
-            logger.debug("[RedissonRBucketCache] checkDuplicateKey, isDuplicate is false, cacheName={}, isDuplicate={}, key={}", this.getCacheName(), redis.isDuplicate(), cacheKey);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RedissonRBucketCache] checkDuplicateKey, isDuplicate is false, cacheName={}, isDuplicate={}, key={}", this.getCacheName(), redis.isDuplicate(), cacheKey);
+            }
             return false;
         }
         if (redis.isDuplicateALlKey()) {
-            logger.debug("[RedissonRBucketCache] checkDuplicateKey key, isDuplicateALlKey is true, cacheName={}, isDuplicateALlKey={}, key={}", this.getCacheName(), redis.isDuplicateALlKey(), cacheKey);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RedissonRBucketCache] checkDuplicateKey key, isDuplicateALlKey is true, cacheName={}, isDuplicateALlKey={}, key={}", this.getCacheName(), redis.isDuplicateALlKey(), cacheKey);
+            }
             return true;
         }
         if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
@@ -582,7 +601,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 logger.warn("[RedissonRBucketCache] checkDuplicateKey key, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
                 return false;
             }
-            logger.debug("[RedissonRBucketCache] checkDuplicateKey key, matched key, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RedissonRBucketCache] checkDuplicateKey key, matched key, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
+            }
             return true;
         }
         if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
@@ -591,10 +612,14 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 logger.warn("[RedissonRBucketCache] checkDuplicateKey cacheName, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
                 return false;
             }
-            logger.debug("[RedissonRBucketCache] checkDuplicateKey cacheName, matched cacheName, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[RedissonRBucketCache] checkDuplicateKey cacheName, matched cacheName, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
+            }
             return true;
         }
-        logger.debug("[RedissonRBucketCache] checkDuplicateKey, not matched, cacheName={}, key={}", this.getCacheName(), cacheKey);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[RedissonRBucketCache] checkDuplicateKey, not matched, cacheName={}, key={}", this.getCacheName(), cacheKey);
+        }
         return false;
     }
 

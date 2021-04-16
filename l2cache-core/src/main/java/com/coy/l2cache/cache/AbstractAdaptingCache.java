@@ -149,7 +149,7 @@ public abstract class AbstractAdaptingCache implements Cache {
             }
             return valueLoaderHitMap;
         } catch (Exception e) {
-            logger.error("[{}] batchGetOrLoad error, cacheKeyList={}", this.getClass().getSimpleName(), notHitCacheKeyMap.values(), e);
+            logger.error("[" + this.getClass().getSimpleName() + "] batchGetOrLoad error, cacheName=" + this.getCacheName() + ", cacheKeyList=" + notHitCacheKeyMap.values(), e);
             throw new L2CacheException("batchGetOrLoad error," + e.getMessage());
         }
     }
