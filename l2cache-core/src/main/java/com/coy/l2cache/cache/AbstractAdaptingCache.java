@@ -132,7 +132,7 @@ public abstract class AbstractAdaptingCache implements Cache {
             // 由于 Collectors.toMap(key,value)中的value为null时，会报 java.util.HashMap.merge NullPointerException，所以使用该方式来处理。
             Map<Object, V> batchPutDataMap = notHitCacheKeyMap.entrySet().stream()
                     .filter(entry -> valueLoaderHitMap.containsKey(entry.getKey()))
-                    .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), valueLoaderHitMap.get(entry.getKey())), HashMap::putAll);
+                    .collect(HashMap::new, (map, entry) -> map.put(entry.getValue(), valueLoaderHitMap.get(entry.getKey())), HashMap::putAll);
             this.batchPut(batchPutDataMap);
             logger.info("[{}] batchGetOrLoad batch put loaded data from valueLoader, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), batchPutDataMap.keySet());
 
