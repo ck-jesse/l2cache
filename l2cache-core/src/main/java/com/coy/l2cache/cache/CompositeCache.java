@@ -315,7 +315,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
         // 二级缓存批量查询
         Map<K, V> l2HitMap = level2Cache.batchGet(l1NotHitKeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
-        logger.info("[CompositeCache] {} l2Cache batchGet, cacheName={}, l1NotHitKeyMapSize={}, l2HitMapSize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size(), l2HitMap.size());
+        // logger.info("[CompositeCache] {} l2Cache batchGet, cacheName={}, l1NotHitKeyMapSize={}, l2HitMapSize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size(), l2HitMap.size());
 
         if (!CollectionUtils.isEmpty(l2HitMap)) {
             hitCacheMap.putAll(l2HitMap);// 合并数据
