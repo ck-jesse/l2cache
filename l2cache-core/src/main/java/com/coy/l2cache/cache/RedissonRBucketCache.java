@@ -34,8 +34,6 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     private static final Logger logger = LoggerFactory.getLogger(RedissonRBucketCache.class);
 
-    private static final String SPLIT = ":";
-
     /**
      * redis config
      */
@@ -91,7 +89,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * @param duplicateIndex 复制品下标
      */
     private Object buildKeyByDuplicate(Object key, int duplicateIndex) {
-        return this.buildKeyBase(key.toString() + SPLIT + duplicateIndex);
+        return this.buildKeyBase(key.toString() + CacheConsts.SPLIT + duplicateIndex);
     }
 
     /**
@@ -102,7 +100,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }
-        StringBuilder sb = new StringBuilder(this.getCacheName()).append(SPLIT);
+        StringBuilder sb = new StringBuilder(this.getCacheName()).append(CacheConsts.SPLIT);
         sb.append(key.toString());
         return sb.toString();
     }

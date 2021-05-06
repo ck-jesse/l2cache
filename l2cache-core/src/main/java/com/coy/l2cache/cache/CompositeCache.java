@@ -2,6 +2,7 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
 import org.checkerframework.checker.units.qual.K;
 import org.slf4j.Logger;
@@ -23,8 +24,6 @@ import java.util.stream.Collectors;
 public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CompositeCache.class);
-
-    private static final String SPLIT = ":";
 
     private final CacheConfig.Composite composite;
     /**
@@ -261,7 +260,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }
-        StringBuilder sb = new StringBuilder(this.getCacheName()).append(SPLIT);
+        StringBuilder sb = new StringBuilder(this.getCacheName()).append(CacheConsts.SPLIT);
         sb.append(key.toString());
         return sb.toString();
     }
