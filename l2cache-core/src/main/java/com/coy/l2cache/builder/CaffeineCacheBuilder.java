@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Caffeine Cache Builder
  *
@@ -26,7 +29,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
     private static Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
 
-    private CustomCaffeineSpec customCaffeineSpec;
+    private static Map<String,CustomCaffeineSpec> customCaffeineSpecMap = new HashMap<>();;
 
     @Override
     public CaffeineCache build(String cacheName) {
@@ -51,6 +54,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         this.buildCaffeineSpec(cacheName, this.getCacheConfig().getCaffeine());
 
         CacheSpec cacheSpec = new CacheSpec();
+        CustomCaffeineSpec customCaffeineSpec = customCaffeineSpecMap.get(cacheName);
         cacheSpec.setExpireTime(customCaffeineSpec.getExpireTime());
         cacheSpec.setMaxSize((int) customCaffeineSpec.getMaximumSize());
         return cacheSpec;
@@ -65,6 +69,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         this.buildCaffeineSpec(cacheName, cacheConfig.getCaffeine());
 
         Caffeine<Object, Object> cacheBuilder = defaultCacheBuilder;
+        CustomCaffeineSpec customCaffeineSpec = customCaffeineSpecMap.get(cacheName);
         if (null != customCaffeineSpec) {
             cacheBuilder = customCaffeineSpec.toBuilder();
         }
@@ -101,6 +106,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
      * 获取自定义的 CaffeineSpec
      */
     private void buildCaffeineSpec(String cacheName, CacheConfig.Caffeine caffeine) {
+        CustomCaffeineSpec customCaffeineSpec = customCaffeineSpecMap.get(cacheName);
         if (null != customCaffeineSpec) {
             return;
         }
@@ -108,7 +114,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         if (!StringUtils.hasText(spec)) {
             throw new RuntimeException("please setting caffeine spec config");
         }
-        customCaffeineSpec = CustomCaffeineSpec.parse(spec);
+        customCaffeineSpecMap.put(cacheName, CustomCaffeineSpec.parse(spec));
     }
 
 }
