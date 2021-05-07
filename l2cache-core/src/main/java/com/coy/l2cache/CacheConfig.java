@@ -224,6 +224,12 @@ public class CacheConfig {
         private long expireTime;
 
         /**
+         * 针对cacheName维度过期时间集合
+         * <cacheName,过期时间(ms)>
+         */
+        private Map<String, Long> expireTimeCacheNameMap = new HashMap<>();
+
+        /**
          * 批量操作的大小，可以理解为是分页
          */
         private int batchPageSize = 50;

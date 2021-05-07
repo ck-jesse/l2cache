@@ -50,11 +50,13 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
         if (null != cacheSpec) {
             // 覆盖CacheConfig.Redis的默认值
             if (cacheSpec.getExpireTime() < 0) {
-                redis.setExpireTime(0);// 0 表示无过期时间
+                redis.getExpireTimeCacheNameMap().put(cacheName, 0L);// 0 表示无过期时间
             } else {
-                redis.setExpireTime(cacheSpec.getExpireTime());
+                redis.getExpireTimeCacheNameMap().put(cacheName, cacheSpec.getExpireTime());
             }
-            logger.info("采用一级缓存上expireTime和maxSize, 覆盖CacheConfig.Redis的默认值, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
+            logger.info("采用一级缓存上expireTime, 覆盖CacheConfig.Redis的默认值, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
+        } else {
+            logger.info("采用CacheConfig.Redis的值, cacheName={}, redis={}", cacheName, redis.toString());
         }
         logger.info("create a RedissonRBucketCache instance, cacheName={}", cacheName);
         return new RedissonRBucketCache(cacheName, cacheConfig, redissonClient);

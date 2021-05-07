@@ -64,7 +64,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public long getExpireTime() {
-        return redis.getExpireTime();
+        return redis.getExpireTimeCacheNameMap().getOrDefault(this.getCacheName(), redis.getExpireTime());
     }
 
     @Override
