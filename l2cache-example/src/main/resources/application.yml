@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8080
   #servlet:
   #  context-path: /l2cache-example
 
@@ -71,6 +71,14 @@ l2cache:
         userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
         # 无过期时间配置
         queryUserSync: initialCapacity=10,maximumSize=20,refreshAfterWrite=1m,recordStats
+        brandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=24h,recordStats
+        timeCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=30d,recordStats
+        homeGoodsGroupPageCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        homeGoodsGroupCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        purchaseWouldCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        goodsPriceRevisionListCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        actDiscountCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        brandParentFirstPushCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
     # 二级缓存
     redis:
       # 加载数据时，是否加锁
