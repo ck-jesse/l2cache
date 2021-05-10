@@ -5,10 +5,10 @@ import com.coy.l2cache.CacheSpec;
 import com.coy.l2cache.cache.GuavaCache;
 import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.consts.CacheType;
-import com.coy.l2cache.content.CustomCaffeineSpec;
 import com.coy.l2cache.content.CustomGuavaCacheBuilderSpec;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.CustomCacheLoader;
+import com.coy.l2cache.load.KeyWarpper;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
         return cacheBuilder.build(new com.google.common.cache.CacheLoader<Object, Object>() {
             @Override
             public Object load(Object key) throws Exception {
-                return cacheLoader.load(key);
+                return cacheLoader.load(new KeyWarpper(key));
             }
         });
     }

@@ -3,8 +3,10 @@ package com.coy.l2cache.sync;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.slf4j.MDC;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 缓存消息
@@ -24,9 +26,10 @@ public class CacheMessage implements Serializable {
     private String cacheName;// 缓存名称
     private String optType;// 操作类型 refresh/clear
     private Object key;// 缓存key
+    private Map<String, String> mdcContextMap;//
 
     public CacheMessage() {
-
+        this.mdcContextMap = MDC.getCopyOfContextMap();
     }
 
     public CacheMessage(String instanceId, String cacheType, String cacheName, Object key, String optType) {
@@ -35,6 +38,7 @@ public class CacheMessage implements Serializable {
         this.cacheName = cacheName;
         this.key = key;
         this.optType = optType;
+        this.mdcContextMap = MDC.getCopyOfContextMap();
     }
 
     @Override
@@ -48,6 +52,7 @@ public class CacheMessage implements Serializable {
         sb.append(", cacheName=").append(cacheName);
         sb.append(", optType=").append(optType);
         sb.append(", key=").append(key);
+        sb.append(", mdcContextMap=").append(mdcContextMap);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

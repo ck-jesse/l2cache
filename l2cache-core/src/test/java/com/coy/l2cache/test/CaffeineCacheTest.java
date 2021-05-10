@@ -10,10 +10,10 @@ import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.sync.CacheMessageListener;
 import com.coy.l2cache.sync.RedisCacheSyncPolicy;
-import org.checkerframework.checker.units.qual.K;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,7 +69,7 @@ public class CaffeineCacheTest {
             @Override
             public String call() throws Exception {
 //                String result = "loader_value" + count.getAndAdd(1);
-                System.out.println("loader value from valueLoader, return " + count.getAndAdd(1));
+                System.out.println(Thread.currentThread().getName() + " loader value from valueLoader, return " + count.getAndAdd(1));
 //                return result;
                 return null;
             }
@@ -143,10 +143,11 @@ public class CaffeineCacheTest {
         for (int i = 0; i < 3; i++) {
             new Thread(() -> {
 
+                MDC.put("threadName", Thread.currentThread().getName());
                 String key = "key_loader";
                 String value = cache.get(key, callable);
-                System.out.println(String.format("get key=%s, value=%s", key, value));
-            }).start();
+                System.out.println(String.format("%s get key=%s, value=%s", Thread.currentThread().getName(), key, value));
+            }, "thread" + i).start();
         }
         while (true) {
 

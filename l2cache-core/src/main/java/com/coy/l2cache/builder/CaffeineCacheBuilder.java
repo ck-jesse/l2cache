@@ -8,6 +8,7 @@ import com.coy.l2cache.cache.CaffeineCache;
 import com.coy.l2cache.load.CustomCacheLoader;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.content.CustomCaffeineSpec;
+import com.coy.l2cache.load.KeyWarpper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
@@ -85,7 +86,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
         }
 
         logger.info("create a native Caffeine LoadingCache instance, cacheName={}", cacheName);
-        return cacheBuilder.build(key -> cacheLoader.load(key));
+        return cacheBuilder.build(key -> cacheLoader.load(new KeyWarpper(key)));
     }
 
     /**

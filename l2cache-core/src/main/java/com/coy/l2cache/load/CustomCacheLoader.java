@@ -6,8 +6,8 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
@@ -100,12 +100,21 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
     }
 
     @Override
-    public Object load(Object key) {
-        // 直接返回null，目的是使spring cache后续逻辑去执行具体的加载数据方法，然后put到缓存
-        ValueLoaderWarpper valueLoader = valueLoaderCache.getIfPresent(key);
+    public Object load(KeyWarpper<Object> keyWarpper) {
+        try {
+            if (null != keyWarpper.getMdcContextMap()) {
+                MDC.setContextMap(keyWarpper.getMdcContextMap());
+            }
+            // 直接返回null，目的是使spring cache后续逻辑去执行具体的加载数据方法，然后put到缓存
+            ValueLoaderWarpper valueLoader = valueLoaderCache.getIfPresent(keyWarpper.getKey());
 
-        LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, this.allowNullValues, this.nullValueCache);
-        return loadFunction.apply(key);
+            LoadFunction loadFunction = new LoadFunction(this.instanceId, this.cacheType, cacheName, level2Cache, cacheSyncPolicy, valueLoader, this.allowNullValues, this.nullValueCache);
+            return loadFunction.apply(keyWarpper.getKey());
+        } finally {
+            if (null != keyWarpper.getMdcContextMap()) {
+                MDC.clear();
+            }
+        }
     }
 
     @Override
