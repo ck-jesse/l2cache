@@ -1,4 +1,4 @@
-package com.coy.l2cache.util;
+package com.coy.l2cache.util.pool;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

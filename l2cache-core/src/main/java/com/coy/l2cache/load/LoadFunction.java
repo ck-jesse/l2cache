@@ -125,7 +125,9 @@ public class LoadFunction implements Function<Object, Object> {
                 this.nullValueCache.put(key, 1);
             }
         }
-        return NullValueUtil.toStoreValue(value, this.allowNullValues, this.cacheName);
+        Object storeValue = NullValueUtil.toStoreValue(value, this.allowNullValues, this.cacheName);
+        logger.info("[LoadFunction] storeValue, cacheName={}, key={}, storeValue={}", cacheName, key, storeValue);
+        return storeValue;
     }
 
 }

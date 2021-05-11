@@ -1,4 +1,4 @@
-package com.coy.l2cache.util;
+package com.coy.l2cache.util.pool;
 
 import org.slf4j.MDC;
 
@@ -10,18 +10,20 @@ import java.util.Map;
  * @author chenck
  * @date 2020/9/23 19:37
  */
-public class RunnableWarpper implements Runnable {
+public class RunnableMdcWarpper implements Runnable {
+
+    private static final long serialVersionUID = 1L;
 
     Runnable runnable;
     Map<String, String> contextMap;
     Object param;
 
-    public RunnableWarpper(Runnable runnable) {
+    public RunnableMdcWarpper(Runnable runnable) {
         this.runnable = runnable;
         this.contextMap = MDC.getCopyOfContextMap();
     }
 
-    public RunnableWarpper(Runnable runnable, Object param) {
+    public RunnableMdcWarpper(Runnable runnable, Object param) {
         this.runnable = runnable;
         this.contextMap = MDC.getCopyOfContextMap();
         this.param = param;
@@ -29,15 +31,11 @@ public class RunnableWarpper implements Runnable {
 
     @Override
     public void run() {
+        Map<String, String> oldContext = MdcUtil.beforeExecution(contextMap);
         try {
-            if (null != contextMap) {
-                MDC.setContextMap(contextMap);
-            }
             runnable.run();
         } finally {
-            if (null != contextMap) {
-                MDC.clear();
-            }
+            MdcUtil.afterExecution(oldContext);
         }
     }
 

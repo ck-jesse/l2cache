@@ -1,6 +1,7 @@
 package com.coy.l2cache.test;
 
 import com.coy.l2cache.util.DateUtils;
+import com.coy.l2cache.util.pool.MdcForkJoinPool;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.junit.Test;
@@ -32,7 +33,9 @@ public class CaffeineConcurrentTest {
                 .removalListener((key, value, cause) -> {
                     println("remove removalCause={}, key=" + key + ", value=" + value);
                 })
+                .executor(MdcForkJoinPool.mdcCommonPool())// 自定义ForkJoinPool
                 .build(key -> {
+                    // 走到此处，若异步，则表示进入到了ForkJoinPool的线程里面
                     Integer value = 100;
                     println("start load value = " + value);
                     Thread.sleep(2000);

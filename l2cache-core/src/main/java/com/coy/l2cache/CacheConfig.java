@@ -159,6 +159,11 @@ public class CacheConfig {
          * <key,value>=<cacheName, spec>
          */
         private Map<String, String> specs = new HashMap<>();
+
+        /**
+         * 是否启用自定义 MdcForkJoinPool，用于链路追踪
+         */
+        private boolean enableMdcForkJoinPool = true;
     }
 
     /**

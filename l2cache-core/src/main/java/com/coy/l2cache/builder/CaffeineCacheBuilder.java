@@ -8,6 +8,7 @@ import com.coy.l2cache.cache.CaffeineCache;
 import com.coy.l2cache.load.CustomCacheLoader;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.content.CustomCaffeineSpec;
+import com.coy.l2cache.util.pool.MdcForkJoinPool;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
     private static Caffeine<Object, Object> defaultCacheBuilder = Caffeine.newBuilder();
 
-    private static Map<String,CustomCaffeineSpec> customCaffeineSpecMap = new HashMap<>();;
+    private static Map<String, CustomCaffeineSpec> customCaffeineSpecMap = new HashMap<>();
 
     @Override
     public CaffeineCache build(String cacheName) {
@@ -79,6 +80,13 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
                 listener.onExpired(key, value, cause.name());
             });
         }
+
+        if (cacheConfig.getCaffeine().isEnableMdcForkJoinPool()) {
+            // 设置MdcForkJoinPool，替换默认的 ForkJoinPool.commonPool
+            cacheBuilder.executor(MdcForkJoinPool.mdcCommonPool());
+            logger.info("Caffeine enable MdcForkJoinPool, cacheName={}, mdcForkJoinPool={}", cacheName, MdcForkJoinPool.mdcCommonPool().toString());
+        }
+
         if (null == cacheLoader) {
             logger.info("create a native Caffeine Cache instance, cacheName={}", cacheName);
             return cacheBuilder.build();

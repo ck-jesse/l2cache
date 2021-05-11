@@ -1,4 +1,4 @@
-package com.coy.l2cache.util;
+package com.coy.l2cache.util.pool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +85,9 @@ public class ThreadPoolSupport {
 
         @Override
         public void rejectedExecution(Runnable runnable, ThreadPoolExecutor e) {
-            if (runnable instanceof RunnableWarpper) {
-                if (null != ((RunnableWarpper) runnable).getParam()) {
-                    logger.warn("[" + poolName + "][队列溢出] rejected task, param={}, executor={}", ((RunnableWarpper) runnable).getParam(), e.toString());
+            if (runnable instanceof RunnableMdcWarpper) {
+                if (null != ((RunnableMdcWarpper) runnable).getParam()) {
+                    logger.warn("[" + poolName + "][队列溢出] rejected task, param={}, executor={}", ((RunnableMdcWarpper) runnable).getParam(), e.toString());
                 } else {
                     logger.warn("[" + poolName + "][队列溢出] rejected task, runnable={}, executor={}", runnable.toString(), e.toString());
                 }

@@ -1,6 +1,6 @@
 package com.coy.l2cache.schedule;
 
-import com.coy.l2cache.util.DaemonThreadFactory;
+import com.coy.l2cache.util.pool.DaemonThreadFactory;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;

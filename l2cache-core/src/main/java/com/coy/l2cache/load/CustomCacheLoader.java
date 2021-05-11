@@ -44,7 +44,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         this.cacheType = cacheType;
         this.cacheName = cacheName;
         if (null == maxSize || maxSize <= 0) {
-            maxSize = 1000;
+            maxSize = 5000;
         }
         valueLoaderCache = Caffeine.newBuilder()
                 .removalListener((key, value, cause) -> {

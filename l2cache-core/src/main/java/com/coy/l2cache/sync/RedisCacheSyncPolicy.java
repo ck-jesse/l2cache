@@ -3,8 +3,8 @@ package com.coy.l2cache.sync;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.content.RedissonSupport;
-import com.coy.l2cache.util.RunnableWarpper;
-import com.coy.l2cache.util.ThreadPoolSupport;
+import com.coy.l2cache.util.pool.RunnableMdcWarpper;
+import com.coy.l2cache.util.pool.ThreadPoolSupport;
 import org.redisson.api.RLock;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
@@ -52,7 +52,7 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     @Override
     public void publish(CacheMessage message) {
-        poolExecutor.execute(new RunnableWarpper(() -> {
+        poolExecutor.execute(new RunnableMdcWarpper(() -> {
             try {
                 Long publishMsgPeriodMilliSeconds = this.getCacheConfig().getCaffeine().getPublishMsgPeriodMilliSeconds();
                 RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
@@ -87,7 +87,9 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
     protected RedissonClient getRedissonClient(CacheConfig cacheConfig) {
         Object actualClient = this.getActualClient();
         if (null != actualClient && actualClient instanceof RedissonClient) {
-            logger.info("use setting RedissonClient instance");
+            if (logger.isDebugEnabled()) {
+                logger.debug("use setting RedissonClient instance");
+            }
             return (RedissonClient) actualClient;
         }
 

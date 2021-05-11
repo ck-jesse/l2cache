@@ -4,8 +4,11 @@ import com.coy.l2cache.Cache;
 import com.coy.l2cache.content.CacheSupport;
 import com.coy.l2cache.cache.Level1Cache;
 import com.coy.l2cache.consts.CacheConsts;
+import com.coy.l2cache.util.pool.MdcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * 缓存消息监听器
@@ -25,6 +28,7 @@ public class CacheMessageListener implements MessageListener {
 
     @Override
     public void onMessage(CacheMessage message) {
+        Map<String, String> oldContext = MdcUtil.beforeExecution(message.getMdcContextMap());
         try {
             if (this.cacheInstanceId.equalsIgnoreCase(message.getInstanceId())) {
                 logger.debug("[CacheMessageListener][SyncCache] don't need to process your own messages, currInstanceId={}, message={}", this.cacheInstanceId, message.toString());
@@ -44,6 +48,8 @@ public class CacheMessageListener implements MessageListener {
             }
         } catch (Exception e) {
             logger.error("[CacheMessageListener][SyncCache] deal message error, currInstanceId=" + this.cacheInstanceId, e);
+        } finally {
+            MdcUtil.afterExecution(oldContext);
         }
     }
 

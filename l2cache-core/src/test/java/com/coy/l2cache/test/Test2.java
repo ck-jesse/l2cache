@@ -1,7 +1,7 @@
 package com.coy.l2cache.test;
 
-import com.coy.l2cache.util.RunnableWarpper;
-import com.coy.l2cache.util.ThreadPoolSupport;
+import com.coy.l2cache.util.pool.RunnableMdcWarpper;
+import com.coy.l2cache.util.pool.ThreadPoolSupport;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -17,7 +17,7 @@ public class Test2 {
 
         for (int i = 0; i < 10; i++) {
             int finalI = i;
-            poolExecutor.execute(new RunnableWarpper(() -> {
+            poolExecutor.execute(new RunnableMdcWarpper(() -> {
                 System.out.println("publish message  " + finalI);
                 try {
                     Thread.sleep(2000);
