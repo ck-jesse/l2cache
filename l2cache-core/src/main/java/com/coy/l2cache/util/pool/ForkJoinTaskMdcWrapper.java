@@ -44,8 +44,6 @@ public class ForkJoinTaskMdcWrapper<T> extends ForkJoinTask<T> {
 
     @Override
     protected boolean exec() {
-        // According to ForkJoinTask.fork() "it is a usage error to fork a task more than once unless it has completed
-        // and been reinitialized". We therefore assume that this method does not have to be thread-safe.
         Map<String, String> oldContext = MdcUtil.beforeExecution(newContext);
         try {
             task.invoke();
