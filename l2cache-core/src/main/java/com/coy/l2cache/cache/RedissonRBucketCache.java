@@ -4,9 +4,9 @@ import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
-import com.coy.l2cache.consts.ColletConsts;
 import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
+import com.coy.l2cache.load.ValueLoaderWarpper;
 import com.coy.l2cache.load.ValueLoaderWarpperTemp;
 import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
@@ -155,8 +155,21 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
-            logger.info("[RedissonRBucketCache] get(key, callable) callable is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
+            logger.info("[RedissonRBucketCache] get(key, callable) callable is null, value is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
             return null;
+        }
+        // 防止从redis中获取的value为null，同时valueLoader也为null的情况下，往redis中存了一个NullValue对象
+        if (valueLoader instanceof ValueLoaderWarpperTemp) {
+            ValueLoaderWarpperTemp valueLoaderWarpperTemp = ((ValueLoaderWarpperTemp) valueLoader);
+            if (null == valueLoaderWarpperTemp.getValueLoader()) {
+                logger.info("[RedissonRBucketCache] get(key, callable) ValueLoaderWarpperTemp.valueLoader is null, value is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
+                return null;
+            }
+            if (valueLoaderWarpperTemp.getValueLoader() instanceof ValueLoaderWarpper
+                    && null == ((ValueLoaderWarpper) valueLoaderWarpperTemp.getValueLoader()).getValueLoader()) {
+                logger.info("[RedissonRBucketCache] get(key, callable) ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
+                return null;
+            }
         }
         RLock lock = null;
         if (redis.isLock() && null != map) {

@@ -4,14 +4,15 @@ import com.coy.l2cache.CacheBuilder;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.builder.CompositeCacheBuilder;
 import com.coy.l2cache.cache.CompositeCache;
+import com.coy.l2cache.cache.Level1Cache;
 import com.coy.l2cache.cache.expire.DefaultCacheExpiredListener;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.content.NullValue;
+import com.coy.l2cache.sync.RedisCacheSyncPolicy;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.api.RMap;
-import org.redisson.misc.Hash;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -70,7 +71,7 @@ public class CompositeCacheTest {
         CacheBuilder builder = new CompositeCacheBuilder()
                 .setCacheConfig(cacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
-                .setCacheSyncPolicy(null);
+                .setCacheSyncPolicy(new RedisCacheSyncPolicy());
         cache = (CompositeCache) builder.build("compositeCache");
 
         callable = new Callable<String>() {
@@ -181,6 +182,34 @@ public class CompositeCacheTest {
             Thread.sleep(2000);
             System.out.println(String.format("get key=%s, value=%s", key, cache.get(key, callable)));
         }*/
+    }
+
+    @Test
+    public void refreshTest() throws InterruptedException {
+        String key = "ck123";
+        String value = cache.get(key, callable);
+        System.out.println(String.format("get key=%s, value=%s", key, value));
+        System.out.println(String.format("get key=%s, value=%s", key, value));
+
+        Level1Cache level1Cache = cache.getLevel1Cache();
+        level1Cache.refresh(key);
+        while (true){
+
+        }
+    }
+
+    @Test
+    public void refreshTest1() throws InterruptedException {
+        String key = "ck123";
+//        Object value = cache.get(key);
+//        System.out.println(String.format("get key=%s, value=%s", key, value));
+//        System.out.println(String.format("get key=%s, value=%s", key, value));
+
+        Level1Cache level1Cache = cache.getLevel1Cache();
+        level1Cache.refresh(key);
+        while (true){
+
+        }
     }
 
     @Test

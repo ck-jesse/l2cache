@@ -73,4 +73,8 @@ public class ValueLoaderWarpperTemp implements Callable {
         }
         return false;
     }
+
+    public Callable<?> getValueLoader() {
+        return this.valueLoader;
+    }
 }

@@ -93,9 +93,15 @@ public class LoadFunction implements Function<Object, Object> {
             }
             // 集群环境下，valueLoader和value都为null时，直接返回null，避免缓存NullValue，导致出现实际上数据存在，而获取到null值的情况。
             // value等于null，表示从redis中获取的值为null（也就是key不存在），所以直接返回null，避免缓存NullValue，导致缓存和db不一致的情况。
-            if (null == valueLoader && null == value) {
-                logger.info("[LoadFunction] valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
-                return null;
+            if (null == value) {
+                if (null == valueLoader) {
+                    logger.info("[LoadFunction] valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                    return null;
+                }
+                if (null == valueLoader.getValueLoader()) {
+                    logger.info("[LoadFunction] ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                    return null;
+                }
             }
             return this.toStoreValue(key, value);
         } catch (RedisTrylockFailException e) {

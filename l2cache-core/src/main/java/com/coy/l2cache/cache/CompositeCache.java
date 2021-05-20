@@ -327,7 +327,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                         .collect(HashMap::new, (map, entry) -> map.put(l1KeyMap.get(entry.getKey()), entry.getValue()), HashMap::putAll);
                 if (!CollectionUtils.isEmpty(l2HitMapTemp)) {
                     level1Cache.batchPut(l2HitMapTemp);
-                    logger.info("[CompositeCache] {} l2Cache batchPut to l1Cache, cacheName={}, cacheMapSize={}", methodName, this.getCacheName(), l2HitMapTemp.size());
+                    logger.info("[CompositeCache] {} l2Cache batchPut to l1Cache, cacheName={}, cacheMapSize={}, keyList={}", methodName, this.getCacheName(), l2HitMapTemp.size(), l2HitMapTemp.keySet());
                 }
             }
         }
