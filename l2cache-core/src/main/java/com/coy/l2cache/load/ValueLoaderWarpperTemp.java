@@ -44,7 +44,9 @@ public class ValueLoaderWarpperTemp implements Callable {
         }
         Object tempValue = valueLoader.call();
         call = true;
-        logger.debug("[ValueLoaderWarpperTemp] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[ValueLoaderWarpperTemp] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
+        }
         return tempValue;
     }
 

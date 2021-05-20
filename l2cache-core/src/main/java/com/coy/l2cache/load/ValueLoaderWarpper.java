@@ -45,7 +45,9 @@ public class ValueLoaderWarpper implements Callable {
             // 用于过滤并发执行同一个key的refresh操作
             if (getWaitRefreshNum() > 0) {
                 int beforeWaitRefreshNum = this.clearWaitRefreshNum();
-                logger.debug("[ValueLoaderWarpper] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[ValueLoaderWarpper] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+                }
             }
         }
     }

@@ -24,4 +24,7 @@ public class CacheConsts {
     public static final String LOG_INFO = "info";
     public static final String LOG_WARN = "warn";
 
+    // 链路跟踪的字段名
+    public static final String SID = "sid";
+    public static final String TRACE_ID = "trace_id";
 }

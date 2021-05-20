@@ -1,9 +1,12 @@
 package com.coy.l2cache.sync;
 
+import com.coy.l2cache.consts.CacheConsts;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.slf4j.MDC;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -39,6 +42,22 @@ public class CacheMessage implements Serializable {
         this.key = key;
         this.optType = optType;
         this.mdcContextMap = MDC.getCopyOfContextMap();
+    }
+
+    public Map<String, String> getMdcContextMap() {
+        if (CollectionUtils.isEmpty(mdcContextMap)) {
+            return mdcContextMap;
+        }
+        // 便于区分操作本身日志和消息通知所触发的日志
+        String sid = mdcContextMap.get(CacheConsts.SID);
+        if (!StringUtils.isEmpty(sid)) {
+            mdcContextMap.put(CacheConsts.SID, sid + CacheConsts.SPLIT + this.getOptType());
+        }
+        String trace_id = mdcContextMap.get(CacheConsts.TRACE_ID);
+        if (!StringUtils.isEmpty(trace_id)) {
+            mdcContextMap.put(CacheConsts.TRACE_ID, trace_id + CacheConsts.SPLIT + this.getOptType());
+        }
+        return mdcContextMap;
     }
 
     @Override
