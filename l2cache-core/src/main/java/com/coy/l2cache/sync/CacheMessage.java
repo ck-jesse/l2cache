@@ -51,13 +51,22 @@ public class CacheMessage implements Serializable {
         // 便于区分操作本身日志和消息通知所触发的日志
         String sid = mdcContextMap.get(CacheConsts.SID);
         if (!StringUtils.isEmpty(sid)) {
-            mdcContextMap.put(CacheConsts.SID, sid + CacheConsts.SPLIT + this.getOptType());
+            mdcContextMap.put(CacheConsts.SID, this.buildNewTraceId(sid));
         }
         String trace_id = mdcContextMap.get(CacheConsts.TRACE_ID);
         if (!StringUtils.isEmpty(trace_id)) {
-            mdcContextMap.put(CacheConsts.TRACE_ID, trace_id + CacheConsts.SPLIT + this.getOptType());
+            mdcContextMap.put(CacheConsts.TRACE_ID, this.buildNewTraceId(trace_id));
         }
         return mdcContextMap;
+    }
+
+    private String buildNewTraceId(String trace_id) {
+        StringBuilder sb = new StringBuilder(CacheConsts.PREFIX);
+        sb.append(CacheConsts.SPLIT);
+        sb.append(trace_id);
+        sb.append(CacheConsts.SPLIT);
+        sb.append(this.getInstanceId());
+        return sb.toString();
     }
 
     @Override

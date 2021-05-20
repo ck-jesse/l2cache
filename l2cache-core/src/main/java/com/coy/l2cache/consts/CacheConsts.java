@@ -27,4 +27,5 @@ public class CacheConsts {
     // 链路跟踪的字段名
     public static final String SID = "sid";
     public static final String TRACE_ID = "trace_id";
+    public static final String PREFIX = "CACHE_MSG";
 }
