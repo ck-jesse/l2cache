@@ -18,8 +18,10 @@ import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -124,10 +126,10 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             try {
                 // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
                 Object value = ((LoadingCache) this.guavaCache).get(key);
-                logger.debug("GuavaCache LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                logger.debug("[GuavaCache] LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
                 return fromStoreValue(value);
             } catch (ExecutionException e) {
-                throw new IllegalStateException("GuavaCache LoadingCache.get cache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
+                throw new IllegalStateException("[GuavaCache] LoadingCache.get cache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
             }
         }
         return fromStoreValue(this.guavaCache.getIfPresent(key));
@@ -160,14 +162,25 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     @Override
     public void put(Object key, Object value) {
         guavaCache.put(key, toStoreValue(value));
+        logger.info("[GuavaCache] put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), guavaCache.size(), key, toStoreValue(value));
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
         }
     }
 
     @Override
+    public Set<Object> keys() {
+        return guavaCache.asMap().keySet();
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return guavaCache.asMap().values();
+    }
+
+    @Override
     public void evict(Object key) {
-        logger.debug("GuavaCache evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("[GuavaCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
         guavaCache.invalidate(key);
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
@@ -176,7 +189,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
 
     @Override
     public void clear() {
-        logger.debug("GuavaCache clear cache, cacheName={}", this.getCacheName());
+        logger.info("[GuavaCache] clear cache, cacheName={}", this.getCacheName());
         guavaCache.invalidateAll();
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
@@ -192,7 +205,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
 
     @Override
     public void clearLocalCache(Object key) {
-        logger.info("GuavaCache clear local cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("[GuavaCache] clear local cache, cacheName={}, key={}", this.getCacheName(), key);
         if (key == null) {
             guavaCache.invalidateAll();
         } else {
@@ -203,7 +216,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     @Override
     public void refresh(Object key) {
         if (isLoadingCache()) {
-            logger.debug("GuavaCache refresh cache, cacheName={}, key={}", this.getCacheName(), key);
+            logger.debug("[GuavaCache] refresh cache, cacheName={}, key={}", this.getCacheName(), key);
             ((LoadingCache) guavaCache).refresh(key);
         }
     }
@@ -213,7 +226,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) guavaCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("GuavaCache refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("[GuavaCache] refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
                 loadingCache.refresh(key);
             }
         }
@@ -222,12 +235,12 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     @Override
     public void refreshExpireCache(Object key) {
         if (isLoadingCache()) {
-            logger.debug("GuavaCache refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
+            logger.debug("[GuavaCache] refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
             try {
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 ((LoadingCache) guavaCache).get(key);
             } catch (ExecutionException e) {
-                logger.error("GuavaCache refreshExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
+                logger.error("[GuavaCache] refreshExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
             }
         }
     }

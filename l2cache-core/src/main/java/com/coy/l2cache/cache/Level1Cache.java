@@ -5,6 +5,9 @@ import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.CacheSyncPolicy;
 
+import java.util.Collection;
+import java.util.Set;
+
 /**
  * 一级缓存
  *
@@ -72,4 +75,18 @@ public interface Level1Cache extends Cache {
      * @see Level1Cache#isLoadingCache() 为true才能执行该方法
      */
     void refreshAllExpireCache();
+
+    /**
+     * return all keys
+     */
+    default Set<Object> keys() {
+        return null;
+    }
+
+    /**
+     * return all values
+     */
+    default Collection<Object> values() {
+        return null;
+    }
 }

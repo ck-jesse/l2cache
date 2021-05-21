@@ -5,6 +5,8 @@ import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.load.CacheLoader;
 import com.coy.l2cache.CacheSyncPolicy;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -66,6 +68,16 @@ public class NoneCache implements Level1Cache, Level2Cache {
     @Override
     public void put(Object key, Object value) {
 
+    }
+
+    @Override
+    public Set<Object> keys() {
+        return null;
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return null;
     }
 
     @Override

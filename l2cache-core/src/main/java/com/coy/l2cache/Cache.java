@@ -227,7 +227,7 @@ public interface Cache {
      */
     default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<K, Object> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         // 如果keyList为空，则直接返回
-        if(CollectionUtils.isEmpty(keyList)){
+        if (CollectionUtils.isEmpty(keyList)) {
             return new HashMap<>();
         }
 

@@ -19,8 +19,10 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -177,6 +179,16 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
         }
+    }
+
+    @Override
+    public Set<Object> keys() {
+        return caffeineCache.asMap().keySet();
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return caffeineCache.asMap().values();
     }
 
     @Override

@@ -16,9 +16,11 @@ import org.junit.Test;
 import org.redisson.Redisson;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -173,6 +175,36 @@ public class CaffeineCacheTest {
 
         System.out.println("缓存中所有的元素");
         printAllCache();
+    }
+
+    @Test
+    public void keysTest() throws InterruptedException {
+        String key = "key1";
+        String value = "value1";
+        cache.put(key, value);
+        cache.put("key2", value);
+        cache.put("key3", value);
+        System.out.println(String.format("put key=%s, value=%s", key, value));
+        System.out.println();
+
+        printCache(key);
+        Set<Object> keys = cache.keys();
+        printCache(keys);
+    }
+
+    @Test
+    public void valuesTest() throws InterruptedException {
+        String key = "key1";
+        String value = "value1";
+        cache.put(key, value);
+        cache.put("key2", value);
+        cache.put("key3", value);
+        System.out.println(String.format("put key=%s, value=%s", key, value));
+        System.out.println();
+
+        printCache(key);
+        Collection<Object> values = cache.values();
+        printCache(values);
     }
 
     @Test
