@@ -11,6 +11,8 @@ public class LogUtil {
 
     /**
      * 自定义日志打印的级别，用于控制打印的内容的多少
+     * <p>
+     * 注：生产的日志级别一般为info，所以将 batchGetLogLevel 配置为 debug，则不会打印日志，在高性能要求下，可有效减少日志量，提升性能
      *
      * @param
      * @author chenck
@@ -18,11 +20,17 @@ public class LogUtil {
      */
     public static void log(Logger logger, String batchGetLogLevel, String logFormat, Object... logParams) {
         if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(batchGetLogLevel)) {
-            logger.debug(logFormat, logParams);
+            if (logger.isDebugEnabled()) {
+                logger.debug(logFormat, logParams);
+            }
         } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(batchGetLogLevel)) {
-            logger.info(logFormat, logParams);
+            if (logger.isInfoEnabled()) {
+                logger.info(logFormat, logParams);
+            }
         } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(batchGetLogLevel)) {
-            logger.warn(logFormat, logParams);
+            if (logger.isWarnEnabled()) {
+                logger.warn(logFormat, logParams);
+            }
         }
     }
 }
