@@ -101,7 +101,9 @@ public abstract class AbstractAdaptingCache implements Cache {
         return hitCacheMap.entrySet().stream()
                 .filter(entry -> {
                     if (null == entry.getValue()) {
-                        logger.info("[{}] filter null from hitCacheMap, cacheName={}, key={}, value={}", this.getClass().getSimpleName(), this.getCacheName(), entry.getKey(), entry.getValue());
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("[{}] filter null from hitCacheMap, cacheName={}, key={}, value={}", this.getClass().getSimpleName(), this.getCacheName(), entry.getKey(), entry.getValue());
+                        }
                         return false;
                     }
                     return true;
