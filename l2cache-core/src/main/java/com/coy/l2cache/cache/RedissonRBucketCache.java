@@ -8,6 +8,7 @@ import com.coy.l2cache.content.NullValue;
 import com.coy.l2cache.exception.RedisTrylockFailException;
 import com.coy.l2cache.load.ValueLoaderWarpper;
 import com.coy.l2cache.load.ValueLoaderWarpperTemp;
+import com.coy.l2cache.util.LogUtil;
 import com.coy.l2cache.util.RandomUtil;
 import com.coy.l2cache.util.SpringCacheExceptionUtil;
 import com.google.common.collect.Lists;
@@ -329,13 +330,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             logger.info("[RedissonRBucketCache] batchGet cache keyMap is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
             return hitMap;
         }
-        if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.debug("[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
-        } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.info("[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
-        } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.warn("[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
-        }
+        LogUtil.log(logger, redis.getBatchGetLogLevel(), "[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
         // 集合切分
         List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), redis.getBatchPageSize());
 
@@ -376,13 +371,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             BatchResult result = batch.execute();
             logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
         });
-        if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.debug("[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
-        } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.info("[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
-        } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(redis.getBatchGetLogLevel())) {
-            logger.warn("[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
-        }
+        LogUtil.log(logger, redis.getBatchGetLogLevel(), "[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
         return hitMap;
     }
 

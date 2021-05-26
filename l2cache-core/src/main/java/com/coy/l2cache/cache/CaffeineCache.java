@@ -13,6 +13,7 @@ import com.coy.l2cache.schedule.NullValueCacheClearTask;
 import com.coy.l2cache.schedule.RefreshExpiredCacheTask;
 import com.coy.l2cache.schedule.RefreshSupport;
 import com.coy.l2cache.sync.CacheMessage;
+import com.coy.l2cache.util.LogUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -349,13 +350,8 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 return;
             }
         });
-        if (CacheConsts.LOG_DEBUG.equalsIgnoreCase(caffeine.getBatchGetLogLevel())) {
-            logger.debug("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
-        } else if (CacheConsts.LOG_INFO.equalsIgnoreCase(caffeine.getBatchGetLogLevel())) {
-            logger.info("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
-        } else if (CacheConsts.LOG_WARN.equalsIgnoreCase(caffeine.getBatchGetLogLevel())) {
-            logger.warn("[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
-        }
+        LogUtil.log(logger, caffeine.getBatchGetLogLevel(), "[CaffeineCache] batchGet cache, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
         return hitMap;
     }
+
 }
