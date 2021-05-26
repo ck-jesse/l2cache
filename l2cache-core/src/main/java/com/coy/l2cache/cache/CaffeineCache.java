@@ -324,7 +324,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
         keyMap.forEach((key, cacheKey) -> {
             // 仅仅获取
-            // refreshAfterWrite模式下：获取存在但已过期的缓存会触发load【此情况需特别注意，当valueLoader为null时】
+            // refreshAfterWrite模式下：获取存在但已过期的缓存会触发load【此情况需特别注意，当valueLoader为null时需要处理好，否则存在缓存NullValue的可能】
             // refreshAfterWrite模式下：获取存在但未过期的缓存不会触发load
             // refreshAfterWrite模式下：获取不存在的缓存不会触发load
             // expireAfterWrite模式下：获取存在但已过期/存在但未过期/不存在的缓存，均不会触发load
