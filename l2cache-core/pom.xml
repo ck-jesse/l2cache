@@ -62,6 +62,22 @@
             <artifactId>spring-cloud-context</artifactId>
             <version>2.1.0.RELEASE</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.jd.platform.hotkey</groupId>
+            <artifactId>hotkey-client</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.ben-manes.caffeine</groupId>
+                    <artifactId>caffeine</artifactId>
+                </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>io.netty</groupId>-->
+<!--                    <artifactId>netty-all</artifactId>-->
+<!--                </exclusion>-->
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <!-- 发布到maven私服 -->

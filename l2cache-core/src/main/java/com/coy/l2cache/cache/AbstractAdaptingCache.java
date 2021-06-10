@@ -31,6 +31,11 @@ public abstract class AbstractAdaptingCache implements Cache {
      */
     private long nullValueExpireTimeSeconds;
 
+    /**
+     * 热key类型
+     */
+    protected String hotkeyType;
+
     public AbstractAdaptingCache(String cacheName, CacheConfig cacheConfig) {
         this.instanceId = cacheConfig.getInstanceId();
         this.cacheName = cacheName;
@@ -39,6 +44,7 @@ public abstract class AbstractAdaptingCache implements Cache {
         if (this.nullValueExpireTimeSeconds < 0) {
             this.nullValueExpireTimeSeconds = 60;
         }
+        this.hotkeyType = cacheConfig.getHotkeyType();
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.HotKeyService;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.spi.ServiceLoader;
 import org.checkerframework.checker.units.qual.K;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -234,6 +236,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         return false;
     }
 
+
+
     /**
      * 本地缓存检测，检测key
      *
@@ -249,7 +253,26 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                 return true;
             }
         }
+
+        // 是否为热key
+        if(ifHotKey(key)){
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * 判断是否为热key
+     *
+     * @param key
+     * @return
+     */
+    private boolean ifHotKey(Object key) {
+        // 自定义cacheKey的构建方式
+        Function<Object, Object> cacheKeyBuilder = info -> buildKeyBase(info);
+
+        HotKeyService hotKeyService = ServiceLoader.load(HotKeyService.class, hotkeyType);
+        return hotKeyService.ifHotKey(key, cacheKeyBuilder);
     }
 
     /**

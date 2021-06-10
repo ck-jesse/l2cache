@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.coy.l2cache.spring.L2CacheConfiguration
+com.coy.l2cache.spring.L2CacheConfiguration,\
+com.coy.l2cache.spring.JdHotKeyConfiguration

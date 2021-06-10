@@ -1,0 +1,2 @@
+none=com.coy.l2cache.hotkey.NoneHotKeyService
+jd=com.coy.l2cache.hotkey.JdHotKeyService

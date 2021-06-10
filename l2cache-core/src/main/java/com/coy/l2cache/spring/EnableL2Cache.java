@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-@Import(L2CacheConfiguration.class)
+@Import({L2CacheConfiguration.class,JdHotKeyConfiguration.class})
 @Configuration
 public @interface EnableL2Cache {
 
