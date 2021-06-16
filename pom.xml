@@ -150,4 +150,16 @@
             <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+    <!--私服 快照支持-->
+    <repositories>
+        <repository>
+            <id>maven-weeget</id>
+            <name>internal nexus repository</name>
+            <layout>default</layout>
+            <url>http://nexus.weeget.cn/repository/maven-public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
