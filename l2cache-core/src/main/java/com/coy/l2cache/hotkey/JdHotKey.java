@@ -2,7 +2,7 @@ package com.coy.l2cache.hotkey;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.weeget.hotkey.client.callback.JdHotKeyStore;
-import com.coy.l2cache.HotKeyService;
+import com.coy.l2cache.HotKey;
 import lombok.extern.slf4j.Slf4j;
 import java.util.function.Function;
 
@@ -12,7 +12,7 @@ import java.util.function.Function;
  * 京东热key探测
  */
 @Slf4j
-public class JdHotKeyService implements HotKeyService {
+public class JdHotKey implements HotKey {
 
     @Override
     public <K> boolean ifHotKey(K key, Function<K, Object> cacheKeyBuilder) {

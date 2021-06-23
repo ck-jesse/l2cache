@@ -14,7 +14,7 @@ import java.util.function.Function;
  * @date 2021/6/10 13:45
  */
 @SPI
-public interface HotKeyService {
+public interface HotKey {
 
     /**
      * 是否为热key

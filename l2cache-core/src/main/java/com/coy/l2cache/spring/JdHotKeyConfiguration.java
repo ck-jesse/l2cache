@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct;
  * @version 1.0
  */
 @Configuration
-@ConditionalOnProperty(name = "l2cache.config.jdHotKey.serviceName")
+@ConditionalOnProperty(name = "l2cache.config.hotkey.jdHotKey.serviceName")
 public class JdHotKeyConfiguration {
 
     @Autowired
@@ -23,7 +23,7 @@ public class JdHotKeyConfiguration {
     @PostConstruct
     public void init() {
         CacheConfig cacheConfig = l2CacheProperties.getConfig();
-        CacheConfig.JdHotKey jdHotKey = cacheConfig.getJdHotKey();
+        CacheConfig.HotKey.JdHotKey jdHotKey = cacheConfig.getHotKey().getJdHotKey();
         if(StrUtil.isBlank(jdHotKey.getEtcdUrl())){
             throw new IllegalStateException("jdHotKey not found etcd url yaml config file:" + jdHotKey);
         }

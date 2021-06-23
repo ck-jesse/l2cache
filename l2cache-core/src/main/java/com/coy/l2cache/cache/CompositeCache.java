@@ -2,11 +2,11 @@ package com.coy.l2cache.cache;
 
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
-import com.coy.l2cache.HotKeyService;
+import com.coy.l2cache.HotKey;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.consts.HotkeyType;
 import com.coy.l2cache.spi.ServiceLoader;
-import org.checkerframework.checker.units.qual.K;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 组合缓存器
@@ -270,9 +269,12 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
     private boolean ifHotKey(Object key) {
         // 自定义cacheKey的构建方式
         Function<Object, Object> cacheKeyBuilder = info -> buildKeyBase(info);
-
-        HotKeyService hotKeyService = ServiceLoader.load(HotKeyService.class, hotkeyType);
-        return hotKeyService.ifHotKey(key, cacheKeyBuilder);
+        // 没有配置热key识别，则直接返回
+        if (HotkeyType.NONE.name().equals(hotkeyType)) {
+            return false;
+        }
+        HotKey hotKey = ServiceLoader.load(HotKey.class, hotkeyType);
+        return hotKey.ifHotKey(key, cacheKeyBuilder);
     }
 
     /**

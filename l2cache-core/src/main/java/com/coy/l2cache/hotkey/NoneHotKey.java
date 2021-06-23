@@ -1,6 +1,6 @@
 package com.coy.l2cache.hotkey;
 
-import com.coy.l2cache.HotKeyService;
+import com.coy.l2cache.HotKey;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Function;
@@ -11,7 +11,7 @@ import java.util.function.Function;
  * 京东热key探测
  */
 @Slf4j
-public class NoneHotKeyService implements HotKeyService {
+public class NoneHotKey implements HotKey {
 
     @Override
     public <K> boolean ifHotKey(K key, Function<K, Object> cacheKeyBuilder) {

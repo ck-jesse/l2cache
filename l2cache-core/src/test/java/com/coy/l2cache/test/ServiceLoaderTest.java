@@ -1,7 +1,7 @@
 package com.coy.l2cache.test;
 
 import com.coy.l2cache.CacheBuilder;
-import com.coy.l2cache.HotKeyService;
+import com.coy.l2cache.HotKey;
 import com.coy.l2cache.spi.ServiceLoader;
 
 import java.util.function.Function;
@@ -28,8 +28,8 @@ public class ServiceLoaderTest {
             return builder.toString();
         };
 
-        HotKeyService hotKeyService = ServiceLoader.load(HotKeyService.class, "jd");
-        boolean isHotKey = hotKeyService.ifHotKey(1, cacheKeyBuilder);
+        HotKey hotKey = ServiceLoader.load(HotKey.class, "jd");
+        boolean isHotKey = hotKey.ifHotKey(1, cacheKeyBuilder);
         System.out.println(isHotKey);
     }
 }
