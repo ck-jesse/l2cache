@@ -270,7 +270,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         // 自定义cacheKey的构建方式
         Function<Object, Object> cacheKeyBuilder = info -> buildKeyBase(info);
         // 没有配置热key识别，则直接返回
-        if (HotkeyType.NONE.name().equals(hotkeyType)) {
+        if (HotkeyType.NONE.name().equalsIgnoreCase(hotkeyType)) {
             return false;
         }
         HotKey hotKey = ServiceLoader.load(HotKey.class, hotkeyType);
