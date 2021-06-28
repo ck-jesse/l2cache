@@ -1,5 +1,6 @@
 package com.coy.l2cache.cache;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
 import com.coy.l2cache.HotKey;
@@ -274,6 +275,9 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             return false;
         }
         HotKey hotKey = ServiceLoader.load(HotKey.class, hotkeyType);
+        if (ObjectUtil.isNull(hotKey)) {
+            logger.error("[CompositeCache] invalid hotkeyType, hotkeyType={}", hotkeyType);
+        }
         return hotKey.ifHotKey(key, cacheKeyBuilder);
     }
 
