@@ -277,6 +277,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         HotKey hotKey = ServiceLoader.load(HotKey.class, hotkeyType);
         if (ObjectUtil.isNull(hotKey)) {
             logger.error("[CompositeCache] invalid hotkeyType, hotkeyType={}", hotkeyType);
+            return false;
         }
         return hotKey.ifHotKey(key, cacheKeyBuilder);
     }
