@@ -7,7 +7,7 @@
     <groupId>com.coy.l2cache</groupId>
     <artifactId>l2cache</artifactId>
     <name>l2cache</name>
-    <version>1.0.28-SNAPSHOT</version>
+    <version>1.0.32-hotkey-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>二级缓存组件</description>
 
@@ -18,7 +18,7 @@
     </modules>
 
     <properties>
-        <!-- project -->
+        <!-- proj`ect -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
 
@@ -150,4 +150,16 @@
             <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+    <!--私服 快照支持-->
+    <repositories>
+        <repository>
+            <id>maven-weeget</id>
+            <name>internal nexus repository</name>
+            <layout>default</layout>
+            <url>http://nexus.weeget.cn/repository/maven-public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

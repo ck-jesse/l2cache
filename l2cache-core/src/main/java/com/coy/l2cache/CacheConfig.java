@@ -1,9 +1,6 @@
 package com.coy.l2cache;
 
-import com.coy.l2cache.consts.CacheConsts;
-import com.coy.l2cache.consts.CacheRange;
-import com.coy.l2cache.consts.CacheSyncPolicyType;
-import com.coy.l2cache.consts.CacheType;
+import com.coy.l2cache.consts.*;
 import com.coy.l2cache.util.RandomUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -65,11 +62,14 @@ public class CacheConfig {
      */
     private String cacheType = CacheType.COMPOSITE.name();
 
+
+
     private final Composite composite = new Composite();
     private final Caffeine caffeine = new Caffeine();
     private final Guava guava = new Guava();
     private final Redis redis = new Redis();
     private final CacheSyncPolicy cacheSyncPolicy = new CacheSyncPolicy();
+    private final HotKey hotKey = new HotKey();
 
     public interface Config {
     }
@@ -340,4 +340,41 @@ public class CacheConfig {
          */
         private Properties props = new Properties();
     }
+
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class HotKey implements Config {
+        /**
+         * 热key类型，默认 NONE 没有集成自动发现功能
+         *
+         * @see HotkeyType
+         */
+        private String hotkeyType = HotkeyType.NONE.name();
+
+        private final JdHotKey jdHotKey = new JdHotKey();
+
+        /**
+         * 京东热key发现配置
+         */
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        public static class JdHotKey implements Config {
+
+            /**
+             * 服务名称
+             * 需要在dashboard进行注册
+             */
+            private String serviceName = "default";
+            /**
+             * ETCD 服务器地址
+             */
+            private String etcdUrl;
+        }
+    }
+
+
+
 }

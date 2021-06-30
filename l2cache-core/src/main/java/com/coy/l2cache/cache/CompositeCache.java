@@ -1,10 +1,13 @@
 package com.coy.l2cache.cache;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.coy.l2cache.Cache;
 import com.coy.l2cache.CacheConfig;
+import com.coy.l2cache.HotKey;
 import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
-import org.checkerframework.checker.units.qual.K;
+import com.coy.l2cache.consts.HotkeyType;
+import com.coy.l2cache.spi.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -13,7 +16,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 组合缓存器
@@ -234,6 +236,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         return false;
     }
 
+
+
     /**
      * 本地缓存检测，检测key
      *
@@ -249,7 +253,33 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                 return true;
             }
         }
+
+        // 是否为热key
+        if(ifHotKey(key)){
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * 判断是否为热key
+     *
+     * @param key
+     * @return
+     */
+    private boolean ifHotKey(Object key) {
+        // 自定义cacheKey的构建方式
+        Function<Object, Object> cacheKeyBuilder = info -> buildKeyBase(info);
+        // 没有配置热key识别，则直接返回
+        if (HotkeyType.NONE.name().equalsIgnoreCase(hotkeyType)) {
+            return false;
+        }
+        HotKey hotKey = ServiceLoader.load(HotKey.class, hotkeyType);
+        if (ObjectUtil.isNull(hotKey)) {
+            logger.error("[CompositeCache] invalid hotkeyType, hotkeyType={}", hotkeyType);
+            return false;
+        }
+        return hotKey.ifHotKey(key, cacheKeyBuilder);
     }
 
     /**

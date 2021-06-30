@@ -130,3 +130,9 @@ l2cache:
       #  max.poll.records: 10
       #  # 设置poll最大时间间隔（默认3s）
       #  max.poll.interval.ms: 3000
+    hotkey:
+      hotkeyType: jd
+      jdHotKey:
+        serviceName: weeget-bullet-goods-rest
+        #etcd的地址，如有多个用逗号分隔
+        etcdUrl: http://127.0.0.1:2379

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>l2cache</artifactId>
         <groupId>com.coy.l2cache</groupId>
-        <version>1.0.28-SNAPSHOT</version>
+        <version>1.0.32-hotkey-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -61,6 +61,27 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-context</artifactId>
             <version>2.1.0.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.weeget.hotkey</groupId>
+            <artifactId>weeget-infinite-hotkey-client</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.ben-manes.caffeine</groupId>
+                    <artifactId>caffeine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
