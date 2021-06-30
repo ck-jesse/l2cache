@@ -77,6 +77,7 @@ V1.1
 ## 方案二：阿里Sentinel热点参数限流
 ###简介
 阿里Sentinel 热点参数限流 是用于统计某个热点数据中访问频次最高的 Top K 数据，并对其访问进行限制。基于此特性，我们可将热点参数限流看做一个热key探测功能，也就是说将被限流的热点参数看做热key，然后存放到本地缓存，变向达到热key探测的目的。
+> 限流的直接表现是在执行 Entry nodeA = SphU.entry(资源名字) 的时候抛出 FlowException 异常。FlowException 是 BlockException 的子类，您可以捕捉 BlockException 来自定义被限流之后的处理逻辑。
 ###适用场景
 - 热点商品探测
 ###  优点
