@@ -18,4 +18,36 @@ public class CaffeineTestControllerTest {
         System.out.println(JSON.toJSONString(user));
     }
 
+    @Test
+    public void priceGet() {
+        String url = HOST + "/priceGet";
+
+        String user = restTemplate.getForObject(url, String.class);
+        System.out.println(JSON.toJSONString(user));
+    }
+
+    @Test
+    public void priceGetOrLoad() {
+        String url = HOST + "/priceGetOrLoad";
+
+        String user = restTemplate.getForObject(url, String.class);
+        System.out.println(JSON.toJSONString(user));
+    }
+
+    @Test
+    public void brandGet() {
+        String url = HOST + "/brandGet";
+
+        String user = restTemplate.getForObject(url, String.class);
+        System.out.println(JSON.toJSONString(user));
+    }
+
+    @Test
+    public void brandGetOrLoad() {
+        String url = HOST + "/brandGetOrLoad";
+
+        String user = restTemplate.getForObject(url, String.class);
+        System.out.println(JSON.toJSONString(user));
+    }
+
 }

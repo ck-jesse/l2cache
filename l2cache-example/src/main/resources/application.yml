@@ -48,6 +48,8 @@ l2cache:
       l1ManualCacheNameSet:
         - compositeCache
         - goodsSpecCache
+        - goodsPriceRevisionCache
+        - brandCache
     # 一级缓存
     caffeine:
       # 是否自动刷新过期缓存 true 是 false 否

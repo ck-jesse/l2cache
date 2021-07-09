@@ -1,0 +1,113 @@
+package com.coy.l2cache.example.cache;
+
+import com.alibaba.fastjson.JSON;
+import com.coy.l2cache.Cache;
+import com.coy.l2cache.example.dto.BrandRespBO;
+import com.coy.l2cache.example.dto.GoodsPriceRevisionIdsReqDTO;
+import com.coy.l2cache.example.dto.GoodsPriceRevisionRespBO;
+import com.coy.l2cache.spring.biz.AbstractCacheService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+@Component
+@Slf4j
+public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> {
+
+    public static final String CACHE_NAME = "goodsPriceRevisionCache";
+
+    @Override
+    public String getCacheName() {
+        return CACHE_NAME;
+    }
+
+    @Override
+    public String buildCacheKey(GoodsPriceRevisionIdsReqDTO goodsPriceRevisionIdsReqDTO) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(goodsPriceRevisionIdsReqDTO.getGoodsId());
+        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGroupId());
+        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getOrganizationId());
+        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
+        return sb.toString();
+    }
+
+    @Cacheable(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_'+#dto.goodsGroupId", sync = true)
+    @Override
+    public GoodsPriceRevisionRespBO getOrLoad(GoodsPriceRevisionIdsReqDTO dto) {
+        return this.reload(dto);
+    }
+
+    @CachePut(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
+    @Override
+    public GoodsPriceRevisionRespBO put(GoodsPriceRevisionIdsReqDTO dto, GoodsPriceRevisionRespBO goodsPriceRevisionRespBO) {
+        return goodsPriceRevisionRespBO;
+    }
+
+    @CachePut(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
+    @Override
+    public GoodsPriceRevisionRespBO reload(GoodsPriceRevisionIdsReqDTO dto) {
+        GoodsPriceRevisionRespBO goodsPriceRevisionRespBO = new GoodsPriceRevisionRespBO();
+        goodsPriceRevisionRespBO.setGoodsPriceRevisionId(0);
+        goodsPriceRevisionRespBO.setGroupId(0);
+        goodsPriceRevisionRespBO.setOrganizationId(0);
+        goodsPriceRevisionRespBO.setGoodsId(0);
+        goodsPriceRevisionRespBO.setGoodsGroupId(0);
+        goodsPriceRevisionRespBO.setAddTime(0L);
+        goodsPriceRevisionRespBO.setUpdateTime(0L);
+        goodsPriceRevisionRespBO.setState(0);
+        log.info("查询信息,dto={},goodsPriceRevisionRespBO={}", JSON.toJSONString(dto), JSON.toJSONString(goodsPriceRevisionRespBO));
+        return goodsPriceRevisionRespBO;
+    }
+
+    @CacheEvict(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
+    @Override
+    public void evict(GoodsPriceRevisionIdsReqDTO dto) {
+        log.info("[evict] cacheName={}, goodsPriceRevisionIdsReqDTO={}", CACHE_NAME, JSON.toJSONString(dto));
+    }
+
+    @Override
+    public Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> batchGet(List<GoodsPriceRevisionIdsReqDTO> keyList) {
+        // 定义缓存key构建器
+        Function<GoodsPriceRevisionIdsReqDTO, Object> cacheKeyBuilder = dto ->  GoodsPriceRevisionCacheService.this.buildCacheKey(dto);
+
+        // 批量查询信息
+        return this.getNativeL2cache().batchGet(keyList, cacheKeyBuilder);
+    }
+
+    @Override
+    public Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> batchGetOrLoad(List<GoodsPriceRevisionIdsReqDTO> keyList) {
+        // 定义缓存key构建器
+        Function<GoodsPriceRevisionIdsReqDTO, Object> cacheKeyBuilder = dto ->  GoodsPriceRevisionCacheService.this.buildCacheKey(dto);
+
+        // 从DB中加载数据
+        Function<List<GoodsPriceRevisionIdsReqDTO>, Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO>> valueLoader = notHitCacheKeyList -> {
+            Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> map = new HashMap<>();
+
+            // 模拟返回数据，业务系统中可直接从DB加载数据
+            notHitCacheKeyList.forEach(goodsPriceRevisionIdsReqDTO -> {
+                GoodsPriceRevisionRespBO goodsPriceRevisionRespBO = new GoodsPriceRevisionRespBO();
+                goodsPriceRevisionRespBO.setGoodsPriceRevisionId(0);
+                goodsPriceRevisionRespBO.setGroupId(0);
+                goodsPriceRevisionRespBO.setOrganizationId(0);
+                goodsPriceRevisionRespBO.setGoodsId(0);
+                goodsPriceRevisionRespBO.setGoodsGroupId(0);
+                goodsPriceRevisionRespBO.setAddTime(0L);
+                goodsPriceRevisionRespBO.setUpdateTime(0L);
+                goodsPriceRevisionRespBO.setState(0);
+                map.put(goodsPriceRevisionIdsReqDTO, goodsPriceRevisionRespBO);
+            });
+            log.info("[批量获取品牌信息] valueLoader 分页获取品牌信息, result={}", JSON.toJSONString(map));
+            return map;
+        };
+
+        // 批量查询信息
+        return this.getNativeL2cache().batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
+    }
+}
