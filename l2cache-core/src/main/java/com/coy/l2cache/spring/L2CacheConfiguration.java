@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @author chenck
  * @date 2020/4/29 10:58
  */
-@EnableCaching // 启用spring-cache
+@EnableCaching(proxyTargetClass = true) // 启用spring-cache
 @Configuration
 @EnableConfigurationProperties(L2CacheProperties.class)
 public class L2CacheConfiguration {
