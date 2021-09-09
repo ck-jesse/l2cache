@@ -42,6 +42,11 @@ public interface CacheService<K, R> {
      * 2.如果构建的缓存key是被l2cache的Cache对象所使用，则key中无需拼接CacheName，因为CacheName会在l2cache中自动构建好。
      * 3.如果构建的缓存key不是被l2cache的Cache对象所使用，则key中需要拼接CacheName，适用于直接通过 RedissonClient 等来操作缓存的场景。
      * <p>
+     * 前提：key是Integer类型
+     * 问题还原：
+     * 1）先通过CacheService.getOrLoad(key)加载数据到本地缓存，此时，本地缓存中key的类型为Integer
+     * 2）再通过CacheService.get(buildCacheKey(key))方法获取缓存数据，由于buildCacheKey(key)的将key转换为了String类型，所以根据这个String类型的key无法从本地缓存获取到缓存数据，会在本地缓存中再次缓存一个key为String类型的缓存，也就是本来是一个缓存，现在变为了2个缓存，一个key为Integer类型，一个key为String类型
+     * 解决方案：CacheService.buildCacheKey()方法返回类型从String修改为Object即可
      *
      * @return 缓存key
      */
