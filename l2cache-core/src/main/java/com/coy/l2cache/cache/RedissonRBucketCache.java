@@ -130,7 +130,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     public Object get(Object key) {
         String cacheKey = (String) buildKey(key);
         Object value = getBucket(cacheKey).get();
-        logger.info("[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+        LogUtil.logDetailPrint(logger,redis.getPrintDetailLogSwitch(),"[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
         return fromStoreValue(value);
     }
 
@@ -152,7 +152,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         RBucket<Object> bucket = getBucket(cacheKey);
         Object value = bucket.get();
         if (value != null) {
-            logger.info("[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+            LogUtil.logDetailPrint(logger,redis.getPrintDetailLogSwitch(),"[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
@@ -330,7 +330,6 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             logger.info("[RedissonRBucketCache] batchGet cache keyMap is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
             return hitMap;
         }
-        LogUtil.log(logger, redis.getBatchGetLogLevel(), "[RedissonRBucketCache] batchGet cache start, cacheName={}, cacheKeyMapSize={}", this.getCacheName(), keyMap.size());
         // 集合切分
         List<List<K>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.keySet()), redis.getBatchPageSize());
 
@@ -369,9 +368,10 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 });
             });
             BatchResult result = batch.execute();
-            logger.info("[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
+            LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
         });
-        LogUtil.log(logger, redis.getBatchGetLogLevel(), "[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
+        LogUtil.logSimplePrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), hitMap.size());
         return hitMap;
     }
 

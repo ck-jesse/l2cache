@@ -28,4 +28,11 @@ public class CacheConsts {
     public static final String SID = "sid";
     public static final String TRACE_ID = "trace_id";
     public static final String PREFIX = "CACHE_MSG";
+
+
+    /**
+     * 是否打印详细日志
+     */
+    public static final String PRINT_DETAIL_LOG ="on";
+    public static final String NOT_PRINT_DETAIL_LOG ="off";
 }

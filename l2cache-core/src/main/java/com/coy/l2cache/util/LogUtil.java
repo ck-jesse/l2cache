@@ -33,4 +33,30 @@ public class LogUtil {
             }
         }
     }
+
+    /**
+     * 打印详情日志信息
+     * @param logger 日志对象
+     * @param printDetailLogSwitch 日志详情开关
+     * @param logFormat 日志信息
+     * @param logParams 日志值
+     */
+    public static void logDetailPrint(Logger logger, String printDetailLogSwitch, String logFormat, Object... logParams) {
+        if (CacheConsts.PRINT_DETAIL_LOG.equalsIgnoreCase(printDetailLogSwitch)) {
+            logger.info(logFormat, logParams);
+        }
+    }
+
+    /**
+     * 打印简单日志信息
+     * @param logger 日志对象
+     * @param printDetailLogSwitch 日志详情开关
+     * @param logFormat 日志信息
+     * @param logParams 日志值
+     */
+    public static void logSimplePrint(Logger logger, String printDetailLogSwitch, String logFormat, Object... logParams) {
+        if (CacheConsts.NOT_PRINT_DETAIL_LOG.equalsIgnoreCase(printDetailLogSwitch)) {
+            logger.info(logFormat, logParams);
+        }
+    }
 }
