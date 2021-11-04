@@ -12,7 +12,7 @@ public class ControllerTest {
 
     @Test
     public void queryUser() {
-        String url = HOST + "/queryUser?userId=cck";
+        String url = HOST + "/queryUser?userId=user01";
 
         User user = restTemplate.getForObject(url, User.class);
 

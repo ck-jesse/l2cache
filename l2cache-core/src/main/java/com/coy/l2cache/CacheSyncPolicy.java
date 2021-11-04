@@ -4,6 +4,8 @@ import com.coy.l2cache.spi.SPI;
 import com.coy.l2cache.sync.CacheMessage;
 import com.coy.l2cache.sync.MessageListener;
 
+import java.io.Serializable;
+
 /**
  * 缓存同步策略
  *
@@ -11,7 +13,7 @@ import com.coy.l2cache.sync.MessageListener;
  * @date 2020/6/29 17:45
  */
 @SPI
-public interface CacheSyncPolicy {
+public interface CacheSyncPolicy extends Serializable {
 
     /**
      * 获取缓存配置

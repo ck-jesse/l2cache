@@ -1,20 +1,18 @@
 package com.coy.l2cache;
 
 
-import com.coy.l2cache.exception.L2CacheException;
 import com.coy.l2cache.load.LoadFunction;
 import com.coy.l2cache.util.NullValueUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 定义公共缓存操作的接口
@@ -24,7 +22,7 @@ import java.util.stream.Collectors;
  * @author chenck
  * @date 2020/6/16 19:49
  */
-public interface Cache {
+public interface Cache extends Serializable {
 
     Logger logger = LoggerFactory.getLogger(Cache.class);
 

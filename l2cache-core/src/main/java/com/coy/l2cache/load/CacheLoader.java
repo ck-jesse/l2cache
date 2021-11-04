@@ -5,6 +5,7 @@ import com.coy.l2cache.cache.Level2Cache;
 import com.coy.l2cache.CacheSyncPolicy;
 import com.github.benmanes.caffeine.cache.Cache;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 
 /**
@@ -13,7 +14,7 @@ import java.util.concurrent.Callable;
  * @author chenck
  * @date 2020/7/2 10:21
  */
-public interface CacheLoader<K, V> {
+public interface CacheLoader<K, V> extends Serializable {
     /**
      * 设置加载数据的处理器
      * 注：在获取缓存时动态设置valueLoader，来达到实现不同缓存调用不同的加载数据逻辑的目的。

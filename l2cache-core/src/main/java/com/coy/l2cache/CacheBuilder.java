@@ -3,6 +3,8 @@ package com.coy.l2cache;
 import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.spi.SPI;
 
+import java.io.Serializable;
+
 /**
  * cache构建器
  *
@@ -10,7 +12,7 @@ import com.coy.l2cache.spi.SPI;
  * @date 2020/7/1 20:43
  */
 @SPI
-public interface CacheBuilder<T extends Cache> {
+public interface CacheBuilder<T extends Cache> extends Serializable {
 
     /**
      * 构建指定名称的cache对象

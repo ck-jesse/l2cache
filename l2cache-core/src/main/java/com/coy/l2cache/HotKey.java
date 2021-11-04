@@ -1,10 +1,8 @@
 package com.coy.l2cache;
 
 import com.coy.l2cache.spi.SPI;
-import com.coy.l2cache.sync.CacheMessage;
-import com.coy.l2cache.sync.MessageListener;
 
-import java.util.Map;
+import java.io.Serializable;
 import java.util.function.Function;
 
 /**
@@ -14,7 +12,7 @@ import java.util.function.Function;
  * @date 2021/6/10 13:45
  */
 @SPI
-public interface HotKey {
+public interface HotKey extends Serializable {
 
     /**
      * 是否为热key

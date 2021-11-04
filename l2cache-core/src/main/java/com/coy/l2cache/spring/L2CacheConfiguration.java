@@ -5,6 +5,7 @@ import com.coy.l2cache.CacheSyncPolicy;
 import com.coy.l2cache.cache.expire.CacheExpiredListener;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.spi.ServiceLoader;
+import com.coy.l2cache.spring.biz.CacheManagerController;
 import com.coy.l2cache.sync.CacheMessageListener;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
@@ -79,6 +80,11 @@ public class L2CacheConfiguration {
 
         // 扩展点，源码中有很多可以借鉴的点
         return customizers.customize(cacheManager);
+    }
+
+    @Bean
+    public CacheManagerController cacheManagerController() {
+        return new CacheManagerController();
     }
 
     /**
