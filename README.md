@@ -55,5 +55,5 @@ L2cache  是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足�
 
 
 
-
+- [如何使用L2cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
 
