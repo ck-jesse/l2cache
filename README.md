@@ -1,11 +1,16 @@
-# l2cache 的重要数据
+# L2cache 的重要数据
 - 已在生产环境投产，目前主要应用在商品、优惠券、用户、营销等核心服务。
 - 经历过2020年双十一、双十二以及多次大促活动的流量洗礼。
 - 支撑公司单月10亿GMV
 - 支撑全链路压测32W+QPS
 
+# L2cache 实战问题
+- https://blog.csdn.net/icansoicrazy/article/details/112274052
+- https://blog.csdn.net/icansoicrazy/article/details/108923992
+- https://blog.csdn.net/icansoicrazy/article/details/125096876
 
-# L2cache  -- 基于内存和Redis的二级缓存框架
+
+# L2cache - 基于内存和Redis的二级缓存框架
 
 L2cache  是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高并发场景下的分布式二级缓存框架。
 
