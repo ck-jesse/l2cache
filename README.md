@@ -5,9 +5,10 @@
 - 支撑全链路压测32W+QPS
 
 # L2cache 实战问题
-- https://blog.csdn.net/icansoicrazy/article/details/112274052
-- https://blog.csdn.net/icansoicrazy/article/details/108923992
-- https://blog.csdn.net/icansoicrazy/article/details/125096876
+- [实战-l2cache-Caffeine的OOM异常分析](https://blog.csdn.net/icansoicrazy/article/details/108923992)
+- [实战-l2cache高并发场景下出现OOM的分析和优化方案](https://blog.csdn.net/icansoicrazy/article/details/112274052)
+- [实战-l2cache中caffeine.getIfPresent()仅仅获取缓存，但触发了数据加载，导致被设置为NullValue的问题分析
+](https://blog.csdn.net/icansoicrazy/article/details/125096876)
 
 
 # L2cache - 基于内存和Redis的二级缓存框架
