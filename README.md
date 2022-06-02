@@ -54,6 +54,6 @@ L2cache  是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足�
 > 若使用缓存，则必然可能出现不一致的情况，也就是说无法保证强一致性。
 
 
-
+# L2cache 如何使用
 - [如何使用L2cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
 
