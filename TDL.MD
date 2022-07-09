@@ -1,0 +1,2 @@
+- 上传开源项目至Maven中央仓库
+- 把热key组件开源：weeget-infinite-hotkey-client
