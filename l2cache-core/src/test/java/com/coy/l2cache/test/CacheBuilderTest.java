@@ -40,7 +40,9 @@ public class CacheBuilderTest {
         System.out.println("get " + cache.get(key));
         Thread.sleep(3000);// 缓存过期时间为为2s，此处休眠3s，目的是为了让缓存过期
         System.out.println("get " + cache.get(key));// 过期后第一次获取，可以获取到值，并且触发异步清理过期缓存
-        System.out.println("get " + cache.get(key));// 过期后第二次获取，获取到null值
+        System.out.println("get " + cache.get(key));// 由于过期后第一次获取是触发异步清理，所以过期后第二次获取，有可能获取到null值，也有可能获取到值
+        Thread.sleep(1000);
+        System.out.println("get " + cache.get(key));// 过期后第三次获取，获取到null值
     }
 
     @Test
