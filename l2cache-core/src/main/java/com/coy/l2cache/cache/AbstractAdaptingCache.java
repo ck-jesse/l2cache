@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractAdaptingCache implements Cache {
 
+    protected CacheConfig cacheConfig;
     /**
      * 缓存实例id
      */
@@ -37,6 +38,7 @@ public abstract class AbstractAdaptingCache implements Cache {
     protected String hotkeyType;
 
     public AbstractAdaptingCache(String cacheName, CacheConfig cacheConfig) {
+        this.cacheConfig = cacheConfig;
         this.instanceId = cacheConfig.getInstanceId();
         this.cacheName = cacheName;
         this.allowNullValues = cacheConfig.isAllowNullValues();

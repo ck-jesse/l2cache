@@ -56,6 +56,12 @@ public class CacheConfig {
     private boolean dynamic = true;
 
     /**
+     * 简单处理：日志级别配置，所以此参数可用于控制是否打印日志
+     * 原因：一方面日志量太多影响性能，一方面日志量太多存储成本高
+     */
+    private String logLevel = CacheConsts.LOG_DEBUG;
+
+    /**
      * 缓存类型，默认 COMPOSITE 组合缓存
      *
      * @see CacheType

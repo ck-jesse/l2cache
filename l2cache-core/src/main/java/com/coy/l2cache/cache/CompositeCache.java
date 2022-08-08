@@ -8,6 +8,7 @@ import com.coy.l2cache.consts.CacheConsts;
 import com.coy.l2cache.consts.CacheType;
 import com.coy.l2cache.consts.HotkeyType;
 import com.coy.l2cache.spi.ServiceLoader;
+import com.coy.l2cache.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -255,7 +256,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
         // 是否为热key
-        if(ifHotKey(key)){
+        if (ifHotKey(key)) {
             return true;
         }
         return false;
@@ -330,15 +331,15 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             hitCacheMap.putAll(l1HitMap);
             // 获取未命中列表（注意：此处以keyMap作为基础，过滤出来一级缓存中没有命中的key，分为两部分：一部分为不走一级缓存的key，另一部分为走一级缓存但是没有命中一级缓存的key）
             keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> l1NotHitKeyMap.put(entry.getKey(), entry.getValue()));
-            logger.info("[CompositeCache] {} l1Cache batchGet, cacheName={}, l1NotHitKeySize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size());
+            LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} l1Cache batchGet, cacheName={}, l1NotHitKeySize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size());
         } else {
             l1NotHitKeyMap.putAll(keyMap);
-            logger.info("[CompositeCache] {} no key matches l1Cache, cacheName={}, keyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap.values());
+            LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} no key matches l1Cache, cacheName={}, keyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap.values());
         }
 
         // 一级缓存全部命中
         if (CollectionUtils.isEmpty(l1NotHitKeyMap)) {
-            logger.info("[CompositeCache] {} l1Cache all hit, cacheName={}, keyMapSize={}", methodName, this.getCacheName(), keyMap.size());
+            LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} l1Cache all hit, cacheName={}, keyMapSize={}", methodName, this.getCacheName(), keyMap.size());
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
@@ -374,7 +375,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                 .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
 
         if (null == valueLoader) {
-            logger.info("[CompositeCache] {} l1Cache and l2Cache, valueLoader is null return hitCacheMap, cacheName={}, hitCacheMapSize={}, l2NotHitKeyList={}", methodName, this.getCacheName(), hitCacheMap.size(), l2NotHitKeyMap.values());
+            LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} l1Cache and l2Cache, valueLoader is null return hitCacheMap, cacheName={}, hitCacheMapSize={}, l2NotHitKeyList={}", methodName, this.getCacheName(), hitCacheMap.size(), l2NotHitKeyMap.values());
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 

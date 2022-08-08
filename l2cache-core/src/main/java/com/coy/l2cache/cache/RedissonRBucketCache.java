@@ -130,7 +130,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     public Object get(Object key) {
         String cacheKey = (String) buildKey(key);
         Object value = getBucket(cacheKey).get();
-        LogUtil.logDetailPrint(logger,redis.getPrintDetailLogSwitch(),"[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+        LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] get cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
         return fromStoreValue(value);
     }
 
@@ -152,7 +152,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         RBucket<Object> bucket = getBucket(cacheKey);
         Object value = bucket.get();
         if (value != null) {
-            LogUtil.logDetailPrint(logger,redis.getPrintDetailLogSwitch(),"[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+            LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] get(key, callable) from redis, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
             return (T) fromStoreValue(value);
         }
         if (null == valueLoader) {
@@ -168,7 +168,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             }
             if (valueLoaderWarpperTemp.getValueLoader() instanceof ValueLoaderWarpper
                     && null == ((ValueLoaderWarpper) valueLoaderWarpperTemp.getValueLoader()).getValueLoader()) {
-                logger.info("[RedissonRBucketCache] get(key, callable) ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
+                LogUtil.log(logger, cacheConfig.getLogLevel(), "[RedissonRBucketCache] get(key, callable) ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", this.getCacheName(), cacheKey);
                 return null;
             }
         }
@@ -362,7 +362,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                     // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
                     if (returnNullValueKey) {
                         hitMap.put(key, null);
-                        logger.warn("[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                        LogUtil.log(logger, cacheConfig.getLogLevel(), "[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
                         return;
                     }
                 });

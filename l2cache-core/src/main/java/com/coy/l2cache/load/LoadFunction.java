@@ -99,7 +99,9 @@ public class LoadFunction implements Function<Object, Object> {
                     return null;
                 }
                 if (null == valueLoader.getValueLoader()) {
-                    logger.info("[LoadFunction] ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("[LoadFunction] ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                    }
                     return null;
                 }
             }
@@ -114,7 +116,9 @@ public class LoadFunction implements Function<Object, Object> {
         } finally {
             if (null != valueLoader && valueLoader.getWaitRefreshNum() > 0) {
                 int beforeWaitRefreshNum = valueLoader.clearWaitRefreshNum();
-                logger.info("[LoadFunction] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("[LoadFunction] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+                }
             }
         }
     }

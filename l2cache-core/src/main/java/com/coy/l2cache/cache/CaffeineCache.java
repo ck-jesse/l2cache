@@ -251,7 +251,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 // 添加一个 valueLoader 为null的ValueLoaderWarpper对象
                 // 一定程度上解决在 valueLoader 被gc回收后，若有大量refresh的请求，会堆积到ForkJoinPool的队列中的问题
                 // valueLoader=null时，可以从redis加载数据
-                logger.info("[CaffeineCache][refresh] add a null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
+                LogUtil.log(logger, cacheConfig.getLogLevel(), "[CaffeineCache][refresh] add a null ValueLoader, cacheName={}, key={}", this.getCacheName(), key);
                 this.cacheLoader.addValueLoader(key, null);
                 valueLoader = this.cacheLoader.getValueLoaderWarpper(key);
             }
@@ -260,7 +260,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                 logger.info("[CaffeineCache][refresh] not do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
                 return;
             }
-            logger.info("[CaffeineCache][refresh] do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
+            LogUtil.log(logger, cacheConfig.getLogLevel(), "[CaffeineCache][refresh] do refresh, cacheName={}, key={}, waitRefreshNum={}", this.getCacheName(), key, waitRefreshNum);
             ((LoadingCache) caffeineCache).refresh(key);
         }
     }
@@ -346,7 +346,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
             if (returnNullValueKey) {
                 hitMap.put(key, null);
-                logger.warn("[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                LogUtil.log(logger, cacheConfig.getLogLevel(), "[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
                 return;
             }
         });
