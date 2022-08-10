@@ -50,6 +50,7 @@ public interface CacheService<K, R> {
      * 1）先通过CacheService.getOrLoad(key)加载数据到本地缓存，此时，本地缓存中key的类型为Integer
      * 2）再通过CacheService.get(buildCacheKey(key))方法获取缓存数据，由于buildCacheKey(key)的将key转换为了String类型，所以根据这个String类型的key无法从本地缓存获取到缓存数据，会在本地缓存中再次缓存一个key为String类型的缓存，也就是本来是一个缓存，现在变为了2个缓存，一个key为Integer类型，一个key为String类型
      * 解决方案：CacheService.buildCacheKey()方法返回类型从String修改为Object即可
+     * 说明：20220809 由于优化CacheService后，get和getOrLoad中的key统一使用buildCacheKey(key)，所以该问题变向解决了，为了降低开发的理解成本，所以返回类型再次从Object改为String
      *
      * @return 缓存key
      */
@@ -57,7 +58,7 @@ public interface CacheService<K, R> {
 
     /**
      * 获取缓存（如果存在，则获取并返回）
-     * 注：仅仅只是获取，若缓存项不存在，则不会加
+     * 注：仅仅只是获取，若缓存项不存在，则不会加载
      *
      * @see CacheService#getNativeL2cache()
      * @see CacheService#buildCacheKey(Object)
