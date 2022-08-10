@@ -1,4 +1,4 @@
-package com.coy.l2cache.example;
+package com.coy.l2cache.example.controller;
 
 import com.coy.l2cache.util.RandomUtil;
 import com.github.benmanes.caffeine.cache.Caffeine;

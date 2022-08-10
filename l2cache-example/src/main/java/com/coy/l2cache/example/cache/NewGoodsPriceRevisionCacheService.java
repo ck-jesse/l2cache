@@ -1,8 +1,6 @@
 package com.coy.l2cache.example.cache;
 
 import com.alibaba.fastjson.JSON;
-import com.coy.l2cache.Cache;
-import com.coy.l2cache.example.dto.BrandRespBO;
 import com.coy.l2cache.example.dto.GoodsPriceRevisionIdsReqDTO;
 import com.coy.l2cache.example.dto.GoodsPriceRevisionRespBO;
 import com.coy.l2cache.spring.biz.AbstractCacheService;
@@ -27,8 +25,7 @@ import java.util.function.Function;
  */
 @Component
 @Slf4j
-@Deprecated
-public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> {
+public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> {
 
     public static final String CACHE_NAME = "goodsPriceRevisionCache";
 
@@ -47,54 +44,8 @@ public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPr
         return sb.toString();
     }
 
-    @Cacheable(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_'+#dto.goodsGroupId", sync = true)
     @Override
-    public GoodsPriceRevisionRespBO getOrLoad(GoodsPriceRevisionIdsReqDTO dto) {
-        return this.reload(dto);
-    }
-
-    @CachePut(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
-    @Override
-    public GoodsPriceRevisionRespBO put(GoodsPriceRevisionIdsReqDTO dto, GoodsPriceRevisionRespBO goodsPriceRevisionRespBO) {
-        return goodsPriceRevisionRespBO;
-    }
-
-    @CachePut(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
-    @Override
-    public GoodsPriceRevisionRespBO reload(GoodsPriceRevisionIdsReqDTO dto) {
-        return this.queryData(dto);
-    }
-
-    @CacheEvict(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
-    @Override
-    public void evict(GoodsPriceRevisionIdsReqDTO dto) {
-        log.info("[evict] cacheName={}, goodsPriceRevisionIdsReqDTO={}", CACHE_NAME, JSON.toJSONString(dto));
-    }
-
-    @Override
-    public Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> batchGet(List<GoodsPriceRevisionIdsReqDTO> keyList) {
-        // 定义缓存key构建器
-        Function<GoodsPriceRevisionIdsReqDTO, Object> cacheKeyBuilder = dto -> GoodsPriceRevisionCacheService.this.buildCacheKey(dto);
-
-        // 批量查询信息
-        return this.getNativeL2cache().batchGet(keyList, cacheKeyBuilder);
-    }
-
-    @Override
-    public Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> batchGetOrLoad(List<GoodsPriceRevisionIdsReqDTO> keyList) {
-        // 定义缓存key构建器
-        Function<GoodsPriceRevisionIdsReqDTO, Object> cacheKeyBuilder = dto -> GoodsPriceRevisionCacheService.this.buildCacheKey(dto);
-
-        // 从DB中加载数据
-        Function<List<GoodsPriceRevisionIdsReqDTO>, Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO>> valueLoader = notHitCacheKeyList -> this.queryDataList(notHitCacheKeyList);
-
-        // 批量查询信息
-        return this.getNativeL2cache().batchGetOrLoad(keyList, cacheKeyBuilder, valueLoader);
-    }
-
-
-    @Override
-    protected GoodsPriceRevisionRespBO queryData(GoodsPriceRevisionIdsReqDTO dto) {
+    protected GoodsPriceRevisionRespBO queryData(GoodsPriceRevisionIdsReqDTO key) {
         GoodsPriceRevisionRespBO goodsPriceRevisionRespBO = new GoodsPriceRevisionRespBO();
         goodsPriceRevisionRespBO.setGoodsPriceRevisionId(0);
         goodsPriceRevisionRespBO.setGroupId(0);
@@ -104,7 +55,7 @@ public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPr
         goodsPriceRevisionRespBO.setAddTime(0L);
         goodsPriceRevisionRespBO.setUpdateTime(0L);
         goodsPriceRevisionRespBO.setState(0);
-        log.info("查询信息,dto={},goodsPriceRevisionRespBO={}", JSON.toJSONString(dto), JSON.toJSONString(goodsPriceRevisionRespBO));
+        log.info("查询信息,dto={},goodsPriceRevisionRespBO={}", JSON.toJSONString(key), JSON.toJSONString(goodsPriceRevisionRespBO));
         return goodsPriceRevisionRespBO;
     }
 

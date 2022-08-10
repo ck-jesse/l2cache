@@ -1,4 +1,4 @@
-package com.coy.l2cache.example;
+package com.coy.l2cache.example.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;

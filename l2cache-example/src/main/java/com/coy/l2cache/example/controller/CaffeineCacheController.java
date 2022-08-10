@@ -1,8 +1,10 @@
-package com.coy.l2cache.example;
+package com.coy.l2cache.example.controller;
 
 import com.coy.l2cache.cache.CompositeCache;
 import com.coy.l2cache.cache.Level1Cache;
 import com.coy.l2cache.consts.CacheConsts;
+import com.coy.l2cache.example.service.CaffeineCacheService;
+import com.coy.l2cache.example.dto.User;
 import com.coy.l2cache.spring.L2CacheCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

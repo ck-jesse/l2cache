@@ -1,6 +1,7 @@
 package com.coy.l2cache.example;
 
 import com.alibaba.fastjson.JSON;
+import com.coy.l2cache.example.dto.User;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 

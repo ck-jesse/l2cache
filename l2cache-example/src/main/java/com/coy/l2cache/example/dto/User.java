@@ -1,4 +1,4 @@
-package com.coy.l2cache.example;
+package com.coy.l2cache.example.dto;
 
 import lombok.Data;
 

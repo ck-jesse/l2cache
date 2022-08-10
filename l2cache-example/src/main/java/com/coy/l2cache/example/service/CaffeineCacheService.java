@@ -1,6 +1,7 @@
-package com.coy.l2cache.example;
+package com.coy.l2cache.example.service;
 
 import com.coy.l2cache.Cache;
+import com.coy.l2cache.example.dto.User;
 import com.coy.l2cache.spring.L2CacheCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
