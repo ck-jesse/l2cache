@@ -233,7 +233,67 @@ l2cache:
 
 #### 3、代码中的使用
 
-结合Spring Cache的注解来使用。
+##### 方式一：基于 CacheService 缓存层来使用（推荐）
+```java
+/**
+ * CacheService 的demo案例
+ * 注：
+ * 为了简化业务开发，重新优化 CacheService 顶层抽象接口。
+ * 优化后的demo案例，只需要实现3个方法，使得开发更加简单，维护也更加简单，开发人员只需要聚焦在具体的业务逻辑
+ */
+@Component
+@Slf4j
+public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRespBO> {
+
+    public static final String CACHE_NAME = "brandCache";
+
+    @Override
+    public String getCacheName() {
+        return CACHE_NAME;
+    }
+
+    @Override
+    public String buildCacheKey(Integer brandId) {
+        return String.valueOf(brandId);
+    }
+
+    @Override
+    protected BrandRespBO queryData(Integer brandId) {
+        // 模拟返回数据，业务系统中可直接从DB加载数据
+        BrandRespBO brandRespBO = new BrandRespBO();
+        brandRespBO.setBrandId(0);
+        brandRespBO.setGroupId(0);
+        brandRespBO.setBrandName("");
+        brandRespBO.setBrandNumber("");
+        brandRespBO.setDescription("");
+        brandRespBO.setState(0);
+        log.info("查询获取品牌相关信息,brandId={},brandInfoRespBO={}", brandId, JSON.toJSONString(brandRespBO));
+        return brandRespBO;
+    }
+
+    @Override
+    protected Map<Integer, BrandRespBO> queryDataList(List<Integer> notHitCacheKeyList) {
+        Map<Integer, BrandRespBO> map = new HashMap<>();
+        // 模拟返回数据，业务系统中可直接从DB加载数据
+        for (Integer brandId : notHitCacheKeyList) {
+            BrandRespBO brandRespBO = new BrandRespBO();
+            brandRespBO.setBrandId(0);
+            brandRespBO.setGroupId(0);
+            brandRespBO.setBrandName("");
+            brandRespBO.setBrandNumber("");
+            brandRespBO.setDescription("");
+            brandRespBO.setState(0);
+            map.put(brandId, brandRespBO);
+        }
+        log.info("[批量获取品牌信息] valueLoader 分页获取品牌信息, result={}", JSON.toJSONString(map));
+        return map;
+    }
+
+}
+```
+
+
+##### 方式二：结合 Spring Cache 的注解来使用
 
 ```java
 @Service
