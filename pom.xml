@@ -15,6 +15,7 @@
         <module>l2cache-core</module>
         <module>l2cache-spring-boot-starter</module>
         <module>l2cache-example</module>
+        <module>l2cache-jd-hotkey</module>
     </modules>
 
     <properties>

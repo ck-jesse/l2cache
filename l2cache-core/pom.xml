@@ -75,8 +75,8 @@
         </dependency>
 
         <dependency>
-            <groupId>cn.weeget.hotkey</groupId>
-            <artifactId>weeget-infinite-hotkey-client</artifactId>
+            <groupId>com.coy.l2cache</groupId>
+            <artifactId>l2cache-jd-hotkey-client</artifactId>
             <version>0.0.2-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
