@@ -1,5 +1,5 @@
-import com.coy.l2cache.jd.hotkey.common.rule.KeyRule;
-import com.coy.l2cache.jd.hotkey.common.tool.FastJsonUtils;
+import com.jd.platform.hotkey.common.rule.KeyRule;
+import com.jd.platform.hotkey.common.tool.FastJsonUtils;
 
 import java.util.Arrays;
 

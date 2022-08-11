@@ -1,7 +1,7 @@
 package com.coy.l2cache.hotkey;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.coy.l2cache.jd.hotkey.client.callback.JdHotKeyStore;
+import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
 import com.coy.l2cache.HotKey;
 import lombok.extern.slf4j.Slf4j;
 import java.util.function.Function;

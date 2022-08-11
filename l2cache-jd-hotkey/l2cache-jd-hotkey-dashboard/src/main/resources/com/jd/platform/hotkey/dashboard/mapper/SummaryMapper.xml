@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jd.platform.hotkey.dashboard.mapper.SummaryMapper" >
+  <resultMap id="BaseResultMap" type="com.jd.platform.hotkey.dashboard.model.Summary" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="index_name" property="indexName" jdbcType="VARCHAR" />
+    <result column="rule" property="rule" jdbcType="VARCHAR" />
+    <result column="app" property="app" jdbcType="VARCHAR" />
+    <result column="index_val1" property="val1" jdbcType="INTEGER" />
+    <result column="index_val2" property="val2" jdbcType="INTEGER" />
+    <result column="index_val3" property="val3" jdbcType="DECIMAL" />
+    <result column="days" property="days" jdbcType="INTEGER" />
+    <result column="hours" property="hours" jdbcType="INTEGER" />
+    <result column="minutes" property="minutes" jdbcType="INTEGER" />
+    <result column="seconds" property="seconds" jdbcType="INTEGER" />
+    <result column="biz_type" property="bizType" jdbcType="INTEGER" />
+    <result column="uuid" property="uuid" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <insert id="saveOrUpdate" parameterType="com.jd.platform.hotkey.dashboard.model.Summary">
+    insert into hk_summary (
+        index_name,rule,app,index_val1,index_val2,index_val3,days,hours, minutes,seconds,biz_type,create_time,uuid
+    )
+    values (
+      #{indexName},#{rule},#{app},
+      #{val1},#{val2},#{val3},
+      #{days}, #{hours},#{minutes},#{seconds},
+      #{bizType},#{createTime},#{uuid})
+    on duplicate key update
+    index_val1 = index_val1+ #{val1},
+    index_val2 = index_val2+ #{val2},
+    index_val3 = index_val3+ #{val3}
+  </insert>
+
+
+
+  <select id="listRuleHitCount" resultType="com.jd.platform.hotkey.dashboard.common.domain.vo.HitCountVo"
+          parameterType="com.jd.platform.hotkey.dashboard.common.domain.req.SearchReq" >
+    select rule, app, index_val1 as totalCount, index_val2 as hitCount,
+           convert(index_val2/index_val1,decimal(8,2)) as ratio, seconds
+    from hk_summary
+    where 1=1
+    <if test="app !=null and app !=''">
+      and app = #{app}
+    </if >
+    <if test="startTime != null">
+      and seconds between UNIX_TIMESTAMP(#{startTime}) and UNIX_TIMESTAMP(#{endTime})
+    </if>
+    order by seconds desc
+  </select>
+
+
+  <delete id="clearExpireData">
+    delete from hk_summary
+    where app = #{app}
+     <![CDATA[ and create_time < #{expireDate}]]>
+  </delete>
+
+
+</mapper>

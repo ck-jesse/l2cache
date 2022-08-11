@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jd.platform.hotkey.dashboard.mapper.RulesMapper" >
+  <resultMap id="BaseResultMap" type="com.jd.platform.hotkey.dashboard.model.Rules" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="rules" property="rules" jdbcType="VARCHAR" />
+    <result column="app" property="app" jdbcType="VARCHAR" />
+    <result column="update_user" property="updateUser" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="version" property="version" jdbcType="INTEGER" />
+  </resultMap>
+
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from hk_rules
+    where app = #{app}
+  </delete>
+
+  <insert id="insert" parameterType="com.jd.platform.hotkey.dashboard.model.Rules" >
+
+    insert into hk_rules (id, rules, app, update_user, update_time)
+    values (#{id,jdbcType=INTEGER}, #{rules,jdbcType=VARCHAR}, #{app,jdbcType=VARCHAR}, 
+      #{updateUser,jdbcType=VARCHAR}, now())
+  </insert>
+
+  <update id="update" parameterType="com.jd.platform.hotkey.dashboard.model.Rules" >
+    update hk_rules
+    set rules = #{rules,jdbcType=VARCHAR},
+      app = #{app,jdbcType=VARCHAR},
+      update_time = now(),
+      version = version+1
+    where app = #{app}
+  </update>
+
+  <select id="select" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select id, rules, app, update_user, update_time, version
+    from hk_rules
+     where app = #{app}
+  </select>
+
+</mapper>
