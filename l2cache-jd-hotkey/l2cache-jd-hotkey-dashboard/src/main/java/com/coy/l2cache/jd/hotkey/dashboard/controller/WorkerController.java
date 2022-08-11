@@ -5,7 +5,6 @@ import com.coy.l2cache.jd.hotkey.dashboard.common.domain.Page;
 import com.coy.l2cache.jd.hotkey.dashboard.common.domain.Result;
 import com.github.pagehelper.PageInfo;
 import com.coy.l2cache.jd.hotkey.dashboard.common.base.BaseController;
-import cn.weeget.hotkey.dashboard.common.domain.*;
 import com.coy.l2cache.jd.hotkey.dashboard.common.domain.req.PageReq;
 import com.coy.l2cache.jd.hotkey.dashboard.model.Worker;
 import com.coy.l2cache.jd.hotkey.dashboard.service.WorkerService;

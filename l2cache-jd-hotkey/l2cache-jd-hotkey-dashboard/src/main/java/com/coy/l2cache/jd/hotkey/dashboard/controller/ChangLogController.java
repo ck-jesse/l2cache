@@ -4,7 +4,6 @@ import com.coy.l2cache.jd.hotkey.dashboard.common.domain.Constant;
 import com.coy.l2cache.jd.hotkey.dashboard.common.domain.Page;
 import com.github.pagehelper.PageInfo;
 import com.coy.l2cache.jd.hotkey.dashboard.common.base.BaseController;
-import cn.weeget.hotkey.dashboard.common.domain.*;
 import com.coy.l2cache.jd.hotkey.dashboard.common.domain.req.PageReq;
 import com.coy.l2cache.jd.hotkey.dashboard.model.ChangeLog;
 import com.coy.l2cache.jd.hotkey.dashboard.service.ChangeLogService;
