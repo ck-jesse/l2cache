@@ -77,7 +77,7 @@
         <dependency>
             <groupId>com.coy.l2cache</groupId>
             <artifactId>l2cache-jd-hotkey-client</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>1.0.34-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.ben-manes.caffeine</groupId>

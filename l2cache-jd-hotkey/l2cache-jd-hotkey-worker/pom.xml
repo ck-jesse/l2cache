@@ -11,7 +11,7 @@
 
     <groupId>com.coy.l2cache</groupId>
     <artifactId>l2cache-jd-hotkey-worker</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.34-SNAPSHOT</version>
     <name>l2cache-jd-hotkey-worker</name>
     <packaging>jar</packaging>
 
@@ -55,31 +55,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <!--私服 快照支持-->
-    <repositories>
-        <repository>
-            <id>yht-maven</id>
-            <name>yht-maven</name>
-            <layout>default</layout>
-            <url>http://nexus.weeget.cn/repository/maven-public</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <!-- 发布到maven私服 -->
-    <distributionManagement>
-        <repository>
-            <id>maven-releases</id>
-            <name>youxuan-central</name>
-            <url>http://nexus.weeget.cn/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven-snapshots</id>
-            <name>youxuan-central</name>
-            <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
