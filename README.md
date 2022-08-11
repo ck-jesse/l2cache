@@ -1,3 +1,8 @@
+
+# L2cache 如何使用
+- [如何使用L2cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
+
+
 # L2cache 的重要数据
 - 已在生产环境投产，目前主要应用在商品、优惠券、用户、营销等核心服务。
 - 经历过2020年双十一、双十二以及多次大促活动的流量洗礼。
@@ -55,8 +60,4 @@ L2cache  是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足�
  **必知：**
 
 > 若使用缓存，则必然可能出现不一致的情况，也就是说无法保证强一致性。
-
-
-# L2cache 如何使用
-- [如何使用L2cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
 
