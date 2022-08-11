@@ -1,0 +1,21 @@
+netty:
+  port: ${nettyPort:11111}
+  heartBeat: ${heartBeat:10}
+  timeOut: ${timeOut:5000}
+local:
+  address: ${localAddress:} #有些获取到的ip不能用，需要手工配worker的地址
+open:
+  timeout: ${openTimeOut:true}
+  monitor: ${openMonitor:false}  #开启持续无key发送监控，如果持续1分钟没发来key，就断开和etcd的连接，之后重建和客户端连接
+thread:
+  count: ${threadCount:0}
+caffeine:
+  minutes: ${caffeineMinutes:1}
+disruptor:
+  bufferSize: ${bufferSize:2} #必须是2的整数倍
+#etcd的地址，如有多个用逗号分隔
+etcd:
+  server: ${etcdServer:http://127.0.0.1:2379} #etcd的地址，重要！！！
+  workerPath: ${workerPath:default} #该worker放到哪个path下，譬如放/app1下，则该worker只能被app1使用，不会为其他client提供服务
+server:
+  port: 9902

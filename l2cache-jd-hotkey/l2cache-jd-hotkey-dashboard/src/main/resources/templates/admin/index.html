@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      >
+<head th:replace="admin/common/html/head :: head_Normal(~{::title},~{::link},~{::style})">
+
+<title th:text=${title}></title>
+<!-- 这儿引用单独的css link -->
+<link rel="stylesheet" th:href="@{/static/admin/assets/js/button/ladda/ladda.min.css}">
+<style type="text/css">
+/**
+*这里写单独的css样式
+*/
+
+#mainFrame{
+height: calc(100vh - 139px);overflow-x: hidden;
+}
+.menuSelected{
+    background-color: #283452;
+}
+</style>
+
+</head>
+
+<body id="body">
+
+<!-- 顶部通用-->
+<div th:replace="admin/common/html/topMenu :: topMenu(1)">
+</div>
+<!-- 结束顶部通用 -->
+<!-- 左边菜单栏通用 -->
+<div th:replace="admin/common/html/leftMenu :: leftMenu">
+</div>
+<!-- 结束左边菜单栏通用 -->
+
+
+<!-- 右边内容 -->
+<div class="wrap-fluid">
+     <div style="background-color: aliceblue;">
+       <iframe  width="100%"   id="mainFrame" name="mainFrame"  frameborder="0" marginheight="0" marginwidth="0" border="false"></iframe>
+     </div>
+      
+     <!-- 页脚 通用-->
+     <div th:replace="admin/common/html/footer :: footer">
+     </div>
+     <!-- 结束页脚通用 -->
+</div>
+<!-- 结束右边内容 -->
+
+<!-- 通用js -->
+<div th:include="admin/common/html/js :: onload_js"> 
+</div>
+<script type="text/javascript" th:src="@{/static/admin/assets/js/toggle_close.js}"></script>
+<script type="text/javascript" th:src="@{/static/admin/assets/js/main.js}"></script>
+<script th:src="@{/static/admin/assets/js/bootstrap/js/base_list.js}" type="text/javascript"></script>
+
+<script>
+
+    $("#mainFrame").attr("src","/user/main");
+    $('.tooltip-tip').on('click',  function(e){
+        $(this).parent().find(".menuSelected").removeClass("menuSelected");
+        $(this).addClass("menuSelected");
+    });
+
+    $(document).ready(function () {
+        $.ajax({
+            type : "POST",
+            url: "/user/getUserName",
+            headers: {
+                "Authorization":getCookie("token")
+            },
+            async : false,
+            success : function(data) {
+                $("#userName").html(data);
+            },
+            error: function(response){  //加载失败时执行
+                var token = getCookie("token");
+                if(response.status == 1000 && ( token == "undefined" || token =="")){
+                    top.location.href = '/user/login';
+                }
+                console.info("加载数据失败");
+            }
+        });
+    });
+
+</script>
+
+</body>
+
+
+</html>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>l2cache-jd-hotkey</artifactId>
+        <groupId>com.coy.l2cache</groupId>
+        <version>0.0.2-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
+    <artifactId>l2cache-jd-hotkey-common</artifactId>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <netty4.version>4.1.49.Final</netty4.version>
+        <snappy.version>1.1.7.3</snappy.version>
+        <fastjson.version>1.2.70</fastjson.version>
+        <hp-etcd.version>0.0.16</hp-etcd.version>
+        <caffeine.version>2.8.2</caffeine.version>
+        <hutool.version>5.1.0</hutool.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>${snappy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty4.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.etcd</groupId>
+            <artifactId>etcd-java</artifactId>
+            <version>${hp-etcd.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>guava</artifactId>
+            <version>${caffeine.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!--私服 快照支持-->
+    <repositories>
+        <repository>
+            <id>yht-maven</id>
+            <name>yht-maven</name>
+            <layout>default</layout>
+            <url>http://nexus.weeget.cn/repository/maven-public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <!-- 发布到maven私服 -->
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>youxuan-central</name>
+            <url>http://nexus.weeget.cn/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>youxuan-central</name>
+            <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

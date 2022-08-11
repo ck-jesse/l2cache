@@ -1,0 +1,122 @@
+@charset "UTF-8";
+html{
+    height: 100%;
+}
+html, body {
+    height: 100%;
+}
+body{
+  font-family:menlo,monospace, Tahoma,"微软雅黑","幼圆";
+  color: #4A5560;
+  --height:calc(1vh / 3);
+  --width:calc(1vw / 3);
+  --target: calc(var(--height) + var(--width));
+  font-size: calc(var(--target) + 6px);
+  height: 100%;
+}
+.common-font-size{
+  --height:calc(1vh / 3);
+  --width:calc(1vw / 3);
+  --target: calc(var(--height) + var(--width));
+  font-size: calc(var(--target) + 6px);
+}
+/*::-moz-selection {
+  background: #12c48b;
+  color: #fff;
+  text-shadow: none;
+}
+
+::selection {
+  background: #12c48b;
+  color: #fff;
+  text-shadow: none;
+}*/
+
+a{
+    display: inline-block;
+    text-decoration: none;
+    color: #1BAAE4;
+    cursor: pointer;
+    font-family: monospace, Tahoma,'微软雅黑';
+}
+.green{
+    color:#17B272;
+}
+.red{
+    color:#FF585D;
+}
+.red:hover{
+    color: #f98280;
+}
+.blue{
+    color:#1BAAE4;
+}
+.orange{
+  color:#FBC462;
+}
+.alert-danger{
+  background-color: #FFD8DB;
+  color: #1D3440;
+  box-shadow: 1px 1px 1px 1px #eee;
+}
+.alert .close{
+  color: #1D3440;
+}
+input:focus, textarea:focus {
+    outline: none;
+}
+a:hover{
+    text-decoration: none;
+    color: #47A7E6;
+}
+.label-success{
+    background-color: #0fd59d;
+}
+.header{
+    border-bottom: solid 1px #E5EBEE;
+    padding: 0px;
+}
+.logo{
+    --height:calc(1vh / 3);
+    --width:calc(1vw / 3);
+    --target: calc(var(--height) + var(--width));
+    font-size: calc(var(--target) + 12px);
+    text-decoration: none;
+    font-weight: bold;
+    color: #0fd59d;
+    padding: 10px;
+    font-family: Tahoma;
+}
+.logo:hover{
+    color: #0fd59d;
+}
+.navi{
+    padding:5px 20px;
+    font-weight:bold;
+}
+.navi a{
+    padding: 0px 20px;
+    color: #4A5560;
+}
+.json-src{
+    height:100%;min-height:550px;
+    background-color:#f6f6f6;padding:0 10px 10px 10px;
+    border:0;border-right:solid 1px #E5EBEE;border-bottom:solid 1px #eee;border-radius:0;
+    esize: none; outline:none;font-size:1.2vh;
+}
+.tool{
+    padding:10px;
+    height: 40px;
+    border-bottom:solid 1px #eee;
+    background-color:#fff;
+    width:100%;font-size:1.2vh;
+    z-index:100;
+}
+.tool a{
+    padding: 0px 20px;
+    color: #999;
+}
+.navi a:hover{
+    color: #888;
+}
+footer{margin-top: 1vh;font-size:calc(2px + 1vh);}

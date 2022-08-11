@@ -1,0 +1,50 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:fragment="head_Normal(titles,links,styles)" >
+    <meta charset="utf-8">
+   
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Le styles -->
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/css/style.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/css/loader-style.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/css/bootstrap.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/js/progress-bar/number-pb.css}">
+	<!-- bootstrap-时间样式 -->
+	<link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/js/bootstrap/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css}">
+
+	<!--颜色控件样式 -->
+	<link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/js/colorPicker/bootstrap-colorpicker.css}">
+
+	<!-- checkbox css-->
+	<link th:href="@{/static/admin/assets/css/Checkboxes/awesome-bootstrap-checkbox.css}" rel="stylesheet"/>
+	<!-- 切换按钮css -->
+	<link th:href="@{/static/admin/assets/js/switch/bootstrap-switch.css}" rel="stylesheet">
+
+    <link rel="shortcut icon" th:href="@{/static/admin/images/xiaojingyu.png}">
+	<link rel="icon" th:href="@{/static/admin/images/xiaojingyu.png}" type="image/x-icon">
+	<th:block th:replace="${titles}" />
+	<!-- 替换新的links-->
+    <th:block th:replace="${links}" />
+    <!-- 替换新的${styles}-->
+	 <th:block th:replace="${styles}" />
+</head>
+
+
+<head th:fragment="Head_Premiss(titles,links,styles)" >
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/css/style.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/css/loader-style.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/static/admin/assets/css/bootstrap.css}">
+    <link rel="shortcut icon" th:href="@{/static/admin/images/xiaojingyu.png}">
+	<link rel="icon" th:href="@{/static/admin/images/xiaojingyu.png}" type="image/x-icon">
+	<th:block th:replace="${titles}" />
+	<!-- 替换新的links-->
+    <th:block th:replace="${links}" />
+    <!-- 替换新的${styles}-->
+	 <th:block th:replace="${styles}" />
+</head>

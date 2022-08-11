@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      >
+<head th:replace="admin/common/html/head :: head_Normal(~{::title},~{::link},~{::style})">
+
+<title th:text=${title}></title>
+
+<link rel="stylesheet" th:href="@{/static/admin/assets/js/button/ladda/ladda.min.css}">
+<!-- bootstrap-table表单样式 -->
+<link th:href="@{/static/admin/assets/js/bootstrap/css/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+<link th:href="@{/static/admin/assets/js/bootstrap/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+
+<style type="text/css">
+
+.select-list ul li{
+	list-style-type: none;
+	float: left;
+}
+.timeBut{
+    float: left;
+    padding-top: 15px
+}
+.timeBut2{
+    float: left;
+    padding-top: 10px
+}
+</style>
+
+</head>
+
+<body id="listbody">
+
+<!-- 右边内容 -->
+<div class="wrap-fluid">
+    <div class="container-fluid paper-wrap bevel tlbr">
+        <!-- 内容 -->
+
+        <div class="content-wrap">
+            <!-- 结束内容 -->
+            <div class="row">
+                <div class="col-sm-12">
+                <!-- 搜索条件 -->
+                
+                	 <div class="nest" id="inlineClose">
+                            <div class="title-alt">
+                                <h6>搜索条件</h6>
+                                <div class="titleClose">
+                                    <a class="gone" href="#inlineClose">
+                                        <span class="entypo-cancel"></span>
+                                    </a>
+                                </div>
+                                <div class="titleToggle">
+                                    <a class="nav-toggle-alt" href="#search_div">
+                                        <span class="entypo-down-open"></span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="body-nest" id="search_div"  style="display: block">
+                                <div class="form_left">
+                                    <form role="form" class="form-inline" id="keyForm">
+                                        <div class="form-group" style="width: 23%" >
+                                          <label class="control-label timeBut" >选择日期：</label>
+                                            <div class='input-group date datetimepicker' id='datetimepicker1' data-date-format="yyyy-mm-dd hh:ii:ss">
+                                                <input type='text' class="form-control" name="startTime" id="st"/>
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" style="width: 18%" >
+                                            <label class="control-label timeBut">~</label>
+                                            <div class='input-group date datetimepicker' id='datetimepicker2' data-date-format="yyyy-mm-dd hh:ii:ss">
+                                                <input type='text' class="form-control"  name="endTime" id="et"/>
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-calendar"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" style="margin-left: 30px">
+                                            <label class="control-label timeBut2">热点Key：</label>
+                                            <input type="text" name="key" placeholder="key"class="form-control" id="key" style="width: 50%;">
+                                        </div>
+                                        <div class="form-group" style="width: 18%;margin-left: -23px" >
+                                            <label class="control-label timeBut2" >所属APP：</label>
+                                            <select name="app" id="apps" class="form-control" style="width: 64%">
+                                            </select>
+                                        </div>
+                                        <button onclick="$.table.search(this)" class="btn btn-success"  style="margin-left:4%" type="button"><i class="fa fa-search"></i>&nbsp;搜索</button>
+                                        <button onclick="exportHot()" class="btn btn-success"  style="margin-left: 1%"  type="button"><i class="fa fa-arrow-circle-o-down"></i>&nbsp;导出</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                	<!-- END搜索条件 -->
+                    <!-- 空白页开始-->
+                    <div class="nest" id="Blank_PageClose">
+                        <div class="title-alt">
+                            <h6>表单</h6>
+                            <div class="titleClose">
+                                <a class="gone" href="#Blank_PageClose">
+                                    <span class="entypo-cancel"></span>
+                                </a>
+                            </div>
+                            <div class="titleToggle">
+                                <a class="nav-toggle-alt" href="#Blank_Page_Content">
+                                    <span class="entypo-up-open"></span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="body-nest" id="Blank_Page_Content">
+                            <!-- 工具条 -->
+                            <div class="btn-group hidden-xs" id="exampleTableEventsToolbar" role="group">
+                           </div>
+                            <!-- 工具条 end-->
+                           <table id="dataTable" class="table-striped footable-res footable metro-blue" data-page-size="6">
+                                    
+                           </table>
+                           
+                        </div>
+                    </div>
+                </div>
+                <!-- 空白页结束 -->
+            </div>
+            <!-- 结束内容 -->
+        </div>
+    </div>
+</div>
+<!-- 结束右边内容 -->
+
+<!-- 通用js -->
+<div th:include="admin/common/html/js :: onload_js">
+   
+</div>
+<!-- bootstarp 表格 -->
+<script th:src="@{/static/admin/assets/js/bootstrap/js/bootstrap-table/bootstrap-table.min.js}" type="text/javascript"></script>
+<script th:src="@{/static/admin/assets/js/bootstrap/js/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}" type="text/javascript"></script>
+<script th:src="@{/static/admin/assets/js/bootstrap/js/base_list.js}" type="text/javascript"></script>
+<!-- 弹窗 -->
+<script th:src="@{/static/admin/assets/js/layer/layer.js}" type="text/javascript"></script>
+<!-- 遮罩层 -->
+<script th:src="@{/static/admin/assets/js/blockUI/jquery.blockUI.js}" type="text/javascript"></script>
+<script th:src="@{/static/admin/assets/js/bootstrap/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js}" type="text/javascript"></script>
+<script th:src="@{/static/admin/assets/js/bootstrap/bootstrap-datetimepicker/js/bootstrap-datetimepicker.zh-CN.js}" type="text/javascript"></script>
+
+<script type="text/javascript">
+var dataUrl="/key/list";
+var removeUrl="/key/remove";
+var createUrl="/key/add";
+var updateUrl="/key/edit/{id}";
+var options = {
+		dataUrl: dataUrl,
+        createUrl: createUrl,
+        updateUrl: updateUrl,
+        removeUrl: removeUrl,
+        sortName: "createTime",
+        modalName: "KEY",
+        search: false,
+	    dataColumns: [
+			{ checkbox: true },
+			{ field: 'id', title: '序号'},
+            { field: 'key', title: 'key'},
+            { field: 'ruleDesc', title: '类型'},
+            { field: 'appName', title: '所属APP'},
+            { field: 'duration', title: '剩余缓存时间'},
+            { field: 'source', title: '来源'},
+            { field: 'type', title: '操作类型',
+                formatter:function (val) {
+                    if(val == 0){ return "PUT"}
+                    if(val == 1){ return "DELETED"}
+                }
+            },
+            { field: 'createTime', title: '创建时间'
+            }]
+  };
+
+
+    $('.datetimepicker').datetimepicker({
+        language: 'zh-CN',
+        CustomFormat: 'yyyy-mm-dd HH:ii:ss',
+        weekStart: 1,
+        todayBtn: 1,            //显示当天按钮，点击则选择当天当天时间
+        autoclose: 1,           //选完时间自动关闭
+        todayHighlight: 1,      //当天时间高亮
+        startView: 2,           //从月视图开始，选天
+        minView: 0,             //提供选择分钟的视图
+        forceParse: 0,
+        minuteStep: 1           //用于构建小时视图。就是最小的视图是每1分钟可选一次。是以分钟为单位的
+    });
+var now = new Date();
+    $("#datetimepicker2").datetimepicker("setDate", now);
+var pre5hours = now.setHours(now.getHours() - 5);
+    $("#datetimepicker1").datetimepicker("setDate", new Date(pre5hours));
+
+
+$(function(){
+    $.ajax({
+        cache : true,
+        type : "POST",
+        url : "/user/info",
+        headers: {
+            "Authorization":getCookie("token")
+        },
+        async : false,
+        error : function(XMLHttpRequest){
+            $.modal.alertError(XMLHttpRequest.responseJSON.msg);
+        },
+        success : function(data) {
+            console.log(data)
+            var role = data.role;
+            if(role === "ADMIN"){
+                $("#apps").append("<option></option>");
+            }
+            var apps = data.appNames;
+            var appName = data.appName;
+            for (var i = 0; i < apps.length; i++) {
+                var app = apps[i];
+                if(app === appName){
+                    $("#apps").append("<option selected = selected>" + apps[i] + "</option>");
+                }else{
+                    $("#apps").append("<option>" + apps[i] + "</option>");
+                }
+            }
+        }
+    });
+
+	var oTab=$.table.oTableInit(options);
+	oTab.Init();
+
+})
+
+function exportHot() {
+    $("#keyForm").attr("action","/key/export");//改变表单的提交地址为下载的地址
+    $("#keyForm").submit();//提交表单
+}
+
+</script>
+
+</body>
+
+</html>

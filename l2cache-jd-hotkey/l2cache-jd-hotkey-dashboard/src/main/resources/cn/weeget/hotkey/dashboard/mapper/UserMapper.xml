@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.weeget.hotkey.dashboard.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="cn.weeget.hotkey.dashboard.model.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="pwd" jdbcType="VARCHAR" property="pwd" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="role" jdbcType="VARCHAR" property="role" />
+    <result column="app_name" jdbcType="VARCHAR" property="appName" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="state" jdbcType="INTEGER" property="state" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, nick_name, user_name, pwd, phone, role, app_name, create_time, state
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from hk_user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectHkUserList" parameterType="cn.weeget.hotkey.dashboard.model.User" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from hk_user
+    <where>
+      <if test="id != null and id != ''"> and id = #{id}</if>
+      <if test="nickName != null and nickName != ''"> and nick_name = #{nickName}</if>
+      <if test="userName != null and userName != ''"> and user_name = #{userName}</if>
+      <if test="pwd != null and pwd != ''"> and pwd = #{pwd}</if>
+      <if test="phone != null and phone != ''"> and phone = #{phone}</if>
+      <if test="role != null and role != ''"> and role = #{role}</if>
+      <if test="appName != null and appName != ''"> and app_name = #{appName}</if>
+      <if test="createTime != null and createTime != ''"> and create_time = #{createTime}</if>
+      <if test="state != null and state != ''"> and state = #{state}</if>
+    </where>
+  </select>
+
+
+  <select id="selectByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from hk_user where user_name = #{userName}
+  </select>
+
+
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from hk_user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertSelective" parameterType="cn.weeget.hotkey.dashboard.model.User" useGeneratedKeys="true" keyProperty="id">
+    insert into hk_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="nickName != null">
+        nick_name,
+      </if>
+      <if test="userName != null">
+        user_name,
+      </if>
+      <if test="pwd != null">
+        pwd,
+      </if>
+      <if test="phone != null">
+        phone,
+      </if>
+      <if test="role != null">
+        role,
+      </if>
+      <if test="appName != null">
+        app_name,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="state != null">
+        state,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="nickName != null">
+        #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null">
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null">
+        #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null">
+        #{role,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null">
+        #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null">
+        #{state,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPk" parameterType="cn.weeget.hotkey.dashboard.model.User">
+    update hk_user
+    <set>
+      <if test="nickName != null">
+        nick_name = #{nickName,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null">
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="pwd != null">
+        pwd = #{pwd,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null">
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="role != null">
+        role = #{role,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null">
+        app_name = #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = now(),
+      </if>
+      <if test="state != null">
+        state = #{state,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="listUser" parameterType="cn.weeget.hotkey.dashboard.common.domain.req.SearchReq" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from hk_user
+    where 1=1
+    <if test="app !=null and app !=''">
+      and app_name = #{app}
+    </if >
+    order by id desc
+  </select>
+
+
+  <select id="findByNameAndPwd" parameterType="cn.weeget.hotkey.dashboard.model.User" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from hk_user
+    where state = 1 and user_name = #{userName} and pwd = #{pwd}
+  </select>
+
+  <select id="listApp" resultType="java.lang.String">
+    select app_name
+    from hk_user where app_name &lt;&gt; ""
+    group by app_name
+  </select>
+
+</mapper>

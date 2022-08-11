@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="720">
+    <meta http-equiv="Cache-Control" content="max-age=3600">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="baidu-site-verification" content="mlJsiTNxiD">
+    <meta name="google-site-verification" content="CPogK9tQWL5XIDF9F9x_tJyy1HtpDI8Rv6owOEIkUvM">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="all">
+    <meta name="author" content="json.cn">
+    <link th:href="@{/static/admin/jn/css/bootstrap.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/admin/jn/css/font-awesome.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/admin/jn/css/base.css}" rel="stylesheet"/>
+    <style></style>
+    <script src="http://cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">.json_key{ color: #92278f;font-weight:bold;}.json_null{color: #f1592a;font-weight:bold;}.json_string{ color: #3ab54a;font-weight:bold;}.json_number{ color: #25aae2;font-weight:bold;}.json_boolean{ color: #f98280;font-weight:bold;}.json_link{ color: #61D2D6;font-weight:bold;}.json_array_brackets{}</style></head>
+<body style="over-flow:visible;" id="listbody" >
+
+<main class="row-fluid" style="height:85%;min-height:550px;">
+    <div class="col-md-5" style="padding:0px;height:100%;" id="oldRules">
+        <div class="numberedtextarea-wrapper ">
+            <input id="myWord" type="hidden" />
+            <textarea id="json-src" placeholder="在此输入json字符串或XML字符串..." class="form-control common-font-size" style="height:100%;height: 87vh;min-height:520px;padding:10px 10px 10px 30px;border:0;border-right:solid 1px #E5EBEE;border-bottom:solid 1px #eee;border-radius:0;resize: none; outline:none;"></textarea>
+            <div class="numberedtextarea-line-numbers" style="padding-top: 10px; line-height: 20.3143px; font-family: menlo, monospace, Tahoma, 微软雅黑, 幼圆; width: 30px;">
+                <div class="numberedtextarea-number numberedtextarea-number-1" style="margin-bottom: 10px;">1</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7" style="padding:0;position:relative;height:100%;" id="newRules">
+        <div class="tool" style="position:absolute;">
+            <a href="###" class="tip zip" title="" data-placement="bottom" data-original-title="压缩" style="color:#999;"><i class="fa fa-database"></i></a>
+            <a href="###" class="tip xml" title="" data-placement="bottom" data-original-title="转XML" style="color:#999;"><i class="fa fa-file-excel-o"></i></a>
+            <a href="###" class="tip shown" title="" data-placement="bottom" data-original-title="显示行号"><i class="glyphicon glyphicon-sort-by-order"></i></a>
+            <a href="###" class="tip clear" title="" data-placement="bottom" data-original-title="清空"><i class="fa fa-trash"></i></a>
+            <a href="###" class="tip save" title="" data-placement="bottom" data-original-title="保存"><i class="fa fa-download"></i></a>
+            <a href="###" class="tip copy" title="" data-clipboard-target="#json-target" data-placement="bottom" data-original-title="复制"><i class="fa fa-copy"></i></a>
+            <a href="###" class="tip compress" title="" data-placement="bottom" data-original-title="折叠"><i class="fa fa-compress"></i></a>
+            <label style="cursor: pointer">
+                <input type="checkbox" name="cancelZY" id="cancelZY" style="margin-top: 0;position: relative;top: 2px"> 保留转义
+            </label>
+        </div>
+        <div id="right-box" class="common-font-size" style="width:100%;height: 87vh;min-height:520px;border:solid 1px #f6f6f6;border-radius:0;resize: none;overflow-y:scroll; outline:none;position:relative;padding-top:40px;">
+            <div id="hidden-message-box" class="alert alert-danger alert-dismissible" role="alert" style="display:none;margin-bottom:0;padding:10px 2vw;font-size: calc(var(--target) + 4px);">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+                </button>
+                <p><i class="fa fa-bell" aria-hidden="true"></i>
+                    提示：
+                    <span id="hidden-message">
+                      默认警告
+                  </span>
+                </p>
+            </div>
+            <div id="line-num" style="background-color:#fafafa;padding:0px 8px;float:left;border-right:dashed 1px #E5EBEE;display:none;z-index:-1;color:#999;position:absolute;text-align:center;over-flow:hidden;"></div>
+            <div class="ro" id="json-target" style="padding:0px 25px;white-space: pre-line;word-wrap:break-word;"></div>
+        </div>
+    </div>
+    <br style="clear:both;">
+</main>
+
+<link th:href="@{/static/admin/jn/css/jquery.numberedtextarea.css}" rel="stylesheet"/>
+
+<script type="text/javascript" async=""
+        src="https://www.google-analytics.com/analytics.js"></script>
+<script src="https://hm.baidu.com/hm.js"></script>
+<script th:src="@{/static/admin/jn/js/jquery.min.js}"></script>
+<script th:src="@{/static/admin/jn/js/jquery.message.js}"></script><div style="clear:both;"></div><div id="jquery-beauty-msg"></div>
+<script th:src="@{/static/admin/jn/js/bignumber.min.js}"></script>
+<script th:src="@{/static/admin/jn/js/jquery.json.js}"></script>
+<script th:src="@{/static/admin/jn/js/jquery.xml2json.js}"></script>
+<script th:src="@{/static/admin/jn/js/jquery.json2xml.js}"></script>
+<script th:src="@{/static/admin/jn/js/json2.js}"></script>
+<script th:src="@{/static/admin/jn/js/jsonlint.js}"></script>
+<script th:src="@{/static/admin/jn/js/clipboard.min.js}"></script>
+<script th:src="@{/static/admin/jn/js/FileSaver.min.js}"></script>
+<script th:src="@{/static/admin/jn/js/bootstrap.min.js}"></script>
+<script th:src="@{/static/admin/jn/js/jquery.numberedtextarea.js}"></script>
+<script th:src="@{/static/admin/assets/js/bootstrap/js/base_list.js}" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $('textarea').numberedtextarea();
+    var current_json = '';
+    var current_json_str = '';
+    var xml_flag = false;
+    var zip_flag = false;
+    var shown_flag = false;
+    var compress_flag = false;
+    $('.tip').tooltip();
+
+    function init() {
+        xml_flag = false;
+        zip_flag = false;
+        shown_flag = false;
+        compress_flag = false;
+        renderLine();
+        $('.xml').attr('style', 'color:#999;');
+        $('.zip').attr('style', 'color:#999;');
+    }
+
+    $('#cancelZY').click(function(){
+        init();
+        var content = $.trim($('#json-src').val());
+        $("#myWord").val(content);
+        var result = '';
+        if (content != '') {
+            //如果是xml,那么转换为json
+            if (content.substr(0, 1) === '<' && content.substr(-1, 1) === '>') {
+                try {
+                    var json_obj = $.xml2json(content);
+                    content = JSON.stringify(json_obj);
+                } catch (e) {
+                    result = '解析错误：<span style="color: #f1592a;font-weight:bold;">' + e.message + '</span>';
+                    current_json_str = result;
+                    $('#json-target').html(result);
+                    return false;
+                }
+
+            }
+            try {
+                var hasZY = $('#cancelZY').prop('checked');
+                if (hasZY) {
+                    content = content.replace(/\\/g, '\\\\');
+                    content = content.replace(/\\"/g, '\\\\"');
+                }
+
+                current_json = jsonlint.parse(content);
+                current_json_str = JSON.stringify(current_json);
+                result = new JSONFormat(content, 4).toString();
+            } catch (e) {
+                result = '<span style="color: #f1592a;font-weight:bold;">' + e + '</span>';
+                current_json_str = result;
+            }
+
+            $('#json-target').html(result);
+        } else {
+            $('#json-target').html('');
+        }
+    });
+    $('#json-src').keyup(function () {
+        init();
+        var content = $.trim($(this).val());
+        $("#myWord").val(content);
+        var result = '';
+        if (content != '') {
+            //如果是xml,那么转换为json
+            if (content.substr(0, 1) === '<' && content.substr(-1, 1) === '>') {
+                try {
+                    var json_obj = $.xml2json(content);
+                    content = JSON.stringify(json_obj);
+                } catch (e) {
+                    result = '解析错误：<span style="color: #f1592a;font-weight:bold;">' + e.message + '</span>';
+                    current_json_str = result;
+                    $('#json-target').html(result);
+                    return false;
+                }
+
+            }
+            try {
+                var hasZY = $('#cancelZY').prop('checked');
+                if (hasZY) {
+                    content = content.replace(/\\/g, '\\\\');
+                    content = content.replace(/\\"/g, '\\\\"');
+                }
+                current_json = jsonlint.parse(content);
+                current_json_str = JSON.stringify(current_json);
+                result = new JSONFormat(content, 4).toString();
+            } catch (e) {
+                result = '<span style="color: #f1592a;font-weight:bold;">' + e + '</span>';
+                current_json_str = result;
+            }
+
+            $('#json-target').html(result);
+        } else {
+            $('#json-target').html('');
+        }
+
+    });
+    $('.xml').click(function () {
+        if (xml_flag) {
+            $('#json-src').keyup();
+        } else {
+            var result = $.json2xml(current_json);
+            $('#json-target').html('<textarea style="width:100%;position:absolute;height: 80vh;min-height:480px;border:0;resize:none;">' + result + '</textarea>');
+            xml_flag = true;
+            $(this).attr('style', 'color:#15b374;');
+        }
+
+    });
+    $('.shown').click(function () {
+        if (!shown_flag) {
+            renderLine();
+            $('#line-num').show();
+            $('.numberedtextarea-line-numbers').show();
+            shown_flag = true;
+            $(this).attr('style', 'color:#15b374;');
+        } else {
+            $('#line-num').hide();
+            $('.numberedtextarea-line-numbers').hide();
+            shown_flag = false;
+            $(this).attr('style', 'color:#999;');
+        }
+    });
+
+    function renderLine() {
+        var line_num = $('#json-target').height() / 20;
+        $('#line-num').html("");
+        var line_num_html = "";
+        for (var i = 1; i < line_num + 1; i++) {
+            line_num_html += "<div>" + i + "<div>";
+        }
+        $('#line-num').html(line_num_html);
+    }
+
+    $('.zip').click(function () {
+        if (zip_flag) {
+            $('#json-src').keyup();
+        } else {
+            $('#json-target').html("<xmp>" + current_json_str + "</xmp>");
+            zip_flag = true;
+            $(this).attr('style', 'color:#15b374;');
+        }
+    });
+
+    $('.compress').click(function () {
+        if (!compress_flag) {
+            $(this).attr('style', 'color:#15b374;');
+            $($(".fa-minus-square-o").toArray().reverse()).click();
+            compress_flag = true;
+        } else {
+            while ($(".fa-plus-square-o").length > 0) {
+                $(".fa-plus-square-o").click();
+            }
+            compress_flag = false;
+            $(this).attr('style', 'color:#555;');
+            $(this).attr('title', '折叠').tooltip('fixTitle').tooltip('show');
+        }
+    });
+    $('.clear').click(function () {
+        $('#myWord').val('');
+        $('#json-src').val('');
+        $('#json-target').html('');
+    });
+    (function ($) {
+        $.fn.innerText = function (msg) {
+            if (msg) {
+                if (document.body.innerText) {
+                    for (var i in this) {
+                        this[i].innerText = msg;
+                    }
+                } else {
+                    for (var i in this) {
+                        this[i].innerHTML.replace(/&amp;lt;br&amp;gt;/gi, "n").replace(/(&amp;lt;([^&amp;gt;]+)&amp;gt;)/gi, "");
+                    }
+                }
+                return this;
+            } else {
+                if (document.body.innerText) {
+                    return this[0].innerText;
+                } else {
+                    return this[0].innerHTML.replace(/&amp;lt;br&amp;gt;/gi, "n").replace(/(&amp;lt;([^&amp;gt;]+)&amp;gt;)/gi, "");
+                }
+            }
+        };
+    })(jQuery);
+    $('.save').click(function () {
+        var text = $('#json-target').innerText().replace('　　', '    ');
+        var blob = new Blob([text], {type: "application/json;charset=utf-8"});
+        var timestamp = new Date().getTime();
+        saveAs(blob, "format." + timestamp + ".json");
+    });
+    $('.copy').click(function () {
+    });
+    var clipboard = new Clipboard('.copy');
+    $('#json-src').keyup();
+</script>
+
+
+<script type="text/javascript">
+    $(function(){
+        var app = $("#apps", parent.document.body).val();
+        getRules(app);
+    })
+
+    function getRules(app) {
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : "/rule/getRule",
+            headers: {
+                "Authorization":getCookie("token")
+            },
+            data:{ "app" : app },
+            async : false,
+            error : function(request) {
+                $.modal.alertError("系统错误");
+            },
+            success : function(data) {
+                $('#myWord').val(data.rules);
+                $('#json-src').val(data.rules);
+                $('#json-src').keyup();
+            }
+        });
+    }
+</script>
+
+
+<footer style="padding:20px;text-align:center;color:#aaa;font-family: Tahoma,&#39;微软雅黑&#39;;">
+    <div style="padding:10px;">
+
+    </div>
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?fca67c0402c411679af17b69c06e092c";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async="" src="https://www.google-analytics.com/analytics.js"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-85291938-3');
+    </script>
+</footer>
+</body>
+
+</html>

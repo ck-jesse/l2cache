@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/common/html/head :: head_Normal(~{::title},~{::link},~{::style})">
+    <title th:text=${title}></title>
+    <link rel="stylesheet" th:href="@{/static/admin/assets/js/button/ladda/ladda.min.css}">
+    <style type="text/css">
+        .select-list ul li{
+            list-style-type: none;
+            float: left;
+        }
+    </style>
+
+</head>
+
+<body id="listbody">
+<!-- 右边内容 -->
+<div class="wrap-fluid">
+
+    <div class="container-fluid bevel tlbr" style="min-height: 600px;position: relative;overflow: hidden;">
+        <div class="body-nest" id="search_div"  style="display: block">
+            <div class="form_left">
+                <form role="form" class="form-inline">
+                    <div class="form-group" style="width: 16%">
+                        <label class="control-label timeBut2" style="float: left;padding-top: 10px">所属APP：</label>
+                        <select name="app"  class="form-control" style="width: 90px" id="apps">
+                        </select>
+                    </div>
+                    <button onclick="save()" class="btn btn-success" type="button" style="margin-left: 75%"><i class="fa fa-edit"></i>&nbsp;保存</button>
+                </form>
+            </div>
+        </div>
+        <div class="" style="font-size: 16px;padding-top: 12px;height: 1px;">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            key-(*代表任意以key为前缀),&nbsp;&nbsp; prefix-是否前缀, &nbsp;&nbsp;interval-间隔时间(秒),
+            threshold-阈值,&nbsp;&nbsp; duration-缓存时间(秒),默认60
+        </div>
+        <div class="nest" id="Blank_PageClose" style="height: 1000px;">
+            <div class="title-alt" style="height: 1px;">
+
+            </div>
+            <div class="body-nest" id="Blank_Page_Content" style="height: 1000px;">
+                <iframe  width="100%"  height="90%"  id="json" name="json"  src="/rule/viewDetail" frameborder="0" marginheight="0" marginwidth="0" border="false"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 结束右边内容 -->
+
+<!-- 通用js -->
+<div th:include="admin/common/html/js :: onload_js">
+
+</div>
+<script th:src="@{/static/admin/assets/js/bootstrap/js/base_list.js}" type="text/javascript"></script>
+<script th:src="@{/static/admin/assets/js/layer/layer.js}" type="text/javascript"></script>
+
+<script th:inline="javascript">
+    var rules = [[${rules}]];
+    var initApp = 1;
+    if(rules != null){
+         initApp = rules.app;
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    $.ajax({
+        cache : true,
+        type : "POST",
+        url : "/user/info",
+        headers: {
+            "Authorization":getCookie("token")
+        },
+        async : false,
+        error : function(XMLHttpRequest){
+            $.modal.alertError(XMLHttpRequest.responseJSON.msg);
+        },
+        success : function(data) {
+            var role = data.role;
+            if(role === "ADMIN"){
+                $("#apps").append("<option></option>");
+            }
+            var apps = data.appNames;
+            var appName = data.appName;
+            for (var i = 0; i < apps.length; i++) {
+                var app = apps[i];
+                if(initApp === 1){
+                    if(app === appName){
+                        $("#apps").append("<option selected = selected>" + apps[i] + "</option>");
+                    }else{
+                        $("#apps").append("<option>" + apps[i] + "</option>");
+                    }
+                }else{
+                    if(apps[i] === initApp){
+                        $("#apps").append("<option selected = 'selected'>" + apps[i] + "</option>");
+                    }else{
+                        $("#apps").append("<option>" + apps[i] + "</option>");
+                    }
+                }
+            }
+        }
+    });
+
+    $("#apps").change(function () {
+        var app = this.options[this.selectedIndex].value;
+        var childWindow = $("#json")[0].contentWindow;
+        childWindow.getRules(app);
+    });
+
+    function add(){
+        var app = $("#apps").val();
+        var rules =  window.frames["json"].document.getElementById("myWord").value;
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : "/rule/add",
+            headers: {
+                "Authorization":getCookie("token")
+            },
+            data:{"app":app,"rules":rules},
+            async : false,
+            error : function(request) {
+                $.modal.alertError("系统错误");
+            },
+            success : function(data) {
+                layer.alert(data.msg)
+            }
+        });
+    }
+    function save(){
+        var app = $("#apps").val();
+        var rules =  window.frames["json"].document.getElementById("myWord").value;
+        var target =  window.frames["json"].document.getElementById("json-target").innerText;
+
+        if(target.indexOf("解析错误") != -1 ){
+            $.modal.alertError("非法的json数组");
+            return false;
+        }
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : "/rule/save",
+            headers: {
+                "Authorization":getCookie("token")
+            },
+            data:{"app":app,"rules":rules},
+            async : false,
+            error : function(XMLHttpRequest){
+                $.modal.alertError(XMLHttpRequest.responseJSON.msg);
+            },
+            success : function(data) {
+                layer.alert(data.msg)
+                parent.location.reload();
+                parent.layer.closeAll()
+            }
+        });
+    }
+    function del(){
+        var app = $("#apps").val();
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : "/rule/remove",
+            headers: {
+                "Authorization":getCookie("token")
+            },
+            data:{"app":app},
+            async : false,
+            error : function(request) {
+                $.modal.alertError("系统错误");
+            },
+            success : function(data) {
+                console.log(data)
+                layer.alert(data.msg)
+                var childWindow = $("#json")[0].contentWindow;
+                childWindow.getRules(app);
+            }
+        });
+    }
+</script>
+
+</body>
+
+</html>

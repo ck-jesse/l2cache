@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.1.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.coy.l2cache</groupId>
+    <artifactId>l2cache-jd-hotkey-sample</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+    <name>l2cache-jd-hotkey-sample</name>
+    <description>l2cache-jd-hotkey-sample</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.coy.l2cache</groupId>
+            <artifactId>l2cache-jd-hotkey-common</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.coy.l2cache</groupId>
+            <artifactId>l2cache-jd-hotkey-client</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!--私服 快照支持-->
+    <repositories>
+        <repository>
+            <id>yht-maven</id>
+            <name>yht-maven</name>
+            <layout>default</layout>
+            <url>http://nexus.weeget.cn/repository/maven-public</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <!-- 发布到maven私服 -->
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>youxuan-central</name>
+            <url>http://nexus.weeget.cn/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>youxuan-central</name>
+            <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

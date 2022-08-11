@@ -1,0 +1,51 @@
+server :
+  port : 9901
+  servlet :
+    context-path : /
+spring :
+  resources:
+    static-locations: classpath:/resources,classpath:/static
+  profiles :
+    active : dev
+    # 服务模块
+  devtools:
+    restart:
+      # 热部署开关
+      enabled: true
+  mvc:   #静态文件
+    static-path-pattern : /static/**
+  #模板引擎
+  thymeleaf:
+    model: HTML5
+    prefix: classpath:/templates/
+    suffix: .html
+    #指定编码
+    encoding: utf-8
+    #禁用缓存 默认false
+    cache: false
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  datasource:
+    username: ${MYSQL_USER:hotkey_rw}
+    password: ${MYSQL_PASS:ui#Q@Uq2fhc$%j5D}
+    url: jdbc:mysql://${MYSQL_HOST:wg-dev-inspire.rwlb.rds.aliyuncs.com}:3306/hotkey?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC&useTimezone=true&serverTimezone=GMT%2B8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      max-lifetime: 120000
+      idle-timeout: 60000
+      connection-timeout: 30000
+      maximum-pool-size: 32
+      minimum-idle: 10
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+#mybatis:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+etcd:
+  server: ${etcdServer:http://127.0.0.1:2379}
+
