@@ -1,5 +1,5 @@
-import cn.weeget.hotkey.common.rule.KeyRule;
-import cn.weeget.hotkey.common.tool.FastJsonUtils;
+import com.coy.l2cache.jd.hotkey.common.rule.KeyRule;
+import com.coy.l2cache.jd.hotkey.common.tool.FastJsonUtils;
 
 import java.util.Arrays;
 

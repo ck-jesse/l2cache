@@ -1,7 +1,7 @@
 package com.coy.l2cache.spring;
 
 import cn.hutool.core.util.StrUtil;
-import cn.weeget.hotkey.client.ClientStarter;
+import com.coy.l2cache.jd.hotkey.client.ClientStarter;
 import com.coy.l2cache.CacheConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
