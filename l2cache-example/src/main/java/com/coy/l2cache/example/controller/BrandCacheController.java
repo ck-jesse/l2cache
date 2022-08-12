@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-public class TestController {
+@RequestMapping(value = "/brand")
+public class BrandCacheController {
 
     @Autowired
     GoodsPriceRevisionCacheService goodsPriceRevisionCacheService;
@@ -40,13 +41,13 @@ public class TestController {
         return goodsPriceRevisionCacheService.getOrLoad(dto);
     }
 
-    @RequestMapping(value = "/brandGet")
-    public BrandRespBO brandGet() {
+    @RequestMapping(value = "/get")
+    public BrandRespBO get() {
         return brandCacheService.get(11);
     }
 
-    @RequestMapping(value = "/brandGetOrLoad")
-    public BrandRespBO brandGetOrLoad() {
+    @RequestMapping(value = "/getOrLoad")
+    public BrandRespBO getOrLoad() {
         return brandCacheService.getOrLoad(11);
     }
 }

@@ -1,9 +1,6 @@
+# 一、集成Spring项目
 
-# 如何使用L2cache
-
-### 集成Spring项目
-
-#### 1、启动L2cache
+## 1、启动L2cache
 
 - **方式一：Enable 启动模式**
 
@@ -32,7 +29,7 @@ public class TestApplication {
 }
 ```
 
-- **方式二：starter 自动装载模式**
+- **方式二：starter 自动装载模式（推荐）**
 
 引入jar包 `l2cache-spring-boot-starter`
 ```xml
@@ -43,7 +40,7 @@ public class TestApplication {
 </dependency>
 ```
 
-#### 2、Spring配置
+## 2、Spring配置
 
 ```yaml
 spring:
@@ -231,9 +228,9 @@ l2cache:
         - goodsSpecCache
 ```
 
-#### 3、代码中的使用
+## 3、代码中的使用
 
-##### 方式一：基于 CacheService 缓存层来使用（推荐）
+### 方式一：基于 CacheService 缓存层来使用（推荐）
 ```java
 /**
  * CacheService 的demo案例
@@ -293,7 +290,7 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
 ```
 
 
-##### 方式二：结合 Spring Cache 的注解来使用
+### 方式二：结合 Spring Cache 的注解来使用
 
 ```java
 @Service
@@ -377,7 +374,7 @@ public class CaffeineCacheService {
 
 
 
-### 手动构建Cache
+# 二、手动构建Cache
 
 详细的构建方法参见如下单元测试类：
 
