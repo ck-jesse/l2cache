@@ -8,6 +8,7 @@ logging:
     root: info
     # 日志级别指定到包或类
     com.coy.l2cache: debug
+    com.github.l2cache: debug
 
 spring:
   application:

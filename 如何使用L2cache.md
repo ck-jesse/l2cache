@@ -379,11 +379,11 @@ public class CaffeineCacheService {
 详细的构建方法参见如下单元测试类：
 
 ```
-com.coy.l2cache.test.GuavaCacheTest
-com.coy.l2cache.test.CaffeineCacheTest
-com.coy.l2cache.test.RedisCacheTest
-com.coy.l2cache.test.CompositeCacheTest
-com.coy.l2cache.test.KafkaCacheSyncPolicyTest
+GuavaCacheTest
+CaffeineCacheTest
+RedisCacheTest
+CompositeCacheTest
+KafkaCacheSyncPolicyTest
 ```
 
 下面列举`CaffeineCacheTest`中的一部分使用场景：

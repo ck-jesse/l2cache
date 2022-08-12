@@ -71,15 +71,15 @@ interface LocalLoadingCache<K, V> extends LocalManualCache<K, V>, LoadingCache<K
 通过分析，发现有两处代码有调用，如下：
 
 ```
-com.coy.l2cache.cache.CaffeineCache#refreshAll
-com.coy.l2cache.cache.CaffeineCache#refresh
+com.github.l2cache.cache.CaffeineCache#refreshAll
+com.github.l2cache.cache.CaffeineCache#refresh
 ```
 
 ## 4、继续分析，上面两个方法在哪里被调用，如下：
 
 ```
 # 该方法没有被调用的地方，所以可以忽略
-com.coy.l2cache.cache.CaffeineCache#refreshAll
+CaffeineCache#refreshAll
 ```
 
 ```java

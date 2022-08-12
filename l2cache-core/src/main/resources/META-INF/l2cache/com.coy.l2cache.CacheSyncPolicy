@@ -1,2 +1,0 @@
-redis=com.coy.l2cache.sync.RedisCacheSyncPolicy
-kafka=com.coy.l2cache.sync.KafkaCacheSyncPolicy
