@@ -26,17 +26,21 @@ import java.util.Map;
 public interface CacheService<K, R> {
 
     /**
-     * 获取缓存名字
-     */
-    String getCacheName();
-
-    /**
      * 获取l2cache组件的Cache对象
      */
     default Cache getNativeL2cache() {
         // 默认直接抛出异常，也就是说强制开发人员在使用该方法时，必须实现该方法，否则直接抛异常
         throw new L2CacheException("未实现方法CacheService.getNativeL2cache()，请检查代码");
     }
+
+    // ---------------------------------------------------
+    // 第一部分：业务逻辑，业务开发时，仅仅只需实现如下几个方法
+    // ---------------------------------------------------
+
+    /**
+     * 获取缓存名字
+     */
+    String getCacheName();
 
     /**
      * 构建缓存key
@@ -55,6 +59,24 @@ public interface CacheService<K, R> {
      * @return 缓存key
      */
     String buildCacheKey(K key);
+
+    /**
+     * 查询单个缓存数据
+     *
+     * @author chenck
+     * @date 2022/8/4 22:02
+     */
+    R queryData(K key);
+
+    /**
+     * 查询缓存数据列表
+     * 注：返回的缓存数据列表，需要根据指定的格式来组装，由于不同的业务场景，可能组装的数据不一样，所以，下放到业务中去实现
+     */
+    Map<K, R> queryDataList(List<K> keyList);
+
+    // ---------------------------------------------------
+    // 第二部分：缓存操作，将缓存操作封装为默认方法实现，简化业务开发
+    // ---------------------------------------------------
 
     /**
      * 获取缓存（如果存在，则获取并返回）
@@ -76,7 +98,7 @@ public interface CacheService<K, R> {
      * 注：若缓存不存在，则从加载并设置到缓存，并返回
      */
     default R getOrLoad(K key) {
-        return this.getNativeL2cache().get(this.buildCacheKey(key), () -> this.reload(key));
+        return this.getNativeL2cache().get(this.buildCacheKey(key), () -> this.queryData(key));
     }
 
     /**
@@ -97,7 +119,12 @@ public interface CacheService<K, R> {
     /**
      * 重新加载缓存（存在则替换，不存在则设置）
      */
-    R reload(K key);
+    default R reload(K key) {
+        R value = this.queryData(key);
+        this.getNativeL2cache().put(this.buildCacheKey(key), value);
+        return value;
+    }
+
 
     /**
      * 淘汰缓存
@@ -138,11 +165,17 @@ public interface CacheService<K, R> {
      * @see Cache#batchGetOrLoad
      */
     default Map<K, R> batchGetOrLoad(List<K> keyList) {
-        return this.getNativeL2cache().batchGetOrLoad(keyList, k -> this.buildCacheKey(k), notHitCacheKeyList -> this.batchReload(notHitCacheKeyList));
+        return this.getNativeL2cache().batchGetOrLoad(keyList, k -> this.buildCacheKey(k), notHitCacheKeyList -> this.queryDataList(notHitCacheKeyList));
     }
 
     /**
      * 批量重新加载缓存（存在则替换，不存在则设置）
      */
-    Map<K, R> batchReload(List<K> keyList);
+    default Map<K, R> batchReload(List<K> keyList) {
+        // 抽取公共逻辑，简化开发
+        Map<K, R> value = this.queryDataList(keyList);
+        this.getNativeL2cache().batchPut(value, k -> this.buildCacheKey(k));
+        return value;
+    }
+
 }

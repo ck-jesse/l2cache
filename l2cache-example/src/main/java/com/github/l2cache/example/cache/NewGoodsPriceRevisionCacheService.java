@@ -41,7 +41,7 @@ public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<Good
     }
 
     @Override
-    protected GoodsPriceRevisionRespBO queryData(GoodsPriceRevisionIdsReqDTO key) {
+    public GoodsPriceRevisionRespBO queryData(GoodsPriceRevisionIdsReqDTO key) {
         GoodsPriceRevisionRespBO goodsPriceRevisionRespBO = new GoodsPriceRevisionRespBO();
         goodsPriceRevisionRespBO.setGoodsPriceRevisionId(0);
         goodsPriceRevisionRespBO.setGroupId(0);
@@ -56,7 +56,7 @@ public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<Good
     }
 
     @Override
-    protected Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> queryDataList(List<GoodsPriceRevisionIdsReqDTO> keyList) {
+    public Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> queryDataList(List<GoodsPriceRevisionIdsReqDTO> keyList) {
         Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> map = new HashMap<>();
 
         // 模拟返回数据，业务系统中可直接从DB加载数据

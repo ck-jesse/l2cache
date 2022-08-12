@@ -36,7 +36,7 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
     }
 
     @Override
-    protected BrandRespBO queryData(Integer brandId) {
+    public BrandRespBO queryData(Integer brandId) {
         // 模拟返回数据，业务系统中可直接从DB加载数据
         BrandRespBO brandRespBO = new BrandRespBO();
         brandRespBO.setBrandId(brandId);
@@ -50,7 +50,7 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
     }
 
     @Override
-    protected Map<Integer, BrandRespBO> queryDataList(List<Integer> notHitCacheKeyList) {
+    public Map<Integer, BrandRespBO> queryDataList(List<Integer> notHitCacheKeyList) {
         Map<Integer, BrandRespBO> map = new HashMap<>();
         // 模拟返回数据，业务系统中可直接从DB加载数据
         for (Integer brandId : notHitCacheKeyList) {

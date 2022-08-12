@@ -1,9 +1,12 @@
 package com.github.l2cache.example.controller;
 
 import com.github.l2cache.example.cache.NewBrandCacheService;
+import com.github.l2cache.example.dto.BrandIdListBO;
 import com.github.l2cache.example.dto.BrandRespBO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,52 +23,46 @@ public class NewBrandCacheController {
     NewBrandCacheService newBrandCacheService;
 
     @RequestMapping(value = "/get")
-    public BrandRespBO get() {
-        return newBrandCacheService.get(11);
+    public BrandRespBO get(Integer brandId) {
+        return newBrandCacheService.get(brandId);
     }
 
     @RequestMapping(value = "/getOrLoad")
-    public BrandRespBO getOrLoad() {
-        return newBrandCacheService.getOrLoad(11);
+    public BrandRespBO getOrLoad(Integer brandId) {
+        return newBrandCacheService.getOrLoad(brandId);
     }
 
-    @RequestMapping(value = "/put")
-    public BrandRespBO put() {
-        Integer brandId = 0;
-        BrandRespBO brandRespBO = new BrandRespBO();
-        return newBrandCacheService.put(brandId, brandRespBO);
+    @PostMapping(value = "/put")
+    public BrandRespBO put(@RequestBody BrandRespBO brandRespBO) {
+        return newBrandCacheService.put(brandRespBO.getBrandId(), brandRespBO);
     }
 
     @RequestMapping(value = "/reload")
-    public BrandRespBO reload() {
-        Integer brandId = 0;
+    public BrandRespBO reload(Integer brandId) {
         return newBrandCacheService.reload(brandId);
     }
 
     @RequestMapping(value = "/evict")
-    public Boolean evict() {
-        newBrandCacheService.evict(11);
+    public Boolean evict(Integer brandId) {
+        newBrandCacheService.evict(brandId);
         return true;
     }
 
-    @RequestMapping(value = "/batchGet")
-    public Map<Integer, BrandRespBO> batchGet() {
-        List<Integer> keyList = new ArrayList<>();
-        Map<Integer, BrandRespBO> map = newBrandCacheService.batchGet(keyList);
+    @PostMapping(value = "/batchGet")
+    public Map<Integer, BrandRespBO> batchGet(@RequestBody BrandIdListBO bo) {
+        Map<Integer, BrandRespBO> map = newBrandCacheService.batchGet(bo.getBrandIdList());
         return map;
     }
 
-    @RequestMapping(value = "/batchGetOrLoad")
-    public Map<Integer, BrandRespBO> batchGetOrLoad() {
-        List<Integer> keyList = new ArrayList<>();
-        Map<Integer, BrandRespBO> map = newBrandCacheService.batchGetOrLoad(keyList);
+    @PostMapping(value = "/batchGetOrLoad")
+    public Map<Integer, BrandRespBO> batchGetOrLoad(@RequestBody BrandIdListBO bo) {
+        Map<Integer, BrandRespBO> map = newBrandCacheService.batchGetOrLoad(bo.getBrandIdList());
         return map;
     }
 
-    @RequestMapping(value = "/batchReload")
-    public Map<Integer, BrandRespBO> batchReload() {
-        List<Integer> keyList = new ArrayList<>();
-        Map<Integer, BrandRespBO> map = newBrandCacheService.batchReload(keyList);
+    @PostMapping(value = "/batchReload")
+    public Map<Integer, BrandRespBO> batchReload(@RequestBody BrandIdListBO bo) {
+        Map<Integer, BrandRespBO> map = newBrandCacheService.batchReload(bo.getBrandIdList());
         return map;
     }
 }
