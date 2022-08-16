@@ -1,5 +1,7 @@
 # 一、集成Spring项目
 
+> 最新版本号： 1.0.35
+
 ## 1、启动L2cache
 
 - **方式一：Enable 启动模式**
@@ -8,9 +10,9 @@
 
 ```xml
 <dependency>
-    <groupId>com.coy.l2cache</groupId>
+    <groupId>com.github.l2cache</groupId>
     <artifactId>l2cache-core</artifactId>
-    <version>1.0</version>
+    <version>1.0.35</version>
 </dependency>
 ```
 
@@ -34,9 +36,9 @@ public class TestApplication {
 引入jar包 `l2cache-spring-boot-starter`
 ```xml
 <dependency>
-    <groupId>com.coy.l2cache</groupId>
+    <groupId>com.github.l2cache</groupId>
     <artifactId>l2cache-spring-boot-starter</artifactId>
-    <version>1.0</version>
+    <version>1.0.35</version>
 </dependency>
 ```
 

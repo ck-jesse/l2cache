@@ -8,7 +8,7 @@
         <version>2.2.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.coy.l2cache</groupId>
+    <groupId>com.github.l2cache</groupId>
     <artifactId>l2cache-jd-hotkey-dashboard</artifactId>
     <version>1.0.35</version>
     <name>l2cache-jd-hotkey-dashboard</name>
@@ -55,7 +55,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.coy.l2cache</groupId>
+            <groupId>com.github.l2cache</groupId>
             <artifactId>l2cache-jd-hotkey-common</artifactId>
             <version>1.0.35</version>
             <scope>compile</scope>
