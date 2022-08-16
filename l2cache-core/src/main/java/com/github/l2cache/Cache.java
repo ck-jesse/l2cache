@@ -264,24 +264,22 @@ public interface Cache extends Serializable {
         if (null == dataMap || dataMap.size() == 0) {
             return;
         }
-        if (null == cacheKeyBuilder) {
-            Map<Object, V> batchMap = new HashMap<>();
-            dataMap.forEach((key, value) -> batchMap.put(key, value));
-            this.batchPut(batchMap);
-            return;
-        }
         Map<Object, V> dataMapTemp = new HashMap<>();
-        dataMap.forEach((key, value) -> {
+        if (null == cacheKeyBuilder) {
+            dataMap.forEach((key, value) -> dataMapTemp.put(key, value));
+        } else {
             // 将 key 转换为cacheKey，因K可能是自定义DTO
-            dataMapTemp.put(cacheKeyBuilder.apply(key), value);
-        });
+            dataMap.forEach((key, value) -> {
+                dataMapTemp.put(cacheKeyBuilder.apply(key), value);
+            });
+        }
         this.batchPut(dataMapTemp);
     }
 
     /**
      * 批量put
      *
-     * @param dataMap 缓存数据集合（K可能是自定义DTO）
+     * @param dataMap 缓存数据集合（key为已经构建好的缓存key）
      */
     default <V> void batchPut(Map<Object, V> dataMap) {
         if (CollectionUtils.isEmpty(dataMap)) {
