@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.coy.l2cache</groupId>
     <artifactId>l2cache-jd-hotkey-sample</artifactId>
-    <version>1.0.34-SNAPSHOT</version>
+    <version>1.0.35</version>
     <name>l2cache-jd-hotkey-sample</name>
     <description>l2cache-jd-hotkey-sample</description>
 
@@ -22,12 +22,12 @@
         <dependency>
             <groupId>com.coy.l2cache</groupId>
             <artifactId>l2cache-jd-hotkey-common</artifactId>
-            <version>1.0.34-SNAPSHOT</version>
+            <version>1.0.35</version>
         </dependency>
         <dependency>
             <groupId>com.coy.l2cache</groupId>
             <artifactId>l2cache-jd-hotkey-client</artifactId>
-            <version>1.0.34-SNAPSHOT</version>
+            <version>1.0.35</version>
         </dependency>
 
         <dependency>
