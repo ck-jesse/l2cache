@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>l2cache-jd-hotkey</artifactId>
-        <groupId>com.github.l2cache</groupId>
+        <groupId>io.github.ck-jesse</groupId>
         <version>1.0.35</version>
     </parent>
 
@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.l2cache</groupId>
+            <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-common</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>

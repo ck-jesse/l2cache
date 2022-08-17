@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.github.l2cache</groupId>
+    <groupId>io.github.ck-jesse</groupId>
     <artifactId>jd-hotkey-worker</artifactId>
     <version>1.0.35</version>
     <name>jd-hotkey-worker</name>
@@ -23,7 +23,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.l2cache</groupId>
+            <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-common</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>

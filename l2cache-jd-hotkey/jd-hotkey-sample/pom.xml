@@ -8,7 +8,7 @@
         <version>2.2.1.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.github.l2cache</groupId>
+    <groupId>io.github.ck-jesse</groupId>
     <artifactId>jd-hotkey-sample</artifactId>
     <version>1.0.35</version>
     <name>jd-hotkey-sample</name>
@@ -22,12 +22,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.l2cache</groupId>
+            <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-common</artifactId>
             <version>1.0.35</version>
         </dependency>
         <dependency>
-            <groupId>com.github.l2cache</groupId>
+            <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-client</artifactId>
             <version>1.0.35</version>
         </dependency>
