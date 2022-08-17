@@ -71,8 +71,8 @@ interface LocalLoadingCache<K, V> extends LocalManualCache<K, V>, LoadingCache<K
 通过分析，发现有两处代码有调用，如下：
 
 ```
-com.github.l2cache.cache.CaffeineCache#refreshAll
-com.github.l2cache.cache.CaffeineCache#refresh
+CaffeineCache#refreshAll
+CaffeineCache#refresh
 ```
 
 ## 4、继续分析，上面两个方法在哪里被调用，如下：

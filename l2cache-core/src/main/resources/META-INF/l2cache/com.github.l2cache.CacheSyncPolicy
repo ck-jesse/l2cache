@@ -1,2 +1,0 @@
-redis=com.github.l2cache.sync.RedisCacheSyncPolicy
-kafka=com.github.l2cache.sync.KafkaCacheSyncPolicy

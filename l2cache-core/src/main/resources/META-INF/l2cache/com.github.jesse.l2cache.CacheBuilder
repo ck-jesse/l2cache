@@ -1,0 +1,4 @@
+none=com.github.jesse.l2cache.builder.NoneCacheBuilder
+composite=com.github.jesse.l2cache.builder.CompositeCacheBuilder
+caffeine=com.github.jesse.l2cache.builder.CaffeineCacheBuilder
+redis=com.github.jesse.l2cache.builder.RedisCacheBuilder
