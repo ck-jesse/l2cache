@@ -10,9 +10,9 @@
     </parent>
 
     <groupId>com.github.l2cache</groupId>
-    <artifactId>l2cache-jd-hotkey-worker</artifactId>
+    <artifactId>jd-hotkey-worker</artifactId>
     <version>1.0.35</version>
-    <name>l2cache-jd-hotkey-worker</name>
+    <name>jd-hotkey-worker</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.l2cache</groupId>
-            <artifactId>l2cache-jd-hotkey-common</artifactId>
+            <artifactId>jd-hotkey-common</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

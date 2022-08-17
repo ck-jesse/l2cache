@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.github.l2cache</groupId>
-    <artifactId>l2cache-jd-hotkey-dashboard</artifactId>
+    <artifactId>jd-hotkey-dashboard</artifactId>
     <version>1.0.35</version>
-    <name>l2cache-jd-hotkey-dashboard</name>
-    <description>l2cache-jd-hotkey-dashboard</description>
+    <name>jd-hotkey-dashboard</name>
+    <description>jd-hotkey-dashboard</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -56,7 +56,7 @@
 
         <dependency>
             <groupId>com.github.l2cache</groupId>
-            <artifactId>l2cache-jd-hotkey-common</artifactId>
+            <artifactId>jd-hotkey-common</artifactId>
             <version>1.0.35</version>
             <scope>compile</scope>
         </dependency>

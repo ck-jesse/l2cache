@@ -76,7 +76,7 @@
 
         <dependency>
             <groupId>com.github.l2cache</groupId>
-            <artifactId>l2cache-jd-hotkey-client</artifactId>
+            <artifactId>jd-hotkey-client</artifactId>
             <version>1.0.35</version>
             <exclusions>
                 <exclusion>

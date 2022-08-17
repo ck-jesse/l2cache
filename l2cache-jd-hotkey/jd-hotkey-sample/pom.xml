@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.github.l2cache</groupId>
-    <artifactId>l2cache-jd-hotkey-sample</artifactId>
+    <artifactId>jd-hotkey-sample</artifactId>
     <version>1.0.35</version>
-    <name>l2cache-jd-hotkey-sample</name>
-    <description>l2cache-jd-hotkey-sample</description>
+    <name>jd-hotkey-sample</name>
+    <description>jd-hotkey-sample</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -21,12 +21,12 @@
     <dependencies>
         <dependency>
             <groupId>com.github.l2cache</groupId>
-            <artifactId>l2cache-jd-hotkey-common</artifactId>
+            <artifactId>jd-hotkey-common</artifactId>
             <version>1.0.35</version>
         </dependency>
         <dependency>
             <groupId>com.github.l2cache</groupId>
-            <artifactId>l2cache-jd-hotkey-client</artifactId>
+            <artifactId>jd-hotkey-client</artifactId>
             <version>1.0.35</version>
         </dependency>
 

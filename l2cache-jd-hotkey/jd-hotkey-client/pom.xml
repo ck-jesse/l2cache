@@ -12,12 +12,12 @@
     <packaging>jar</packaging>
     <version>1.0.35</version>
 
-    <artifactId>l2cache-jd-hotkey-client</artifactId>
+    <artifactId>jd-hotkey-client</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.github.l2cache</groupId>
-            <artifactId>l2cache-jd-hotkey-common</artifactId>
+            <artifactId>jd-hotkey-common</artifactId>
             <version>${parent.version}</version>
             <scope>compile</scope>
         </dependency>

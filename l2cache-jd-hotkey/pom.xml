@@ -10,11 +10,11 @@
     <description>Jd HotKey</description>
 
     <modules>
-        <module>l2cache-jd-hotkey-worker</module>
-        <module>l2cache-jd-hotkey-client</module>
-        <module>l2cache-jd-hotkey-common</module>
-        <module>l2cache-jd-hotkey-sample</module>
-        <module>l2cache-jd-hotkey-dashboard</module>
+        <module>jd-hotkey-worker</module>
+        <module>jd-hotkey-client</module>
+        <module>jd-hotkey-common</module>
+        <module>jd-hotkey-sample</module>
+        <module>jd-hotkey-dashboard</module>
     </modules>
 
     <properties>
