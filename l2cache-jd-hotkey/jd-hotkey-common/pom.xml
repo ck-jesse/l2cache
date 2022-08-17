@@ -16,7 +16,7 @@
         <java.version>1.8</java.version>
         <netty4.version>4.1.49.Final</netty4.version>
         <snappy.version>1.1.7.3</snappy.version>
-        <fastjson.version>1.2.70</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <hp-etcd.version>0.0.16</hp-etcd.version>
         <caffeine.version>2.8.2</caffeine.version>
         <hutool.version>5.1.0</hutool.version>
