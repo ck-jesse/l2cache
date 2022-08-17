@@ -12,6 +12,11 @@
     <artifactId>l2cache-example</artifactId>
     <name>l2cache-example</name>
 
+    <properties>
+        <!-- deploy时跳过该模块 -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
 
         <dependency>

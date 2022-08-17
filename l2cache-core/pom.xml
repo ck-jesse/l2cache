@@ -91,18 +91,4 @@
         </dependency>
     </dependencies>
 
-    <!-- 发布到maven私服 -->
-    <distributionManagement>
-        <repository>
-            <id>maven-releases</id>
-            <name>youxuan-central</name>
-            <url>http://nexus.weeget.cn/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>maven-snapshots</id>
-            <name>youxuan-central</name>
-            <url>http://nexus.weeget.cn/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
 </project>
