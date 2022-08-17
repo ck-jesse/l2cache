@@ -137,14 +137,53 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>https://maven.aliyun.com/repository/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <licenses>
         <license>
             <name>Open Software License 3.0</name>
             <url>https://opensource.org/licenses/OSL-3.0</url>
-            <distribution>repo</distribution>
         </license>
     </licenses>
 
@@ -193,21 +232,25 @@
             <id>ossrh</id>
             <properties>
                 <profiles.active>ossrh</profiles.active>
+                <gpg.executable>gpg</gpg.executable>
             </properties>
             <!-- 发布到maven中央仓库 -->
+            <!-- 403 Forbidden: https://central.sonatype.org/faq/403-error/ -->
             <distributionManagement>
                 <repository>
-                    <id>oss</id>
+                    <id>ossrh</id>
+                    <name>maven-central</name>
                     <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
                 </repository>
                 <snapshotRepository>
-                    <id>oss</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                    <id>ossrh</id>
+                    <name>maven-central</name>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
                 </snapshotRepository>
             </distributionManagement>
             <build>
                 <plugins>
-                    <!-- Gpg Signature 部署到中央仓库的加密插件 -->
+                    <!-- Gpg Signature 对部署到中央仓库的组件进行签名 -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
