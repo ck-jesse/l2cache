@@ -1,6 +1,6 @@
 # 一、集成Spring项目
 
-> 最新版本号： 1.0.35
+> 最新版本号： 1.0.35 （已部署到中央仓库）
 
 ## 1、启动L2cache
 
@@ -10,7 +10,7 @@
 
 ```xml
 <dependency>
-    <groupId>com.github.jesse.l2cache</groupId>
+    <groupId>io.github.ck-jesse</groupId>
     <artifactId>l2cache-core</artifactId>
     <version>1.0.35</version>
 </dependency>
@@ -36,7 +36,7 @@ public class TestApplication {
 引入jar包 `l2cache-spring-boot-starter`
 ```xml
 <dependency>
-    <groupId>com.github.jesse.l2cache</groupId>
+    <groupId>io.github.ck-jesse</groupId>
     <artifactId>l2cache-spring-boot-starter</artifactId>
     <version>1.0.35</version>
 </dependency>
