@@ -10,6 +10,7 @@
     <version>1.0.35</version>
     <packaging>pom</packaging>
     <description>二级缓存组件</description>
+    <url>https://github.com/ck-jesse/l2cache</url>
 
     <modules>
         <module>l2cache-core</module>
@@ -201,6 +202,7 @@
             </activation>
         </profile>
         <!-- Central maven repository -->
+        <!-- Deploying to OSSRH with Apache Maven: https://central.sonatype.org/publish/publish-maven/ -->
         <!-- 发布到中央仓库: mvn clean deploy -P ossrh -Dgpg.passphrase=密码 -->
         <profile>
             <id>ossrh</id>

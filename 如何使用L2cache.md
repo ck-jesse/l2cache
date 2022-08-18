@@ -10,7 +10,7 @@
 
 ```xml
 <dependency>
-    <groupId>com.github.l2cache</groupId>
+    <groupId>com.github.jesse.l2cache</groupId>
     <artifactId>l2cache-core</artifactId>
     <version>1.0.35</version>
 </dependency>
@@ -36,7 +36,7 @@ public class TestApplication {
 引入jar包 `l2cache-spring-boot-starter`
 ```xml
 <dependency>
-    <groupId>com.github.l2cache</groupId>
+    <groupId>com.github.jesse.l2cache</groupId>
     <artifactId>l2cache-spring-boot-starter</artifactId>
     <version>1.0.35</version>
 </dependency>
