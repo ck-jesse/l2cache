@@ -299,7 +299,7 @@ public class CacheConfig {
          * 解析Redisson yaml文件
          */
         public org.redisson.config.Config getRedissonConfig() {
-            if (StringUtils.isEmpty(this.redissonYamlConfig)) {
+            if (StringUtils.isEmpty(this.redissonYamlConfig) && redissonConfig == null) {
                 return null;
             }
             if (null != redissonConfig) {
