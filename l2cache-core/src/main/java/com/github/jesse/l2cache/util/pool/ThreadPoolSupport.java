@@ -32,33 +32,33 @@ public class ThreadPoolSupport {
     private final static int DEF_CORE_POOL_SIZE = 10;
     private final static int DEF_MAXIMUM_POOL_SIZE = 32;
     private final static long DEF_KEEPALIVE_TIME_SECONDS = 60;
-    private final static int DEF_QUEUE_CAPACITY = 3000;
+    private final static int DEF_QUEUE_CAPACITY = 10000;
 
     /**
      * 获取 ThreadPoolExecutor 实例
      */
     public static ThreadPoolExecutor getPool() {
-        return ThreadPoolSupport.getPool(DEF_POOL_NAME, DEF_CORE_POOL_SIZE, DEF_MAXIMUM_POOL_SIZE, DEF_KEEPALIVE_TIME_SECONDS, DEF_QUEUE_CAPACITY);
+        return ThreadPoolSupport.getPool(DEF_POOL_NAME, DEF_CORE_POOL_SIZE, DEF_MAXIMUM_POOL_SIZE, DEF_KEEPALIVE_TIME_SECONDS, DEF_QUEUE_CAPACITY, new MyAbortPolicy(DEF_POOL_NAME));
     }
 
     /**
      * 获取 ThreadPoolExecutor 实例
      */
     public static ThreadPoolExecutor getPool(String poolName) {
-        return ThreadPoolSupport.getPool(poolName, DEF_CORE_POOL_SIZE, DEF_MAXIMUM_POOL_SIZE, DEF_KEEPALIVE_TIME_SECONDS, DEF_QUEUE_CAPACITY);
+        return ThreadPoolSupport.getPool(poolName, DEF_CORE_POOL_SIZE, DEF_MAXIMUM_POOL_SIZE, DEF_KEEPALIVE_TIME_SECONDS, DEF_QUEUE_CAPACITY, new MyAbortPolicy(DEF_POOL_NAME));
     }
 
     /**
      * 获取 ThreadPoolExecutor 实例
      */
     public static ThreadPoolExecutor getPool(int corePoolSize, int maximumPoolSize, long keepAliveTimeSeconds, int queueCapacity) {
-        return ThreadPoolSupport.getPool(DEF_POOL_NAME, corePoolSize, maximumPoolSize, keepAliveTimeSeconds, queueCapacity);
+        return ThreadPoolSupport.getPool(DEF_POOL_NAME, corePoolSize, maximumPoolSize, keepAliveTimeSeconds, queueCapacity, new MyAbortPolicy(DEF_POOL_NAME));
     }
 
     /**
      * 获取 ThreadPoolExecutor 实例
      */
-    public static ThreadPoolExecutor getPool(String poolName, int corePoolSize, int maximumPoolSize, long keepAliveTimeSeconds, int queueCapacity) {
+    public static ThreadPoolExecutor getPool(String poolName, int corePoolSize, int maximumPoolSize, long keepAliveTimeSeconds, int queueCapacity, RejectedExecutionHandler handler) {
         ThreadPoolExecutor pool = POOL_MAP.get(poolName);
         if (null != pool) {
             return pool;
@@ -70,12 +70,16 @@ public class ThreadPoolSupport {
                 return pool;
             }
             pool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTimeSeconds, TimeUnit.SECONDS,
-                    new LinkedBlockingQueue(queueCapacity), new DaemonThreadFactory(poolName + "_task_"), new MyAbortPolicy(poolName));
+                    new LinkedBlockingQueue(queueCapacity), new DaemonThreadFactory(poolName + "_task_"), handler);
             POOL_MAP.put(poolName, pool);
             return pool;
         }
     }
 
+    /**
+     * 由于达到队列容量，而无法执行任务时的处理程序
+     * 默认采取直接拒绝任务
+     */
     public static class MyAbortPolicy implements RejectedExecutionHandler {
         private String poolName;
 
