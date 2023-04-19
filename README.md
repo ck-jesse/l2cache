@@ -1,4 +1,4 @@
-# L2Cache
+# L2Cache 分布式二级缓存框架
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.ck-jesse/l2cache-core?color=green)](https://search.maven.org/search?q=g:io.github.ck-jesse%20AND%20a:l2cache-core)
 [![Crates.io](https://img.shields.io/crates/l/ap)](https://www.apache.org/licenses/LICENSE-2.0.html)
