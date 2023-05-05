@@ -45,7 +45,7 @@ public class ThreadPoolSupport {
      * 获取 ThreadPoolExecutor 实例
      */
     public static ThreadPoolExecutor getPool(String poolName) {
-        return ThreadPoolSupport.getPool(poolName, DEF_CORE_POOL_SIZE, DEF_MAXIMUM_POOL_SIZE, DEF_KEEPALIVE_TIME_SECONDS, DEF_QUEUE_CAPACITY, new MyAbortPolicy(DEF_POOL_NAME));
+        return ThreadPoolSupport.getPool(poolName, DEF_CORE_POOL_SIZE, DEF_MAXIMUM_POOL_SIZE, DEF_KEEPALIVE_TIME_SECONDS, DEF_QUEUE_CAPACITY, new MyAbortPolicy(poolName));
     }
 
     /**

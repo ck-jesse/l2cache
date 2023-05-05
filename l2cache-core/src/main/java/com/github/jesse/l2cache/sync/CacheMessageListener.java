@@ -34,8 +34,8 @@ public class CacheMessageListener implements MessageListener {
                 logger.debug("[CacheMessageListener][SyncCache] don't need to process your own messages, currInstanceId={}, message={}", this.cacheInstanceId, message.toString());
                 return;
             }
-            logger.info("[CacheMessageListener][SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}",
-                    this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey());
+            logger.info("[CacheMessageListener][SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}, desc={}",
+                    this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey(), message.getDesc());
 
             Level1Cache level1Cache = getLevel1Cache(message);
             if (null == level1Cache) {

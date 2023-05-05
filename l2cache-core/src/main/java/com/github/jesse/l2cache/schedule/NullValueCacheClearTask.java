@@ -1,7 +1,10 @@
 package com.github.jesse.l2cache.schedule;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.github.jesse.l2cache.consts.CacheConsts;
+import com.github.jesse.l2cache.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 
 /**
  * @author chenck
@@ -25,6 +28,8 @@ public class NullValueCacheClearTask implements Runnable {
     @Override
     public void run() {
         long clearBeforeSize = nullValueCache.estimatedSize();
+        // 每次执行设置trace_id，便于排查问题
+        MDC.put(CacheConsts.SID, CacheConsts.PREFIX_CLEAR_NULL_VALUE + CacheConsts.SPLIT + RandomUtil.getUUID());
         try {
             if (clearBeforeSize <= 0) {
                 return;
@@ -38,6 +43,8 @@ public class NullValueCacheClearTask implements Runnable {
             }
         } catch (Exception e) {
             log.error("[NullValueCacheClearTask] invalidate NullValue error, cacheName=" + this.cacheName + ", clearBeforeSize=" + clearBeforeSize + ", clearAfterSize=" + nullValueCache.estimatedSize(), e);
+        } finally {
+            MDC.remove(CacheConsts.SID);
         }
     }
 }

@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class NewBrandCacheControllerTest {
 
-    private static final String HOST = "http://127.0.0.1:8080";
+    private static final String HOST = "http://127.0.0.1:8081";
 
     RestTemplate restTemplate = new RestTemplate();
 
@@ -24,7 +24,7 @@ public class NewBrandCacheControllerTest {
 
     @Test
     public void getOrLoad() {
-        String url = HOST + "/new/brand/getOrLoad?brandId=1001";
+        String url = HOST + "/new/brand/getOrLoad?brandId=1006";
         BrandRespBO result = restTemplate.getForObject(url, BrandRespBO.class);
         System.out.println(JSON.toJSONString(result));
     }

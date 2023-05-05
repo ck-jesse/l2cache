@@ -30,18 +30,20 @@ public class CacheMessage implements Serializable {
     private String optType;// 操作类型 refresh/clear
     private Object key;// 缓存key
     private Map<String, String> mdcContextMap;
+    private String desc;// 描述 用于标记发起消息的触发方法，便于排查问题
 
     public CacheMessage() {
         this.mdcContextMap = MDC.getCopyOfContextMap();
     }
 
-    public CacheMessage(String instanceId, String cacheType, String cacheName, Object key, String optType) {
+    public CacheMessage(String instanceId, String cacheType, String cacheName, Object key, String optType, String desc) {
         this.instanceId = instanceId;
         this.cacheType = cacheType;
         this.cacheName = cacheName;
         this.key = key;
         this.optType = optType;
         this.mdcContextMap = MDC.getCopyOfContextMap();
+        this.desc = desc;
     }
 
     public Map<String, String> getMdcContextMap() {
@@ -61,7 +63,7 @@ public class CacheMessage implements Serializable {
     }
 
     private String buildNewTraceId(String trace_id) {
-        StringBuilder sb = new StringBuilder(CacheConsts.PREFIX);
+        StringBuilder sb = new StringBuilder(CacheConsts.PREFIX_CACHE_MSG);
         sb.append(CacheConsts.SPLIT);
         sb.append(trace_id);
         sb.append(CacheConsts.SPLIT);
@@ -80,8 +82,8 @@ public class CacheMessage implements Serializable {
         sb.append(", cacheName=").append(cacheName);
         sb.append(", optType=").append(optType);
         sb.append(", key=").append(key);
+        sb.append(", desc=").append(desc);
         sb.append(", mdcContextMap=").append(mdcContextMap);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
     }

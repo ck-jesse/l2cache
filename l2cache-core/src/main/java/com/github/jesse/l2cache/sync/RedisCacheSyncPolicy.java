@@ -44,8 +44,7 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
         // 订阅主题
         this.topic.addListener(CacheMessage.class, (channel, msg) -> {
-            logger.debug("[RedisCacheSyncPolicy] received a message, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}",
-                    msg.getInstanceId(), msg.getCacheName(), msg.getCacheType(), msg.getOptType(), msg.getKey());
+            // 执行消息监听器
             RedisCacheSyncPolicy.this.getCacheMessageListener().onMessage(msg);
         });
     }
@@ -57,7 +56,7 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
                 Long publishMsgPeriodMilliSeconds = this.getCacheConfig().getCaffeine().getPublishMsgPeriodMilliSeconds();
                 RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
                 RLock lock = redissonClient.getLock(buildLockKey(message));
-                // 限制同一个key多长时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
+                // 限制同一个key指定时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
                 if (!lock.tryLock(0, publishMsgPeriodMilliSeconds, TimeUnit.MILLISECONDS)) {
                     logger.warn("[RedisCacheSyncPolicy] trylock fail, no need to publish message, publishMsgPeriod={}ms, message={}", publishMsgPeriodMilliSeconds, message.toString());
                     return;
@@ -98,11 +97,14 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
     }
 
     private String buildLockKey(CacheMessage message) {
+        // 从 "缓存名称:key" 改为 "缓存名称:key:操作类型"，让lockKey粒度更加精细化，避免不同操作类型(refresh/clear)互相影响
         return new StringBuilder("lock")
                 .append(CacheConsts.SPLIT)
                 .append(message.getCacheName())
                 .append(CacheConsts.SPLIT)
                 .append(message.getKey())
+                .append(CacheConsts.SPLIT)
+                .append(message.getOptType())
                 .toString();
     }
 }

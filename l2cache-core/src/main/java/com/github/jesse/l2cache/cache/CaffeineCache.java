@@ -17,6 +17,7 @@ import com.github.jesse.l2cache.util.LogUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.github.jesse.l2cache.util.pool.MdcForkJoinPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +75,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
         if (this.isAllowNullValues()) {
             this.nullValueCache = Caffeine.newBuilder()
+                    .executor(MdcForkJoinPool.mdcCommonPool2())
                     .expireAfterWrite(cacheConfig.getNullValueExpireTimeSeconds(), TimeUnit.SECONDS)
                     .maximumSize(cacheConfig.getNullValueMaxSize())
                     .removalListener((key, value, cause) -> {
@@ -81,7 +83,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                         if (null != key) {
                             this.caffeineCache.invalidate(key);
                             if (null != this.cacheSyncPolicy) {
-                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "RemoveNullValue"));
                             }
                         }
                     })
@@ -178,7 +180,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
 
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH, "put"));
         }
     }
 
@@ -200,7 +202,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             nullValueCache.invalidate(key);
         }
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "evict"));
         }
     }
 
@@ -212,7 +214,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             nullValueCache.invalidateAll();
         }
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
+            cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR, "clear"));
         }
     }
 
@@ -308,13 +310,14 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
     }
 
-    private CacheMessage createMessage(Object key, String optType) {
+    private CacheMessage createMessage(Object key, String optType, String desc) {
         return new CacheMessage()
                 .setInstanceId(this.getInstanceId())
                 .setCacheType(this.getCacheType())
                 .setCacheName(this.getCacheName())
                 .setKey(key)
-                .setOptType(optType);
+                .setOptType(optType)
+                .setDesc(desc);
     }
 
     @Override

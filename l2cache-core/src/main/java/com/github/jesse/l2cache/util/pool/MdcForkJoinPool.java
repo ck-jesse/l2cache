@@ -20,9 +20,13 @@ public class MdcForkJoinPool extends ForkJoinPool {
      * Common (static) pool.
      */
     static final MdcForkJoinPool mdcCommon = new MdcForkJoinPool();
+    static final MdcForkJoinPool mdcCommon2 = new MdcForkJoinPool(4);
 
     public static MdcForkJoinPool mdcCommonPool() {
         return mdcCommon;
+    }
+    public static MdcForkJoinPool mdcCommonPool2() {
+        return mdcCommon2;
     }
 
     // constructor
