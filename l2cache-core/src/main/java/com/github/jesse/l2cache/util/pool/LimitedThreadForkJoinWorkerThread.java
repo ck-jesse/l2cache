@@ -16,4 +16,10 @@ public class LimitedThreadForkJoinWorkerThread extends ForkJoinWorkerThread {
         setDaemon(false); // 设置是否为守护线程
     }
 
+    protected LimitedThreadForkJoinWorkerThread(ForkJoinPool pool, String threadName) {
+        super(pool);
+        setPriority(Thread.NORM_PRIORITY); // 设置线程优先级
+        setDaemon(false); // 设置是否为守护线程
+        setName(threadName);
+    }
 }
