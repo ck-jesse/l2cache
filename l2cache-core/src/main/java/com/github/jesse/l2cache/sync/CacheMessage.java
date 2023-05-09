@@ -66,8 +66,8 @@ public class CacheMessage implements Serializable {
         StringBuilder sb = new StringBuilder(CacheConsts.PREFIX_CACHE_MSG);
         sb.append(CacheConsts.SPLIT);
         sb.append(trace_id);
-        sb.append(CacheConsts.SPLIT);
-        sb.append(this.getInstanceId());
+        // sb.append(CacheConsts.SPLIT);
+        // sb.append(this.getInstanceId());
         return sb.toString();
     }
 

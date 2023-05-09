@@ -43,7 +43,7 @@ public class NullValueClearSupport {
         synchronized (NullValueClearSupport.class) {
             if (null == scheduler) {
                 scheduler = new ScheduledThreadPoolExecutor(corePoolSize,
-                        new DaemonThreadFactory("Clear-NullValue-"));
+                        new DaemonThreadFactory("ClearNullValue-"));
             }
         }
         return scheduler;

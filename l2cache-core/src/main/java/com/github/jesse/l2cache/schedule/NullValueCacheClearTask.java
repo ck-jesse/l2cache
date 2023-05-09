@@ -36,13 +36,14 @@ public class NullValueCacheClearTask implements Runnable {
             }
             // cleanUp 会触发 expireAfterWrite 的过期淘汰和基于大小的淘汰
             nullValueCache.cleanUp();
-            if (clearBeforeSize > 0) {
-                log.info("[NullValueCacheClearTask] invalidate NullValue, cacheName={}, clearBeforeSize={}, clearAfterSize={}", this.cacheName, clearBeforeSize, nullValueCache.estimatedSize());
+            long clearAfterSize = nullValueCache.estimatedSize();
+            if (clearBeforeSize > 0 && clearBeforeSize != clearAfterSize) {
+                log.info("invalidate NullValue, cacheName={}, clearBeforeSize={}, clearAfterSize={}", this.cacheName, clearBeforeSize, clearAfterSize);
             } else {
-                log.debug("[NullValueCacheClearTask] invalidate NullValue, cacheName={}, clearBeforeSize={}, clearAfterSize={}", this.cacheName, clearBeforeSize, nullValueCache.estimatedSize());
+                log.debug("invalidate NullValue, cacheName={}, clearBeforeSize={}, clearAfterSize={}", this.cacheName, clearBeforeSize, clearAfterSize);
             }
         } catch (Exception e) {
-            log.error("[NullValueCacheClearTask] invalidate NullValue error, cacheName=" + this.cacheName + ", clearBeforeSize=" + clearBeforeSize + ", clearAfterSize=" + nullValueCache.estimatedSize(), e);
+            log.error("invalidate NullValue error, cacheName=" + this.cacheName + ", clearBeforeSize=" + clearBeforeSize + ", clearAfterSize=" + nullValueCache.estimatedSize(), e);
         } finally {
             MDC.remove(CacheConsts.SID);
         }

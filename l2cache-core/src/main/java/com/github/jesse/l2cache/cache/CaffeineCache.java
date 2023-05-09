@@ -75,7 +75,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
         if (this.isAllowNullValues()) {
             this.nullValueCache = Caffeine.newBuilder()
-                    .executor(MdcForkJoinPool.mdcCommonPool2())
+                    .executor(new MdcForkJoinPool("RemoveNullValue"))
                     .expireAfterWrite(cacheConfig.getNullValueExpireTimeSeconds(), TimeUnit.SECONDS)
                     .maximumSize(cacheConfig.getNullValueMaxSize())
                     .removalListener((key, value, cause) -> {

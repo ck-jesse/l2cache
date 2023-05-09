@@ -17,26 +17,58 @@ import java.util.concurrent.Future;
 public class MdcForkJoinPool extends ForkJoinPool {
 
     /**
+     * max #workers - 1
+     */
+    public static final int MAX_CAP = 0x7fff;
+
+    /**
+     * the default parallelism level
+     */
+    public static final int DEFAULT_PARALLELISM = Math.min(MAX_CAP, Runtime.getRuntime().availableProcessors());
+
+    /**
+     * the default thread name prefix
+     */
+    public static final String DEFAULT_THREAD_NAME_PREFIX = "MdcForkJoinPool";
+
+    /**
+     * Sequence number for creating workerNamePrefix.
+     */
+    private static int poolNumberSequence;
+
+    /**
+     * Returns the next sequence number. We don't expect this to
+     * ever contend, so use simple builtin sync.
+     */
+    private static final synchronized int nextPoolId() {
+        return ++poolNumberSequence;
+    }
+
+    /**
      * Common (static) pool.
      */
     static final MdcForkJoinPool mdcCommon = new MdcForkJoinPool();
-    static final MdcForkJoinPool mdcCommon2 = new MdcForkJoinPool(4);
 
     public static MdcForkJoinPool mdcCommonPool() {
         return mdcCommon;
-    }
-    public static MdcForkJoinPool mdcCommonPool2() {
-        return mdcCommon2;
     }
 
     // constructor
 
     public MdcForkJoinPool() {
-        super();
+        this(DEFAULT_PARALLELISM, DEFAULT_THREAD_NAME_PREFIX);
     }
 
     public MdcForkJoinPool(int parallelism) {
-        super(parallelism);
+        this(parallelism, DEFAULT_THREAD_NAME_PREFIX);
+    }
+
+    public MdcForkJoinPool(String threadNamePrefix) {
+        this(DEFAULT_PARALLELISM, threadNamePrefix);
+    }
+
+    public MdcForkJoinPool(int parallelism, String threadNamePrefix) {
+        this(parallelism, new LimitedThreadForkJoinWorkerThreadFactory(parallelism, threadNamePrefix + "-" + nextPoolId()), null, false);
     }
 
     /**

@@ -21,6 +21,10 @@ public class LimitedThreadForkJoinWorkerThreadFactory implements ForkJoinPool.Fo
      * 最大线程数
      */
     private final int maxThreads;
+
+    /**
+     * 线程名称前缀
+     */
     private String threadNamePrefix;
 
     /**
@@ -44,13 +48,13 @@ public class LimitedThreadForkJoinWorkerThreadFactory implements ForkJoinPool.Fo
     public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
         int count = threadCount.incrementAndGet();
 
-        // 如果当前线程数量小于等于最大线程数，则创建新线程，并将threadCoun+1
+        // 如果当前线程数量小于等于最大线程数，则创建新线程，并将threadCount+1
         if (count <= maxThreads) {
             if (null == threadNamePrefix || "".equals(threadNamePrefix.trim())) {
                 return new LimitedThreadForkJoinWorkerThread(pool);
             } else {
                 // 使用自定义线程名称
-                return new LimitedThreadForkJoinWorkerThread(pool, threadNamePrefix + "-" + count);
+                return new LimitedThreadForkJoinWorkerThread(pool, threadNamePrefix + "-worker-" + count);
             }
         }
 
