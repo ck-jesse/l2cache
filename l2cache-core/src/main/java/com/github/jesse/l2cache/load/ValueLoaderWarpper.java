@@ -37,7 +37,7 @@ public class ValueLoaderWarpper implements Callable {
     public Object call() throws Exception {
         try {
             if (null == valueLoader) {
-                logger.warn("[ValueLoaderWarpper] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
+                logger.warn("valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
                 return null;
             }
             return valueLoader.call();
@@ -46,7 +46,7 @@ public class ValueLoaderWarpper implements Callable {
             if (getWaitRefreshNum() > 0) {
                 int beforeWaitRefreshNum = this.clearWaitRefreshNum();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("[ValueLoaderWarpper] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+                    logger.debug("clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
                 }
             }
         }

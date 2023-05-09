@@ -94,7 +94,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             NullValueClearSupport.getInstance().scheduleWithFixedDelay(new NullValueCacheClearTask(this.getCacheName(), this.nullValueCache), 5,
                     cacheConfig.getNullValueClearPeriodSeconds(), TimeUnit.SECONDS);
 
-            logger.info("[CaffeineCache] NullValueCache初始化成功, cacheName={}, expireTime={}s, maxSize={}, clearPeriodSeconds={}s", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize(), cacheConfig.getNullValueClearPeriodSeconds());
+            logger.info("NullValueCache初始化成功, cacheName={}, expireTime={}s, maxSize={}, clearPeriodSeconds={}s", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize(), cacheConfig.getNullValueClearPeriodSeconds());
         }
     }
 
@@ -129,7 +129,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
             Object value = ((LoadingCache) this.caffeineCache).get(key);
             if (logger.isDebugEnabled()) {
-                logger.debug("[CaffeineCache] LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                logger.debug("LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             }
             return fromStoreValue(value);
         }
@@ -149,7 +149,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
             Object value = ((LoadingCache) this.caffeineCache).get(key);
             if (logger.isDebugEnabled()) {
-                logger.debug("[CaffeineCache] LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                logger.debug("LoadingCache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             }
             return (T) fromStoreValue(value);
         }
@@ -158,7 +158,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         Object value = this.caffeineCache.get(key, new LoadFunction(this.getInstanceId(), this.getCacheType(), this.getCacheName(),
                 null, this.getCacheSyncPolicy(), ValueLoaderWarpper.newInstance(this.getCacheName(), key, valueLoader), this.isAllowNullValues(), this.nullValueCache));
         if (logger.isDebugEnabled()) {
-            logger.debug("[CaffeineCache] Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            logger.debug("Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
         }
         return (T) fromStoreValue(value);
     }
@@ -170,7 +170,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             return;
         }
         caffeineCache.put(key, toStoreValue(value));
-        logger.info("[CaffeineCache] put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), caffeineCache.estimatedSize(), key, toStoreValue(value));
+        logger.info("put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), caffeineCache.estimatedSize(), key, toStoreValue(value));
 
         // 允许null值，且值为空，则记录到nullValueCache，用于淘汰NullValue
         if (this.isAllowNullValues() && (value == null || value instanceof NullValue)) {
@@ -196,7 +196,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void evict(Object key) {
-        logger.info("[CaffeineCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("evict cache, cacheName={}, key={}", this.getCacheName(), key);
         caffeineCache.invalidate(key);
         if (null != nullValueCache) {
             nullValueCache.invalidate(key);
@@ -208,7 +208,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void clear() {
-        logger.info("[CaffeineCache] clear cache, cacheName={}", this.getCacheName());
+        logger.info("clear cache, cacheName={}", this.getCacheName());
         caffeineCache.invalidateAll();
         if (null != nullValueCache) {
             nullValueCache.invalidateAll();
@@ -222,14 +222,14 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public boolean isExists(Object key) {
         boolean rslt = caffeineCache.asMap().containsKey(key);
         if (logger.isDebugEnabled()) {
-            logger.debug("[CaffeineCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
+            logger.debug("key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
         }
         return rslt;
     }
 
     @Override
     public void clearLocalCache(Object key) {
-        logger.info("[CaffeineCache] clear local cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("clear local cache, cacheName={}, key={}", this.getCacheName(), key);
         if (key == null) {
             caffeineCache.invalidateAll();
             if (null != nullValueCache) {
@@ -273,7 +273,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
             for (Object key : loadingCache.asMap().keySet()) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("[CaffeineCache] refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
+                    logger.debug("refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
                 }
                 this.refresh(key);
             }
@@ -284,7 +284,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     public void refreshExpireCache(Object key) {
         if (isLoadingCache()) {
             if (logger.isDebugEnabled()) {
-                logger.debug("[CaffeineCache] refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
             }
             // 通过LoadingCache.get(key)来刷新过期缓存
             ((LoadingCache) caffeineCache).get(key);
@@ -296,14 +296,14 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) caffeineCache;
             if (null != nullValueCache) {
-                logger.info("[CaffeineCache] refreshAllExpireCache, cacheName={}, size={}, NullValueSize={}, stats={}", this.getCacheName(), loadingCache.estimatedSize(), nullValueCache.estimatedSize(), loadingCache.stats());
+                logger.info("refreshAllExpireCache, cacheName={}, size={}, NullValueSize={}, stats={}", this.getCacheName(), loadingCache.estimatedSize(), nullValueCache.estimatedSize(), loadingCache.stats());
             } else {
-                logger.info("[CaffeineCache] refreshAllExpireCache, cacheName={}, size={}, stats={}", this.getCacheName(), loadingCache.estimatedSize(), loadingCache.stats());
+                logger.info("refreshAllExpireCache, cacheName={}, size={}, stats={}", this.getCacheName(), loadingCache.estimatedSize(), loadingCache.stats());
             }
             Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("[CaffeineCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
+                    logger.debug("refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 }
                 value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
             }
@@ -333,7 +333,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             // expireAfterWrite模式下：获取存在但已过期/存在但未过期/不存在的缓存，均不会触发load
             Object value = this.caffeineCache.getIfPresent(cacheKey);
             if (logger.isDebugEnabled()) {
-                logger.debug("[CaffeineCache] batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+                logger.debug("batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
             }
 
             // value=null表示key不存在，则不将key包含在返回数据中

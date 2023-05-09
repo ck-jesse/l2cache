@@ -31,10 +31,10 @@ public class CacheMessageListener implements MessageListener {
         Map<String, String> oldContext = MdcUtil.beforeExecution(message.getMdcContextMap());
         try {
             if (this.cacheInstanceId.equalsIgnoreCase(message.getInstanceId())) {
-                logger.debug("[CacheMessageListener][SyncCache] don't need to process your own messages, currInstanceId={}, message={}", this.cacheInstanceId, message.toString());
+                logger.debug("[SyncCache] don't need to process your own messages, currInstanceId={}, message={}", this.cacheInstanceId, message.toString());
                 return;
             }
-            logger.info("[CacheMessageListener][SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}, desc={}",
+            logger.info("[SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}, desc={}",
                     this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey(), message.getDesc());
 
             Level1Cache level1Cache = getLevel1Cache(message);
@@ -47,7 +47,7 @@ public class CacheMessageListener implements MessageListener {
                 level1Cache.clearLocalCache(message.getKey());
             }
         } catch (Exception e) {
-            logger.error("[CacheMessageListener][SyncCache] deal message error, currInstanceId=" + this.cacheInstanceId, e);
+            logger.error("[SyncCache] deal message error, currInstanceId=" + this.cacheInstanceId, e);
         } finally {
             MdcUtil.afterExecution(oldContext);
         }
@@ -59,12 +59,12 @@ public class CacheMessageListener implements MessageListener {
     private Level1Cache getLevel1Cache(CacheMessage message) {
         Cache cache = CacheSupport.getCache(message.getCacheType(), message.getCacheName());
         if (null == cache) {
-            logger.warn("[CacheMessageListener][SyncCache] cache is not exists or not instanced, cacheType=" + message.getCacheType() + ", " +
+            logger.warn("[SyncCache] cache is not exists or not instanced, cacheType=" + message.getCacheType() + ", " +
                     "cacheName=" + message.getCacheName());
             return null;
         }
         if (!(cache instanceof Level1Cache)) {
-            logger.warn("[CacheMessageListener][SyncCache] cache must be implements Level1Cache, cacheType=" + message.getCacheType() + " " + cache.getClass().getName());
+            logger.warn("[SyncCache] cache must be implements Level1Cache, cacheType=" + message.getCacheType() + " " + cache.getClass().getName());
             return null;
         }
         return (Level1Cache) cache;

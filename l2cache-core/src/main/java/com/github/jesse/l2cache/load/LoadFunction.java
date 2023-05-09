@@ -62,11 +62,11 @@ public class LoadFunction implements Function<Object, Object> {
             // 走到此处，表明从L1中没有获取到缓存，需要先从L2中获取缓存，若L2无缓存，则再执行目标方法加载数据到缓存
             if (null == level2Cache) {
                 if (null == valueLoader) {
-                    logger.debug("[LoadFunction] level2Cache and valueLoader is null, return null, cacheName={},key={}", cacheName, key);
+                    logger.debug("level2Cache and valueLoader is null, return null, cacheName={},key={}", cacheName, key);
                     return this.toStoreValue(key, null);
                 }
                 Object value = valueLoader.call();
-                logger.debug("[LoadFunction] load data from target method, level2Cache is null, cacheName={}, key={}, value={}", cacheName, key, value);
+                logger.debug("load data from target method, level2Cache is null, cacheName={}, key={}, value={}", cacheName, key, value);
                 if (null != cacheSyncPolicy) {
                     cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH, "AfterValueLoader"));
                 }
@@ -94,12 +94,12 @@ public class LoadFunction implements Function<Object, Object> {
             // value等于null，表示从redis中获取的值为null（也就是key不存在），所以直接返回null，避免缓存NullValue，导致缓存和db不一致的情况。
             if (null == value) {
                 if (null == valueLoader) {
-                    logger.info("[LoadFunction] valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                    logger.info("valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
                     return null;
                 }
                 if (null == valueLoader.getValueLoader()) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("[LoadFunction] ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
+                        logger.debug("ValueLoaderWarpper.valueLoader is null, value is null, return null, cacheName={}, key={}", cacheName, key);
                     }
                     return null;
                 }
@@ -107,7 +107,7 @@ public class LoadFunction implements Function<Object, Object> {
             return this.toStoreValue(key, value);
         } catch (RedisTrylockFailException e) {
             // 针对 redis 加载数据时的重复请求，直接返回null，避免缓存NullValue
-            logger.warn("[LoadFunction] RedisTrylockFailException cacheName={}, key={}, msg={}", cacheName, key, e.getMessage());
+            logger.warn("RedisTrylockFailException cacheName={}, key={}, msg={}", cacheName, key, e.getMessage());
             return null;
         } catch (Exception ex) {
             // 将异常包装spring cache异常
@@ -116,7 +116,7 @@ public class LoadFunction implements Function<Object, Object> {
             if (null != valueLoader && valueLoader.getWaitRefreshNum() > 0) {
                 int beforeWaitRefreshNum = valueLoader.clearWaitRefreshNum();
                 if (logger.isDebugEnabled()) {
-                    logger.debug("[LoadFunction] clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
+                    logger.debug("clear waitRefreshNum, cacheName={}, key={}, beforeWaitRefreshNum={}", cacheName, key, beforeWaitRefreshNum);
                 }
             }
         }
@@ -130,12 +130,12 @@ public class LoadFunction implements Function<Object, Object> {
         // 注意：CaffeineCache 的定时任务检查到缓存项的值为NullValue时，会清理掉该缓存项，避免一直缓存，一定程度上解决缓存穿透的问题。
         if (this.allowNullValues && (value == null || value instanceof NullValue)) {
             if (null != this.nullValueCache) {
-                logger.info("[LoadFunction] NullValueCache put, cacheName={}, key={}, value=1", cacheName, key);
+                logger.info("NullValueCache put, cacheName={}, key={}, value=1", cacheName, key);
                 this.nullValueCache.put(key, 1);
             }
         }
         Object storeValue = NullValueUtil.toStoreValue(value, this.allowNullValues, this.cacheName);
-        logger.info("[LoadFunction] storeValue, cacheName={}, key={}, storeValue={}", cacheName, key, storeValue);
+        logger.info("storeValue, cacheName={}, key={}, storeValue={}", cacheName, key, storeValue);
         return storeValue;
     }
 

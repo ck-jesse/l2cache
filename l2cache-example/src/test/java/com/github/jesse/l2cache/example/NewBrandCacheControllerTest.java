@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class NewBrandCacheControllerTest {
 
-    private static final String HOST = "http://127.0.0.1:8080";
+    private static final String HOST = "http://127.0.0.1:8081";
 
     RestTemplate restTemplate = new RestTemplate();
 
@@ -52,7 +52,7 @@ public class NewBrandCacheControllerTest {
 
     @Test
     public void evict() {
-        String url = HOST + "/new/brand/evict?brandId=1001";
+        String url = HOST + "/new/brand/evict?brandId=1003";
         Boolean result = restTemplate.getForObject(url, Boolean.class);
         System.out.println(result);
     }

@@ -39,13 +39,13 @@ public class ValueLoaderWarpperTemp implements Callable {
     @Override
     public Object call() throws Exception {
         if (null == valueLoader) {
-            logger.warn("[ValueLoaderWarpperTemp] valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
+            logger.warn("valueLoader is null, return null, cacheName={}, key={}", cacheName, key);
             return null;
         }
         Object tempValue = valueLoader.call();
         call = true;
         if (logger.isDebugEnabled()) {
-            logger.debug("[ValueLoaderWarpperTemp] valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
+            logger.debug("valueLoader.call, cacheName={}, key={}, value={}", cacheName, key, tempValue);
         }
         return tempValue;
     }

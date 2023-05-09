@@ -36,7 +36,7 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
     @Override
     public void connnect() {
         if (!start.compareAndSet(false, true)) {
-            logger.info("[RedisCacheSyncPolicy] already started");
+            logger.info("already started");
             return;
         }
         RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
@@ -58,21 +58,21 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
                 RLock lock = redissonClient.getLock(buildLockKey(message));
                 // 限制同一个key指定时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
                 if (!lock.tryLock(0, publishMsgPeriodMilliSeconds, TimeUnit.MILLISECONDS)) {
-                    logger.warn("[RedisCacheSyncPolicy] trylock fail, no need to publish message, publishMsgPeriod={}ms, message={}", publishMsgPeriodMilliSeconds, message.toString());
+                    logger.warn("trylock fail, no need to publish message, publishMsgPeriod={}ms, message={}", publishMsgPeriodMilliSeconds, message.toString());
                     return;
                 }
 
                 // 重入锁的数量(同一个线程可以重入)
                 int lockHoldCount = lock.getHoldCount();
                 if (lockHoldCount > 1) {
-                    logger.warn("[RedisCacheSyncPolicy] trylock succ, no need to publish message, publishMsgPeriod={}ms, lockHoldCount={}, message={}", publishMsgPeriodMilliSeconds, lockHoldCount, message.toString());
+                    logger.warn("trylock succ, no need to publish message, publishMsgPeriod={}ms, lockHoldCount={}, message={}", publishMsgPeriodMilliSeconds, lockHoldCount, message.toString());
                     return;
                 }
 
                 long receivedMsgClientNum = this.topic.publish(message);
-                logger.info("[RedisCacheSyncPolicy] publish succ, cacheName={}, key={}, receivedMsgClientNum={}, message={}", message.getCacheName(), message.getKey(), receivedMsgClientNum, message.toString());
+                logger.info("publish succ, cacheName={}, key={}, receivedMsgClientNum={}, message={}", message.getCacheName(), message.getKey(), receivedMsgClientNum, message.toString());
             } catch (Exception e) {
-                logger.error("[RedisCacheSyncPolicy] publish error, cacheName=" + message.getCacheName() + ", key=" + message.getKey(), e);
+                logger.error("publish error, cacheName=" + message.getCacheName() + ", key=" + message.getKey(), e);
             }
 
         }, message));

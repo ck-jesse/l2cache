@@ -48,7 +48,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
         valueLoaderCache = Caffeine.newBuilder()
                 .removalListener((key, value, cause) -> {
                     if (logger.isDebugEnabled()) {
-                        logger.info("[CustomCacheLoader]valueLoader is Recycled, cacheName={}, cause={}, key={}, valueLoader={}", cacheName, cause, key, value);
+                        logger.info("valueLoader is Recycled, cacheName={}, cause={}, key={}, valueLoader={}", cacheName, cause, key, value);
                     }
                 })
                 .maximumSize(maxSize)
@@ -89,7 +89,7 @@ public class CustomCacheLoader implements CacheLoader<Object, Object> {
             valueLoaderCache.put(key, ValueLoaderWarpper.newInstance(this.cacheName, key, valueLoader));
         } else {
             if (null == warpper.getValueLoader()) {
-                logger.info("[CustomCacheLoader]ValueLoaderWarpper.valueLoader is null and set a new valueLoader, cacheName={}, key={}, valueLoader={}", cacheName, key, valueLoader);
+                logger.info("ValueLoaderWarpper.valueLoader is null and set a new valueLoader, cacheName={}, key={}, valueLoader={}", cacheName, key, valueLoader);
                 warpper.setValueLoader(valueLoader);
             }
         }

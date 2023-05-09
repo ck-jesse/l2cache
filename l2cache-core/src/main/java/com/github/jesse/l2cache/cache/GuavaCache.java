@@ -91,7 +91,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             NullValueClearSupport.getInstance().scheduleWithFixedDelay(new NullValueCacheClearTask(this.getCacheName(), this.nullValueCache), 5,
                     cacheConfig.getNullValueClearPeriodSeconds(), TimeUnit.SECONDS);
 
-            logger.info("[CaffeineCache] NullValueCache初始化成功, cacheName={}, expireTime={}s, maxSize={}, clearPeriodSeconds={}s", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize(), cacheConfig.getNullValueClearPeriodSeconds());
+            logger.info("NullValueCache初始化成功, cacheName={}, expireTime={}s, maxSize={}, clearPeriodSeconds={}s", this.getCacheName(), cacheConfig.getNullValueExpireTimeSeconds(), cacheConfig.getNullValueMaxSize(), cacheConfig.getNullValueClearPeriodSeconds());
         }
     }
 
@@ -126,7 +126,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             try {
                 // 如果是refreshAfterWrite策略，则只会阻塞加载数据的线程，其他线程返回旧值（如果是异步加载，则所有线程都返回旧值）
                 Object value = ((LoadingCache) this.guavaCache).get(key);
-                logger.debug("[GuavaCache] LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+                logger.debug("LoadingCache.get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
                 return fromStoreValue(value);
             } catch (ExecutionException e) {
                 throw new IllegalStateException("[GuavaCache] LoadingCache.get cache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
@@ -152,17 +152,17 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                         null, this.getCacheSyncPolicy(), ValueLoaderWarpper.newInstance(this.getCacheName(), key, valueLoader), this.isAllowNullValues(), this.nullValueCache);
                 return loadFunction.apply(key);
             });
-            logger.debug("GuavaCache Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
+            logger.debug("Cache.get(key, callable) cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             return (T) fromStoreValue(value);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("GuavaCache Cache.get(key, callable) cache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
+            throw new IllegalStateException("[GuavaCache] Cache.get(key, callable) cache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
         }
     }
 
     @Override
     public void put(Object key, Object value) {
         guavaCache.put(key, toStoreValue(value));
-        logger.info("[GuavaCache] put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), guavaCache.size(), key, toStoreValue(value));
+        logger.info("put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), guavaCache.size(), key, toStoreValue(value));
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
         }
@@ -180,7 +180,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
 
     @Override
     public void evict(Object key) {
-        logger.info("[GuavaCache] evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("evict cache, cacheName={}, key={}", this.getCacheName(), key);
         guavaCache.invalidate(key);
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
@@ -189,7 +189,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
 
     @Override
     public void clear() {
-        logger.info("[GuavaCache] clear cache, cacheName={}", this.getCacheName());
+        logger.info("clear cache, cacheName={}", this.getCacheName());
         guavaCache.invalidateAll();
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
@@ -199,13 +199,13 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     @Override
     public boolean isExists(Object key) {
         boolean rslt = guavaCache.asMap().containsKey(key);
-        logger.debug("[GuavaCache] key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
+        logger.debug("key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), key, rslt);
         return rslt;
     }
 
     @Override
     public void clearLocalCache(Object key) {
-        logger.info("[GuavaCache] clear local cache, cacheName={}, key={}", this.getCacheName(), key);
+        logger.info("clear local cache, cacheName={}, key={}", this.getCacheName(), key);
         if (key == null) {
             guavaCache.invalidateAll();
         } else {
@@ -216,7 +216,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     @Override
     public void refresh(Object key) {
         if (isLoadingCache()) {
-            logger.debug("[GuavaCache] refresh cache, cacheName={}, key={}", this.getCacheName(), key);
+            logger.debug("refresh cache, cacheName={}, key={}", this.getCacheName(), key);
             ((LoadingCache) guavaCache).refresh(key);
         }
     }
@@ -226,7 +226,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         if (isLoadingCache()) {
             LoadingCache loadingCache = (LoadingCache) guavaCache;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("[GuavaCache] refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("refreshAll cache, cacheName={}, key={}", this.getCacheName(), key);
                 loadingCache.refresh(key);
             }
         }
@@ -235,12 +235,12 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     @Override
     public void refreshExpireCache(Object key) {
         if (isLoadingCache()) {
-            logger.debug("[GuavaCache] refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
+            logger.debug("refreshExpireCache, cacheName={}, key={}", this.getCacheName(), key);
             try {
                 // 通过LoadingCache.get(key)来刷新过期缓存
                 ((LoadingCache) guavaCache).get(key);
             } catch (ExecutionException e) {
-                logger.error("[GuavaCache] refreshExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
+                logger.error("refreshExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
             }
         }
     }
@@ -251,7 +251,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             LoadingCache loadingCache = (LoadingCache) guavaCache;
             Object value = null;
             for (Object key : loadingCache.asMap().keySet()) {
-                logger.debug("[GuavaCache] refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
+                logger.debug("refreshAllExpireCache, cacheName={}, key={}", this.getCacheName(), key);
                 try {
                     value = loadingCache.get(key);// 通过LoadingCache.get(key)来刷新过期缓存
 
@@ -267,18 +267,18 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                         if (null != nullValue) {
                             continue;
                         }
-                        logger.info("[GuavaCache] refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
+                        logger.info("refreshAllExpireCache invalidate NullValue, cacheName={}, key={}", this.getCacheName(), key);
                         loadingCache.invalidate(key);
                         if (null != cacheSyncPolicy) {
                             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
                         }
                     }*/
                 } catch (ExecutionException e) {
-                    logger.error("[GuavaCache] refreshAllExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
+                    logger.error("refreshAllExpireCache error, cacheName=" + this.getCacheName() + ", key=" + key, e);
                 }
             }
             if (null != nullValueCache) {
-                logger.debug("[GuavaCache] refreshAllExpireCache number of NullValue, cacheName={}, size={}", this.getCacheName(), nullValueCache.asMap().size());
+                logger.debug("refreshAllExpireCache number of NullValue, cacheName={}, size={}", this.getCacheName(), nullValueCache.asMap().size());
             }
         }
     }
@@ -300,7 +300,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         keyMap.forEach((key, cacheKey) -> {
             // 仅仅获取
             Object value = this.guavaCache.getIfPresent(cacheKey);
-            logger.debug("[GuavaCache] batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+            logger.debug("batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
 
             // value=null表示key不存在，则不将key包含在返回数据中
             if (value == null) {
@@ -315,11 +315,11 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
             // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
             if (returnNullValueKey) {
                 hitMap.put(key, null);
-                logger.warn("[GuavaCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                logger.warn("batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
                 return;
             }
         });
-        logger.info("[GuavaCache] batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
+        logger.info("batchGet cache, cacheName={}, cacheKeyMap={}, hitMap={}", this.getCacheName(), keyMap.values(), hitMap);
         return hitMap;
     }
 }

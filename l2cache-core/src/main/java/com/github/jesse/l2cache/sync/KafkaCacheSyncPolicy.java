@@ -39,7 +39,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
     @Override
     public void connnect() {
         if (!start.compareAndSet(false, true)) {
-            logger.info("[KafkaCacheSyncPolicy] already started");
+            logger.info("already started");
             return;
         }
         CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getCacheConfig().getCacheSyncPolicy();
@@ -59,16 +59,16 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
                 try {
                     // 拉取消息，设置指定超时时间
                     ConsumerRecords<String, String> records = consumer.poll(Duration.ofSeconds(3));
-                    logger.debug("[KafkaCacheSyncPolicy] poll messages, topic={}, records={}", cacheSyncPolicy.getTopic(), records.count());
+                    logger.debug("poll messages, topic={}, records={}", cacheSyncPolicy.getTopic(), records.count());
 
                     for (ConsumerRecord<String, String> record : records) {
-                        logger.debug("[KafkaCacheSyncPolicy] received a message, topic={}, record={}", cacheSyncPolicy.getTopic(), record.toString());
+                        logger.debug("received a message, topic={}, record={}", cacheSyncPolicy.getTopic(), record.toString());
                         CacheMessage message = ObjectMapperUtil.toObject(record.value(), CacheMessage.class);
                         KafkaCacheSyncPolicy.this.getCacheMessageListener().onMessage(message);
                     }
                     consumer.commitSync();
                 } catch (Exception e) {
-                    logger.error("[KafkaCacheSyncPolicy] poll message deal error", e);
+                    logger.error("poll message deal error", e);
                 }
             }
         });
@@ -80,26 +80,26 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
         CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getCacheConfig().getCacheSyncPolicy();
         try {
             String messageStr = ObjectMapperUtil.toJson(message);
-            logger.info("[KafkaCacheSyncPolicy] publish cache sync message, message={}", messageStr);
+            logger.info("publish cache sync message, message={}", messageStr);
 
             // 异步发送，采用回调接收结果
             if (cacheSyncPolicy.isAsync()) {
                 producer.send(new ProducerRecord<>(cacheSyncPolicy.getTopic(), null, messageStr), (recordMetadata, e) -> {
                     if (recordMetadata != null) {
-                        logger.debug("[KafkaCacheSyncPolicy] sent to partition({}), offset({}), message({}) ",
+                        logger.debug("sent to partition({}), offset({}), message({}) ",
                                 recordMetadata.partition(), recordMetadata.offset(), messageStr);
                     } else {
-                        logger.error("[KafkaCacheSyncPolicy] async publish cache message error", e);
+                        logger.error("async publish cache message error", e);
                     }
                 });
-                logger.debug("[KafkaCacheSyncPolicy] async publish cache message");
+                logger.debug("async publish cache message");
                 return;
             }
             // 同步发送消息
             RecordMetadata recordMetadata = producer.send(new ProducerRecord<>(cacheSyncPolicy.getTopic(), null, messageStr)).get();
-            logger.info("[KafkaCacheSyncPolicy] publish topic={}, RecordMetadata={}", cacheSyncPolicy.getTopic(), recordMetadata.toString());
+            logger.info("publish topic={}, RecordMetadata={}", cacheSyncPolicy.getTopic(), recordMetadata.toString());
         } catch (Exception e) {
-            logger.error("[KafkaCacheSyncPolicy] publish cache sync message error", e);
+            logger.error("publish cache sync message error", e);
         }
     }
 
