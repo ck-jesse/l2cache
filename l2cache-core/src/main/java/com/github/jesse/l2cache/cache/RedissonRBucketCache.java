@@ -8,6 +8,7 @@ import com.github.jesse.l2cache.content.NullValue;
 import com.github.jesse.l2cache.exception.RedisTrylockFailException;
 import com.github.jesse.l2cache.load.ValueLoaderWarpper;
 import com.github.jesse.l2cache.load.ValueLoaderWarpperTemp;
+import com.github.jesse.l2cache.util.BiConsumerWrapper;
 import com.github.jesse.l2cache.util.LogUtil;
 import com.github.jesse.l2cache.util.RandomUtil;
 import com.github.jesse.l2cache.util.SpringCacheExceptionUtil;

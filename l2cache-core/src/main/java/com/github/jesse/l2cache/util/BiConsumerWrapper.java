@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.cache;
+package com.github.jesse.l2cache.util;
 
 import com.github.jesse.l2cache.util.pool.MdcUtil;
 import org.slf4j.MDC;
@@ -12,10 +12,10 @@ import java.util.function.BiConsumer;
  */
 public class BiConsumerWrapper implements BiConsumer<Object, Throwable> {
 
-    BiConsumer<Object, ? super Throwable> action;
+    BiConsumer<Object, Throwable> action;
     Map<String, String> contextMap;
 
-    public BiConsumerWrapper(BiConsumer<Object, ? super Throwable> action) {
+    public BiConsumerWrapper(BiConsumer<Object, Throwable> action) {
         this.action = action;
         this.contextMap = MDC.getCopyOfContextMap();
     }
