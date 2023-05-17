@@ -98,7 +98,8 @@ public class BrandCacheService extends AbstractCacheService<Integer, BrandRespBO
 
         // 批量查询信息
         Cache cache = this.getNativeL2cache();
-        return cache.batchGetOrLoad(keyList, valueLoader);
+        // 添加自定义key构建起
+        return cache.batchGetOrLoad(keyList, k -> this.buildCacheKey(k), valueLoader);
     }
 
     @Override
