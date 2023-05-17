@@ -1,8 +1,9 @@
 package com.github.jesse.l2cache.spring.biz;
 
 import com.github.jesse.l2cache.Cache;
+import com.github.jesse.l2cache.biz.CacheService;
 import com.github.jesse.l2cache.exception.L2CacheException;
-import com.github.jesse.l2cache.spring.L2CacheCacheManager;
+import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

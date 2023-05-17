@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.example.controller;
 
-import com.github.jesse.l2cache.spring.L2CacheCacheManager;
+import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;

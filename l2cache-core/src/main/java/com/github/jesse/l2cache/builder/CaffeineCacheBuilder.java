@@ -1,5 +1,6 @@
 package com.github.jesse.l2cache.builder;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.content.CustomCaffeineSpec;
@@ -13,7 +14,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -100,11 +100,11 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
      * 获取 spec
      */
     private String getSpec(String cacheName, CacheConfig.Caffeine caffeine) {
-        if (!StringUtils.hasText(cacheName)) {
+        if (StrUtil.isBlank(cacheName)) {
             return caffeine.getDefaultSpec();
         }
         String spec = caffeine.getSpecs().get(cacheName);
-        if (!StringUtils.hasText(spec)) {
+        if (StrUtil.isBlank(spec)) {
             return caffeine.getDefaultSpec();
         }
         return spec;
@@ -119,7 +119,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
             return;
         }
         String spec = this.getSpec(cacheName, caffeine);
-        if (!StringUtils.hasText(spec)) {
+        if (StrUtil.isBlank(spec)) {
             throw new RuntimeException("please setting caffeine spec config");
         }
         customCaffeineSpecMap.put(cacheName, CustomCaffeineSpec.parse(spec));

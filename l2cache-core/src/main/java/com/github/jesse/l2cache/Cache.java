@@ -1,11 +1,11 @@
 package com.github.jesse.l2cache;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.load.LoadFunction;
 import com.github.jesse.l2cache.util.NullValueUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -225,7 +225,7 @@ public interface Cache extends Serializable {
      */
     default <K, V> Map<K, V> batchGetOrLoad(List<K> keyList, Function<K, Object> cacheKeyBuilder, Function<List<K>, Map<K, V>> valueLoader, boolean returnNullValueKey) {
         // 如果keyList为空，则直接返回
-        if (CollectionUtils.isEmpty(keyList)) {
+        if (CollectionUtil.isEmpty(keyList)) {
             return new HashMap<>();
         }
 
@@ -282,7 +282,7 @@ public interface Cache extends Serializable {
      * @param dataMap 缓存数据集合（key为已经构建好的缓存key）
      */
     default <V> void batchPut(Map<Object, V> dataMap) {
-        if (CollectionUtils.isEmpty(dataMap)) {
+        if (CollectionUtil.isEmpty(dataMap)) {
             return;
         }
         dataMap.forEach((key, value) -> {

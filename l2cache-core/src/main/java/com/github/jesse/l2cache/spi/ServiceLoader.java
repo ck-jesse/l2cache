@@ -1,9 +1,9 @@
 package com.github.jesse.l2cache.spi;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class ServiceLoader {
         try {
             // 获取clazz对应的扩展点
             ServiceProvider serviceProvider = getServiceProvider(clazz);
-            if (StringUtils.isEmpty(name)) {
+            if (StrUtil.isEmpty(name)) {
                 // 未指定name，则加载默认的
                 name = serviceProvider.defaultName;
             }

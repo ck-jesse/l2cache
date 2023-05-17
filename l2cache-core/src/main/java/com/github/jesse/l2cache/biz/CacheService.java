@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.spring.biz;
+package com.github.jesse.l2cache.biz;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.exception.L2CacheException;

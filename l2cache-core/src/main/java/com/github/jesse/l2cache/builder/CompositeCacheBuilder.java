@@ -1,5 +1,6 @@
 package com.github.jesse.l2cache.builder;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
 import com.github.jesse.l2cache.CacheConfig;
@@ -9,7 +10,6 @@ import com.github.jesse.l2cache.cache.CompositeCache;
 import com.github.jesse.l2cache.cache.Level1Cache;
 import com.github.jesse.l2cache.cache.Level2Cache;
 import com.github.jesse.l2cache.spi.ServiceLoader;
-import org.springframework.util.StringUtils;
 
 /**
  * @author chenck
@@ -21,14 +21,14 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
     public CompositeCache build(String cacheName) {
         String l1CacheType = this.getCacheConfig().getComposite().getL1CacheType();
         String l2CacheType = this.getCacheConfig().getComposite().getL2CacheType();
-        if (StringUtils.isEmpty(l1CacheType) && StringUtils.isEmpty(l2CacheType)) {
+        if (StrUtil.isEmpty(l1CacheType) && StrUtil.isEmpty(l2CacheType)) {
             throw new IllegalArgumentException("must be configured l1CacheType and l2CacheType");
         }
         // 缓存类型为空时设置为 NoneCache
-        if (StringUtils.isEmpty(l1CacheType)) {
+        if (StrUtil.isEmpty(l1CacheType)) {
             l1CacheType = CacheType.NONE.name();
         }
-        if (StringUtils.isEmpty(l2CacheType)) {
+        if (StrUtil.isEmpty(l2CacheType)) {
             l2CacheType = CacheType.NONE.name();
         }
         if (l1CacheType.equalsIgnoreCase(l2CacheType)) {

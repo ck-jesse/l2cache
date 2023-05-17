@@ -1,11 +1,13 @@
-package com.github.jesse.l2cache.spring;
+package com.github.jesse.l2cache.spring.config;
 
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
-import com.github.jesse.l2cache.spring.biz.CacheManagerController;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.spi.ServiceLoader;
+import com.github.jesse.l2cache.spring.L2CacheProperties;
+import com.github.jesse.l2cache.spring.biz.CacheManagerController;
+import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import com.github.jesse.l2cache.sync.CacheMessageListener;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;

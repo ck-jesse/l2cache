@@ -1,9 +1,9 @@
 package com.github.jesse.l2cache.content;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
 import com.github.jesse.l2cache.CacheSpec;
-import org.springframework.util.StringUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,10 +56,10 @@ public class CacheSupport {
      * 获取或创建缓存实例
      */
     public static Cache getCache(String cacheType, String cacheName, CacheBuilder cacheBuilder) {
-        if (StringUtils.isEmpty(cacheType)) {
+        if (StrUtil.isEmpty(cacheType)) {
             throw new IllegalArgumentException("缓存类型不能为空");
         }
-        if (StringUtils.isEmpty(cacheName)) {
+        if (StrUtil.isEmpty(cacheName)) {
             throw new IllegalArgumentException("缓存名称不能为空");
         }
 

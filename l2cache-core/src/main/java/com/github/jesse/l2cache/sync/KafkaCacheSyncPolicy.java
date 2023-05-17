@@ -1,5 +1,6 @@
 package com.github.jesse.l2cache.sync;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.util.ObjectMapperUtil;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -12,7 +13,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -163,7 +163,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     private void setProp(Properties source, Properties target, String key, String defaultValue) {
         String value = source.getProperty(key, defaultValue);
-        if (StringUtils.isEmpty(value)) {
+        if (StrUtil.isBlank(value)) {
             return;
         }
         target.put(key, value);

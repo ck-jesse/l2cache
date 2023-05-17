@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.spring.biz;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.exception.L2CacheException;
-import com.github.jesse.l2cache.spring.L2CacheCacheManager;
+import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import com.github.jesse.l2cache.util.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

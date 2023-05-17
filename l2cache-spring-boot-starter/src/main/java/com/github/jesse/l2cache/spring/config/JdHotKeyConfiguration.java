@@ -1,7 +1,8 @@
-package com.github.jesse.l2cache.spring;
+package com.github.jesse.l2cache.spring.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.spring.L2CacheProperties;
 import com.jd.platform.hotkey.client.ClientStarter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

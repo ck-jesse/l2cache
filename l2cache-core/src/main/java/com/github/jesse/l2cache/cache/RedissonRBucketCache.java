@@ -1,5 +1,6 @@
 package com.github.jesse.l2cache.cache;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.consts.CacheConsts;
@@ -16,7 +17,6 @@ import com.google.common.collect.Lists;
 import org.redisson.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -327,7 +327,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         Map<K, V> hitMap = new HashMap<>();
 
         // 查询参数为空
-        if (CollectionUtils.isEmpty(keyMap)) {
+        if (CollectionUtil.isEmpty(keyMap)) {
             logger.info("batchGet cache keyMap is null, cacheName={}, keyMap={}", this.getCacheName(), keyMap);
             return hitMap;
         }

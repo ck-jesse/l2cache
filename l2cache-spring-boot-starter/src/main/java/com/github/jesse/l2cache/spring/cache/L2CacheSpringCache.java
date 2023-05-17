@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.spring;
+package com.github.jesse.l2cache.spring.cache;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheConfig;

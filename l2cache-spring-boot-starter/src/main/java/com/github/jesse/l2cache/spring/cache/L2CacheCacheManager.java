@@ -1,11 +1,11 @@
-package com.github.jesse.l2cache.spring;
+package com.github.jesse.l2cache.spring.cache;
 
 import com.github.jesse.l2cache.CacheBuilder;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
-import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
 import com.github.jesse.l2cache.cache.expire.DefaultCacheExpiredListener;
+import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;

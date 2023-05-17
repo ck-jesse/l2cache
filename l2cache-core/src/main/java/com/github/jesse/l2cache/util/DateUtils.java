@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.util;
 
-import org.springframework.util.StringUtils;
+import cn.hutool.core.util.StrUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,7 +31,7 @@ public class DateUtils {
      * @throws ParseException
      */
     public static Date parseDate(String dateString, String dateFormat) throws ParseException {
-        if (StringUtils.isEmpty(dateFormat)) {
+        if (StrUtil.isEmpty(dateFormat)) {
             dateFormat = switchDateFormat(dateString);
         }
         return new SimpleDateFormat(dateFormat).parse(dateString);
@@ -97,7 +97,7 @@ public class DateUtils {
         if (date == null) {
             return "";
         }
-        if (StringUtils.isEmpty(dateFormat)) {
+        if (StrUtil.isEmpty(dateFormat)) {
             dateFormat = DATE_FORMAT_19;
         }
         return new SimpleDateFormat(dateFormat).format(date);

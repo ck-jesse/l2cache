@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.example.service;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.example.dto.User;
-import com.github.jesse.l2cache.spring.L2CacheCacheManager;
+import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

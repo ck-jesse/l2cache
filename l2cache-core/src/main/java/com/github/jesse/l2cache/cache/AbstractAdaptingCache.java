@@ -1,9 +1,9 @@
 package com.github.jesse.l2cache.cache;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.exception.L2CacheException;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,13 +84,13 @@ public abstract class AbstractAdaptingCache implements Cache {
         }
 
         // 全部命中缓存，直接返回
-        if (CollectionUtils.isEmpty(notHitCacheKeyMap) && !CollectionUtils.isEmpty(hitCacheMap)) {
+        if (CollectionUtil.isEmpty(notHitCacheKeyMap) && !CollectionUtil.isEmpty(hitCacheMap)) {
             logger.info("[{}] batchGetOrLoad all_hit cache, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
         Map<K, V> valueLoaderHitMap = this.loadAndPut(valueLoader, notHitCacheKeyMap);
-        if (!CollectionUtils.isEmpty(valueLoaderHitMap)) {
+        if (!CollectionUtil.isEmpty(valueLoaderHitMap)) {
             hitCacheMap.putAll(valueLoaderHitMap);// 合并数据
         }
         return this.filterNullValue(hitCacheMap, returnNullValueKey);
@@ -125,7 +125,7 @@ public abstract class AbstractAdaptingCache implements Cache {
             Map<K, V> valueLoaderHitMap = valueLoader.apply(new ArrayList<>(notHitCacheKeyMap.keySet()));
 
             // 从DB获取数据，一个都没有命中，直接返回
-            if (CollectionUtils.isEmpty(valueLoaderHitMap)) {
+            if (CollectionUtil.isEmpty(valueLoaderHitMap)) {
                 // 对未命中的key缓存空值，防止缓存穿透
                 Map<Object, V> nullValueMap = new HashMap<>();
                 notHitCacheKeyMap.forEach((k, cacheKey) -> {

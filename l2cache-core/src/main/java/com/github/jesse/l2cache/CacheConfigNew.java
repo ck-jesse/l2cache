@@ -1,12 +1,12 @@
 package com.github.jesse.l2cache;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.consts.CacheSyncPolicyType;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.util.RandomUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -253,7 +253,7 @@ public class CacheConfigNew {
          * 解析Redisson yaml文件
          */
         public org.redisson.config.Config getRedissonConfig() {
-            if (StringUtils.isEmpty(this.redissonYamlConfig)) {
+            if (StrUtil.isBlank(this.redissonYamlConfig) && redissonConfig == null) {
                 return null;
             }
             if (null != redissonConfig) {

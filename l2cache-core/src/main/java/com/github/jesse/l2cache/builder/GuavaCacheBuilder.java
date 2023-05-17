@@ -1,5 +1,6 @@
 package com.github.jesse.l2cache.builder;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.content.CustomGuavaCacheBuilderSpec;
@@ -12,7 +13,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * Guava Cache Builder
@@ -88,11 +88,11 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
      * 获取 spec
      */
     private String getSpec(String cacheName, CacheConfig.Guava guava) {
-        if (!StringUtils.hasText(cacheName)) {
+        if (StrUtil.isBlank(cacheName)) {
             return guava.getDefaultSpec();
         }
         String spec = guava.getSpecs().get(cacheName);
-        if (!StringUtils.hasText(spec)) {
+        if (StrUtil.isBlank(spec)) {
             return guava.getDefaultSpec();
         }
         return spec;
@@ -106,7 +106,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
             return;
         }
         String spec = this.getSpec(cacheName, guava);
-        if (!StringUtils.hasText(spec)) {
+        if (StrUtil.isBlank(spec)) {
             throw new RuntimeException("please setting guava cache spec config");
         }
         cacheBuilderSpec = CustomGuavaCacheBuilderSpec.parse(spec);
