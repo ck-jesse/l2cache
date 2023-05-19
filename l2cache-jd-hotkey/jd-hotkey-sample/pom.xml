@@ -10,7 +10,7 @@
     </parent>
     <groupId>io.github.ck-jesse</groupId>
     <artifactId>jd-hotkey-sample</artifactId>
-    <version>1.0.35</version>
+    <version>1.0.36</version>
     <name>jd-hotkey-sample</name>
     <description>jd-hotkey-sample</description>
 
@@ -24,12 +24,12 @@
         <dependency>
             <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-common</artifactId>
-            <version>1.0.35</version>
+            <version>1.0.36</version>
         </dependency>
         <dependency>
             <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-client</artifactId>
-            <version>1.0.35</version>
+            <version>1.0.36</version>
         </dependency>
 
         <dependency>

@@ -38,7 +38,6 @@
 
     <dependencyManagement>
         <dependencies>
-
             <!-- spring-boot -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -100,6 +99,26 @@
                 <scope>test</scope>
             </dependency>
 
+            <!-- l2cache-core -->
+            <dependency>
+                <groupId>io.github.ck-jesse</groupId>
+                <artifactId>l2cache-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- l2cache-spring-boot-starter -->
+            <dependency>
+                <groupId>io.github.ck-jesse</groupId>
+                <artifactId>l2cache-spring-boot-starter</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- jd-hotkey-client -->
+            <dependency>
+                <groupId>io.github.ck-jesse</groupId>
+                <artifactId>jd-hotkey-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -219,7 +238,7 @@
         </profile>
         <!-- Central maven repository -->
         <!-- Deploying to OSSRH with Apache Maven: https://central.sonatype.org/publish/publish-maven/ -->
-        <!-- 发布到中央仓库: mvn clean deploy -P ossrh -Dgpg.passphrase=密码 -->
+        <!-- 发布到中央仓库: mvn clean deploy -P ossrh -Dgpg.passphrase=密码 -Dmaven.test.skip=true -f pom.xml -->
         <profile>
             <id>ossrh</id>
             <properties>
