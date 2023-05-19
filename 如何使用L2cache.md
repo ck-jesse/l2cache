@@ -4,36 +4,10 @@
 
 ## 1、启动L2cache
 
-- **方式一：Enable 启动模式**
 
-引入jar包`l2cache-core`
+- **starter 自动装载模式（推荐）**
 
-```xml
-<dependency>
-    <groupId>io.github.ck-jesse</groupId>
-    <artifactId>l2cache-core</artifactId>
-    <version>1.0.36</version>
-</dependency>
-```
-
-在SpringBoot启动类上标注 `@EnableL2Cache`  启动`l2cache`。
-
-```java
-/**
- * 通过 Spring Enable 注解模式来启用二级缓存组件
- */
-@EnableL2Cache
-@SpringBootApplication
-public class TestApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(TestApplication.class, args);
-    }
-}
-```
-
-- **方式二：starter 自动装载模式（推荐）**
-
-引入jar包 `l2cache-spring-boot-starter`
+引入jar包 `l2cache-spring-boot-starter` 即可
 ```xml
 <dependency>
     <groupId>io.github.ck-jesse</groupId>
@@ -41,6 +15,7 @@ public class TestApplication {
     <version>1.0.36</version>
 </dependency>
 ```
+
 
 ## 2、Spring配置
 
