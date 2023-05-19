@@ -83,3 +83,13 @@ L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高
 - [实战-l2cache高并发场景下出现OOM的分析和优化方案](https://blog.csdn.net/icansoicrazy/article/details/112274052)
 - [实战-l2cache中caffeine.getIfPresent()仅仅获取缓存，但触发了数据加载，导致被设置为NullValue的问题分析
   ](https://blog.csdn.net/icansoicrazy/article/details/125096876)
+
+
+# 六、鼓励与帮助
+如果 l2cache 对您有所帮助，不妨右上角点点 `Star` 或者`任意赞赏`支持。
+
+您的 `Star` 或 `赞赏` 将会给我带来更多动力。
+
+最后，欢迎你 Fork PR 成为项目贡献者。
+
+![rewards](img\rewards.jpg)
