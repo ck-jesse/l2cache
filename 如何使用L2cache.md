@@ -18,6 +18,7 @@
 
 
 ## 2、Spring配置
+具体代码示例参考：[l2cache](https://github.com/ck-jesse/l2cache) 中的 `l2cache-example` 模块。
 
 ```yaml
 spring:
