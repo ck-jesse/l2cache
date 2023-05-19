@@ -7,7 +7,7 @@
     <groupId>io.github.ck-jesse</groupId>
     <artifactId>l2cache</artifactId>
     <name>l2cache</name>
-    <version>1.0.35</version>
+    <version>1.0.36</version>
     <packaging>pom</packaging>
     <description>二级缓存组件</description>
     <url>https://github.com/ck-jesse/l2cache</url>
