@@ -1,11 +1,11 @@
 package com.github.jesse.l2cache;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheSyncPolicyType;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.consts.HotkeyType;
-import com.github.jesse.l2cache.util.RandomUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -24,9 +24,9 @@ import java.util.*;
 public class CacheConfig {
 
     /**
-     * 缓存实例id（默认为UUID）
+     * 缓存实例id
      */
-    private String instanceId = RandomUtil.getUUID();
+    private String instanceId = "C" + IdUtil.getSnowflakeNextIdStr();
 
     /**
      * 是否存储空值，设置为true时，可防止缓存穿透
@@ -68,7 +68,6 @@ public class CacheConfig {
      * @see CacheType
      */
     private String cacheType = CacheType.COMPOSITE.name();
-
 
 
     private final Composite composite = new Composite();
@@ -386,7 +385,6 @@ public class CacheConfig {
             private String etcdUrl;
         }
     }
-
 
 
 }

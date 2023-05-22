@@ -33,7 +33,7 @@
         <kafka-clients.version>2.0.1</kafka-clients.version>
         <lombok.version>1.18.12</lombok.version>
         <junit.version>4.13.1</junit.version>
-        <hutool.version>5.8.16</hutool.version>
+        <hutool.version>5.8.17</hutool.version>
     </properties>
 
     <dependencyManagement>

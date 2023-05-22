@@ -1,6 +1,7 @@
 package com.github.jesse.l2cache.example;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -28,5 +29,13 @@ public class Test {
         Map<Object, Object> notHitCacheKeyMap = new HashMap<>();
         System.out.println(CollectionUtils.isEmpty(notHitCacheKeyMap));
         System.out.println(CollectionUtil.isEmpty(notHitCacheKeyMap));
+    }
+
+    @org.junit.Test
+    public void idUtilTest(){
+
+        System.out.println(IdUtil.fastSimpleUUID());
+        System.out.println(IdUtil.nanoId());
+        System.out.println(IdUtil.getSnowflakeNextIdStr());
     }
 }
