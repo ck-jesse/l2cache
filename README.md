@@ -78,6 +78,7 @@ L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高
 
 
 # 五、实战问题
+- [l2cache热key探测-技术方案调研](https://blog.csdn.net/icansoicrazy/article/details/130885982)
 - [记录一次阿里云Redis版超出最大内存限制异常](https://editor.csdn.net/md/?articleId=108810679)
 - [实战-l2cache-Caffeine的OOM异常分析](https://blog.csdn.net/icansoicrazy/article/details/108923992)
 - [实战-l2cache高并发场景下出现OOM的分析和优化方案](https://blog.csdn.net/icansoicrazy/article/details/112274052)
