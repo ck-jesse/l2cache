@@ -92,5 +92,3 @@ L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高
 您的 `Star` 或 `赞赏` 将会给我带来更多动力。
 
 最后，欢迎你 Fork PR 成为项目贡献者。
-
-![rewards](https://gitee.com/ck-jesse/l2cache/raw/master/img/rewards.jpg)
