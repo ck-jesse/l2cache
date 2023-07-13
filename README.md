@@ -93,3 +93,6 @@ L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高
 您的 `Star` 或 `赞赏` 将会给我带来更多动力。
 
 最后，欢迎你 Fork PR 成为项目贡献者。
+
+# 七、已知用户
+按照注册顺序，欢迎更多访问公司在[#26](https://github.com/ck-jesse/l2cache/issues/26)注册（仅限开源用户）。
