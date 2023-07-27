@@ -8,17 +8,19 @@
 L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高并发场景下的分布式二级缓存框架。
 
 # 二、如何使用
-- [如何使用L2cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
+- [如何使用L2Cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
 
+# 三、核心原理
+- [L2Cache核心原理解析](https://blog.csdn.net/icansoicrazy/article/details/131959016)
 
-# 三、重要数据
+# 四、重要数据
 - 已在生产环境投产，目前主要应用在商品、优惠券、用户、营销等核心服务。
 - 经历过多年双十一、双十二，以及`多次大促活动的流量洗礼`。
 - 支撑公司单月`10亿GMV`
 - 支撑全链路压测`35W QPS`
 
 
-# 四、核心功能
+# 五、核心功能
 - **支持多种缓存类型：** 一级缓存、二级缓存、混合缓存
 - **解决痛点问题：** 缓存击穿、缓存穿透等
 - **动态缓存配置：** 支持动态调整混合缓存下的缓存类型，支持热key的手动配置
@@ -78,7 +80,7 @@ L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高
 > 若使用缓存，则必然可能出现不一致的情况，也就是说无法保证强一致性。
 
 
-# 五、实战问题
+# 六、实战问题
 - [l2cache热key探测-技术方案调研](https://blog.csdn.net/icansoicrazy/article/details/130885982)
 - [记录一次阿里云Redis版超出最大内存限制异常](https://editor.csdn.net/md/?articleId=108810679)
 - [实战-l2cache-Caffeine的OOM异常分析](https://blog.csdn.net/icansoicrazy/article/details/108923992)
@@ -87,12 +89,12 @@ L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高
   ](https://blog.csdn.net/icansoicrazy/article/details/125096876)
 
 
-# 六、鼓励与帮助
+# 七、鼓励与帮助
 如果 l2cache 对您有所帮助，不妨右上角点点 `Star` 或者`任意赞赏`支持。
 
 您的 `Star` 或 `赞赏` 将会给我带来更多动力。
 
 最后，欢迎你 Fork PR 成为项目贡献者。
 
-# 七、已知用户
+# 八、已知用户
 按照注册顺序，欢迎更多访问公司在[#26](https://github.com/ck-jesse/l2cache/issues/26)注册（仅限开源用户）。
