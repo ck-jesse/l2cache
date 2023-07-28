@@ -7,6 +7,8 @@
 
 L2Cache 是一个基于`内存`、 `Redis` 、 `Spring Cache` 实现的满足高并发场景下的分布式二级缓存框架。
 
+L2Cache 并没有重复造轮子，它只是将目前市面上比较成熟、经得起考验的框架组合起来，封装屏蔽了复杂的缓存操作和实现原理，最终给开发者留出了一个简单易懂和易维护的分布式缓存开发工具。
+
 # 二、如何使用
 - [如何使用L2Cache](https://blog.csdn.net/icansoicrazy/article/details/125097730)
 
