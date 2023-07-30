@@ -129,15 +129,17 @@ public void getIfPresentTest() throws InterruptedException{
 - 输出结果
 ```text
 [缓存未过期] get key = 1, value =1
-[缓存已过期] getIfPresent key = 1, value =null
-[缓存未过期] getIfPresent key = 1, value =null
+load value = 0
+[缓存已过期] getIfPresent key = 1, value =1
+remove removalCause={}, key=1, value=1
+[缓存未过期] getIfPresent key = 1, value =0
 [缓存不存在] getIfPresent key = 2, value =null
 ```
 
 - 结论
 ```text
 refreshAfterWrite模式下：
-1)获取已过期的缓存，这种情况下会触发load【重点】
+1)获取已过期的缓存，这种情况下会触发load【重点，此情况需特别注意，当valueLoader为null时，会緩存NullValue】
 2)获取未过期的缓存，这种情况下不会触发load
 3)获取不存在的缓存，这种情况下不会触发load
 ```
@@ -148,10 +150,17 @@ goodsSimpleListCache 缓存配置（实际缓存配置）
 分析至此，已完全确定该问题是由于caffeine.getIfPresent这个方法触发了load。
 
 # 方案
+
+## 临时方案
 修改缓存配置：采用 expireAfterWrite模式即可
 > goodsSimpleListCache: initialCapacity=64,maximumSize=10000,expireAfterWrite=30d,recordStats
 > 
 
+## 最终方案
+作为一个bug进行修复，具体如下：
+
+> LoadFunction.apply()中增加判断：集群环境下，valueLoader和value都为null时，直接返回null，避免缓存NullValue
+> RedissonRBucketCache.get()中增加判断：防止从redis中获取的value为null，同时valueLoader也为null的情况下，往redis中存了一个NullValue对象
 
 # 总结
 1、问题分析时一定要细心，不要放过细节信息
