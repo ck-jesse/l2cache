@@ -133,7 +133,9 @@ l2cache:
       #  max.poll.records: 10
       #  # 设置poll最大时间间隔（默认3s）
       #  max.poll.interval.ms: 3000
+#    # 热key探测
 #    hotkey:
+#      # 热key探测类型
 #      hotkeyType: jd
 #      jdHotKey:
 #        serviceName: weeget-bullet-goods-rest
