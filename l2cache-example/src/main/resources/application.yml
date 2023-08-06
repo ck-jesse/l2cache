@@ -62,7 +62,8 @@ l2cache:
       # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
       # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
       # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
-      # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
+      # 最新最优的推荐用法：refreshAfterWrite 和 实现CacheService接口，只需实现4个业务相关的方法即可（缓存操作提炼到上层接口中去实现）
+      # 基于注解的推荐用法：refreshAfterWrite 和 实现CacheService接口，并定义@Cacheable(sync=true)
       # 注意：当缓存项在有效期内重复利用率很低时，不适合用本地缓存，如3千万用户参加抢购活动，用户信息的缓存，则不能用本地缓存。
       # 因为超过最大数量限制时，再往里面添加元素，会异步按照LFU淘汰元素，若未及时淘汰，在大量用户请求的情况，会导致堆内存飙升，频繁的FullGC和YoungGC，最终导致OOM。
       defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=2m,softValues,recordStats
@@ -132,7 +133,9 @@ l2cache:
       #  max.poll.records: 10
       #  # 设置poll最大时间间隔（默认3s）
       #  max.poll.interval.ms: 3000
+#    # 热key探测
 #    hotkey:
+#      # 热key探测类型
 #      hotkeyType: jd
 #      jdHotKey:
 #        serviceName: weeget-bullet-goods-rest

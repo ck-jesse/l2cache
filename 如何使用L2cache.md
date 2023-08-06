@@ -68,7 +68,8 @@ l2cache:
       # Caffeine在缓存过期时默认只有一个线程去加载数据，配置了refreshAfterWrite后当大量请求过来时，可以确保其他用户快速获取响应。
       # 创建缓存的默认配置（完全与SpringCache中的Caffeine实现的配置一致）
       # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
-      # 推荐用法：refreshAfterWrite 和 @Cacheable(sync=true)
+      # 最新最优的推荐用法：refreshAfterWrite 和 实现CacheService接口，只需实现4个业务相关的方法即可（缓存操作提炼到上层接口中去实现）
+      # 基于注解的推荐用法：refreshAfterWrite 和 实现CacheService接口，并定义@Cacheable(sync=true)
       defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30m,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
@@ -88,7 +89,7 @@ l2cache:
       #expireTime: 30000
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
-      # 缓存同步策略配置
+    # 缓存同步策略配置
     cacheSyncPolicy:
       # 策略类型 kafka / redis
       type: redis
@@ -97,17 +98,16 @@ l2cache:
 ```
 
 注：
+
 1、通过自定义`CacheLoader`结合到`Caffeine`或`Guava`的`LoadingCache`来实现数据加载。
 
 2、建议所有缓存都设置过期时间，如果有些缓存维度可以是永久，那么也建议将过期时间设置长一些即可。
 
 
 
-**关键点：**
+**关键点：** 支持根据配置来灵活的组合使用不同的Cache，具体如下。
 
-支持根据配置来灵活的组合使用不同的Cache。
-
-1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
+### 1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
 
 ```yaml
 l2cache:
@@ -115,7 +115,7 @@ l2cache:
     cacheType: caffeine
 ```
 
-2、支持只使用二级缓存`Redis`。
+### 2、支持只使用二级缓存`Redis`。
 
 ```yaml
 l2cache:
@@ -123,7 +123,8 @@ l2cache:
     cacheType: redis
 ```
 
-3、支持同时使用一二级缓存。（推荐该方式，因为可动态配置缓存是走本地缓存还是走redis）
+### 3、支持同时使用一二级缓存【推荐】
+推荐该方式，因为可动态配置缓存是走本地缓存还是走redis。
 
 ```yaml
 l2cache:
@@ -134,7 +135,7 @@ l2cache:
       l2CacheType: redis
 ```
 
-4、支持配置指定缓存走本地缓存。
+### 4、支持配置指定缓存走本地缓存。
 
 4.1）全部缓存 走本地缓存
 ```yaml
@@ -184,7 +185,7 @@ l2cache:
         - goodsSpecCache
 ```
 
-4.3）指定key + 指定缓存名字 走本地缓存
+4.4）指定key + 指定缓存名字 走本地缓存
 ```yaml
 l2cache:
   config:
@@ -204,6 +205,33 @@ l2cache:
       l1ManualCacheNameSet:
         - compositeCache
         - goodsSpecCache
+```
+
+### 5、缓存同步策略配置
+详细配置见：[缓存同步策略配置](https://github.com/ck-jesse/l2cache/blob/master/doc/%E7%BC%93%E5%AD%98%E5%90%8C%E6%AD%A5%E7%AD%96%E7%95%A5%E9%85%8D%E7%BD%AE%E6%A0%B7%E4%BE%8B.md)
+```yaml
+l2cache:
+  config:
+    # 缓存同步策略配置
+    cacheSyncPolicy:
+      # 策略类型 kafka / redis
+      type: redis
+      # 缓存更新时通知其他节点的topic名称
+      topic: l2cache
+```
+
+### 6、热key探测配置
+```yaml
+l2cache:
+  config:
+    # 热key探测 
+    hotkey:
+      # 热key探测类型
+      hotkeyType: jd
+      jdHotKey:
+        serviceName: weeget-bullet-goods-rest
+        #etcd的地址，如有多个用逗号分隔
+        etcdUrl: http://127.0.0.1:2379
 ```
 
 ## 3、代码中的使用
