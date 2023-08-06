@@ -86,11 +86,7 @@ public interface CacheService<K, R> {
      * @see CacheService#buildCacheKey(Object)
      */
     default R get(K key) {
-        Cache l2cache = getNativeL2cache();
-        if (null == l2cache) {
-            throw new L2CacheException("未获取到l2cache的Cache对象，请检查缓存配置是否正确");
-        }
-        return (R) l2cache.getIfPresent(this.buildCacheKey(key));
+        return (R) this.getNativeL2cache().getIfPresent(this.buildCacheKey(key));
     }
 
     /**
@@ -140,11 +136,7 @@ public interface CacheService<K, R> {
      * @see CacheService#buildCacheKey(Object)
      */
     default boolean isExists(K key) {
-        Cache l2cache = getNativeL2cache();
-        if (null == l2cache) {
-            throw new L2CacheException("未获取到l2cache的Cache对象，请检查缓存配置是否正确");
-        }
-        return l2cache.isExists(this.buildCacheKey(key));
+        return this.getNativeL2cache().isExists(this.buildCacheKey(key));
     }
 
     /**
