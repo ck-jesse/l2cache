@@ -12,8 +12,7 @@ import java.util.concurrent.Callable;
 /**
  * 自定义CacheLoader
  * <p>
- * 目的：主要是为了在使用refreshAfterWrite策略的特性：仅加载数据的线程阻塞，其他线程返回旧值
- * 结合@Cacheable(sync=true)，在高并发场景下可提供更佳的性能。
+ * 目的：主要是为了使用refreshAfterWrite策略的特性：仅加载数据的线程阻塞，其他线程返回旧值
  *
  * @author chenck
  * @date 2020/5/9 14:28

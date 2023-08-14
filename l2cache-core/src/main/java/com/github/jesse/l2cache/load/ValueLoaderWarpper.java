@@ -55,6 +55,8 @@ public class ValueLoaderWarpper implements Callable {
     /**
      * 递增
      * 注：过滤并发执行同一个key的refresh操作，保证同一个key只有一个refresh操作在执行
+     *
+     * @return the previous value
      */
     public int getAndIncrement() {
         return this.waitRefreshNum.getAndIncrement();
