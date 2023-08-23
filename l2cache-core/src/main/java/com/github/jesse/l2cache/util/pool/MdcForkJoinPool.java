@@ -56,22 +56,23 @@ public class MdcForkJoinPool extends ForkJoinPool {
     // constructor
 
     public MdcForkJoinPool() {
-        super();
-        //this(DEFAULT_PARALLELISM, DEFAULT_THREAD_NAME_PREFIX);
+        this(DEFAULT_PARALLELISM, DEFAULT_THREAD_NAME_PREFIX);
     }
 
     public MdcForkJoinPool(int parallelism) {
-        super(parallelism);
-        //this(parallelism, DEFAULT_THREAD_NAME_PREFIX);
+        this(parallelism, DEFAULT_THREAD_NAME_PREFIX);
     }
 
     public MdcForkJoinPool(String threadNamePrefix) {
-        super(DEFAULT_PARALLELISM);
-        //this(DEFAULT_PARALLELISM, threadNamePrefix);
+        this(DEFAULT_PARALLELISM, threadNamePrefix);
     }
 
+    /**
+     * @param parallelism      the parallelism level. For default value, use {@link java.lang.Runtime#availableProcessors}.
+     * @param threadNamePrefix 自定义的线程名称前缀
+     */
     public MdcForkJoinPool(int parallelism, String threadNamePrefix) {
-        //this(parallelism, new LimitedThreadForkJoinWorkerThreadFactory(parallelism, threadNamePrefix + "-" + nextPoolId()), null, false);
+        this(parallelism, new CustomForkJoinWorkerThreadFactory(threadNamePrefix + "-" + nextPoolId()), null, false);
     }
 
     /**
