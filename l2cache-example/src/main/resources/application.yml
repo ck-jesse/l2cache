@@ -1,5 +1,4 @@
-server:
-  port: 8081
+#server:
   #servlet:
   #  context-path: /l2cache-example
 

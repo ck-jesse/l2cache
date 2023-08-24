@@ -86,7 +86,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.github.jesse.l2cache.example.Application</mainClass>
+                    <mainClass>com.github.jesse.l2cache.example.Application80</mainClass>
                 </configuration>
             </plugin>
         </plugins>
