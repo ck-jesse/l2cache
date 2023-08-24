@@ -38,7 +38,8 @@ public class ManagedBlockerTest {
             execNum++;
             Thread.sleep(1000);
             System.out.println("execNum=" + execNum + " , " + threadDateTimeInfo() + ", pool=" + pool.toString());
-            if (execNum % 50 == 0) {
+
+            if (execNum % 30 == 0) {
                 System.out.println("execNum=" + execNum);
                 test(pool, execNum);
                 Thread.sleep(30000);
@@ -49,7 +50,7 @@ public class ManagedBlockerTest {
     static void test(ForkJoinPool pool, int execNum) {
 
         String key = "key_" + execNum + "_";
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 50; i++) {
             int finalI = i;
             // 构建任务并提交到线程池
             pool.execute(new RecursiveTask<Object>() {
@@ -70,7 +71,7 @@ public class ManagedBlockerTest {
                         // 运行指定的阻塞任务。当ForkJoinTask 在 ForkJoinPool 中运行时，此方法可能会在必要时创建备用线程，以确保当前线程在 ManagedBlockerblock.block() 中阻塞时有足够的并行性。
                         ForkJoinPool.managedBlock(myManagedBlocker);
 
-                        System.out.println(threadDateTimeInfo() + ", 休眠2s, result=" + myManagedBlocker.getResult() + ", RunningThreadCount=" + pool.getRunningThreadCount() + ", ActiveThreadCount=" + pool.getActiveThreadCount() + ", PoolSize=" + pool.getPoolSize());
+                        System.out.println(threadDateTimeInfo() + ", 休眠2s, result=" + myManagedBlocker.getResult() + ", pool=" + pool);
                         setRawResult(myManagedBlocker.getResult());
                         return getRawResult();
                     } catch (InterruptedException e) {

@@ -19,10 +19,13 @@ import java.util.function.Function;
  * 3、ManagedBlocker将最大正在运行的线程数限制为32767.尝试创建大于最大数目的池导致IllegalArgumentException，只有当池被关闭或内部资源耗尽时，此实现才会拒绝提交的任务（即通过抛出RejectedExecutionException ）。
  * 【方案】
  * 在管理阻塞时，通过自定义 {@LimitedThreadForkJoinWorkerThreadFactory} 来限制ForkJoinPool最大可创建的线程数，并复用当前的ForkJoinPool的线程，以此来避免无限制的创建`备用线程`
+ * <p>
+ * TODO 暂未找到方法对ForkJoinPool的线程回收进行精确控制，因此废弃该类
  *
  * @author chenck
  * @date 2023/5/5 18:30
  */
+@Deprecated
 public class MyManagedBlocker implements ForkJoinPool.ManagedBlocker {
     private Function function;
     private Object key;
@@ -37,13 +40,20 @@ public class MyManagedBlocker implements ForkJoinPool.ManagedBlocker {
 
     @Override
     public boolean block() throws InterruptedException {
-        result = function.apply(key);
+        // 当阻塞条件满足时，返回 true，否则返回 false
         done = true;
+
+        // 执行阻塞操作，这可能是一个 IO 操作、等待锁等
+        result = function.apply(key);
+
+        // 返回 true 表示阻塞成功，返回 false 表示阻塞被中断
         return false;
     }
 
     @Override
     public boolean isReleasable() {
+        // 判断是否可以释放阻塞
+        // 返回 true，表示可以释放阻塞，返回 false，表示继续阻塞
         return done;
     }
 
