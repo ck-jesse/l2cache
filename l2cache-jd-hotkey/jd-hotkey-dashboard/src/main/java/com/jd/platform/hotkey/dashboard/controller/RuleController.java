@@ -1,6 +1,7 @@
 package com.jd.platform.hotkey.dashboard.controller;
 
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONTokener;
 import com.github.pagehelper.PageInfo;
@@ -128,7 +129,7 @@ public class RuleController extends BaseController {
 	 */
 	private void checkRule(String rules) {
 		try {
-			Object json = new JSONTokener(rules).nextValue();
+			Object json = new JSONTokener(rules, JSONConfig.create()).nextValue();
 			if (json instanceof JSONObject) {
 				// JSONObject jsonObject = (JSONObject) json;
 				throw new BizException(ResultEnum.ILLEGAL_JSON_ARR);
