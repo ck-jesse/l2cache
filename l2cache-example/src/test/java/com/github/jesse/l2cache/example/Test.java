@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author chenck
@@ -37,5 +38,11 @@ public class Test {
         System.out.println(IdUtil.fastSimpleUUID());
         System.out.println(IdUtil.nanoId());
         System.out.println(IdUtil.getSnowflakeNextIdStr());
+    }
+
+    @org.junit.Test
+    public void atomicIntegerTest(){
+        AtomicInteger threadNumber = new AtomicInteger(10);
+        System.out.println(threadNumber.compareAndSet(101, 1));
     }
 }

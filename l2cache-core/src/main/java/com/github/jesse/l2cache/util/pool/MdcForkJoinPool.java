@@ -40,7 +40,7 @@ public class MdcForkJoinPool extends ForkJoinPool {
      * Returns the next sequence number. We don't expect this to
      * ever contend, so use simple builtin sync.
      */
-    private static final synchronized int nextPoolId() {
+    private static synchronized int nextPoolId() {
         return ++poolNumberSequence;
     }
 
