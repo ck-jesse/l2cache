@@ -1,6 +1,6 @@
 # 一、集成Spring项目
 
-> 最新版本号： 1.0.36 （已部署到中央仓库）
+> 最新版本号： 1.0.37 （已部署到中央仓库）
 
 ## 1、启动L2cache
 
@@ -12,7 +12,7 @@
 <dependency>
     <groupId>io.github.ck-jesse</groupId>
     <artifactId>l2cache-spring-boot-starter</artifactId>
-    <version>1.0.36</version>
+    <version>1.0.37</version>
 </dependency>
 ```
 
