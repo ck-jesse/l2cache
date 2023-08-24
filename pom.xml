@@ -190,6 +190,7 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <!-- 许可证信息 -->
     <licenses>
         <license>
             <name>Open Software License 3.0</name>
@@ -197,6 +198,7 @@
         </license>
     </licenses>
 
+    <!-- 开发者信息 -->
     <developers>
         <developer>
             <name>jesse</name>
@@ -205,6 +207,7 @@
         </developer>
     </developers>
 
+    <!-- SCM信息，可以理解为托管信息，我这里在github上托管 -->
     <scm>
         <connection>scm:https://github.com/ck-jesse/l2cache.git</connection>
         <developerConnection>scm:https://github.com/ck-jesse/l2cache.git</developerConnection>
