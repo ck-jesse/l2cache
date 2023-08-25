@@ -33,8 +33,15 @@ public class LimitedThreadForkJoinWorkerThread extends ForkJoinWorkerThread {
 
     /**
      * 线程终止时，执行的清理动作
-     * 问：为什么自定义线程的onTermination()方法，不会在线程回收时被调用？
-     * 答：onTermination() 方法仅在线程执行任务时抛出未捕获异常的情况下被调用，它并不是在线程被回收时执行的方法。
+     * 【场景1：不结合ManagedBlocker的情况下】
+     * 结论：在线程执行完任务，且没有窃取到其他任务时，会执行 onTermination()
+     * 案例：CustomForkJoinWorkerThreadFactoryTest
+     *
+     * 【场景2：结合ManagedBlocker的情况下】
+     * 案例：ManagedBlockerTest
+     * 分析：
+     * 1、当创建的线程序号达到一定数量时（如：20个），任务执行完后，线程一直处于WAIT状态，这就导致无可用线程，且一直不会执行到onTermination()方法，也就不会执行threadCount-1
+     * 2、同时由于threadCount=maxThreads，导致不会创建新线程，最终出现业务逻辑不被执行的情况。
      */
     @Override
     protected void onTermination(Throwable exception) {

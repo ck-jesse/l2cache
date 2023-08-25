@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  */
 public class Test4 {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Map<String, String> l1KeyMap = new HashMap<>();
         l1KeyMap.put("key1", "key1");
         l1KeyMap.put("key2", "key2");
@@ -27,5 +27,18 @@ public class Test4 {
 //                .collect(Collectors.toMap(entry -> l1KeyMap.get(entry.getKey()), entry -> entry.getValue()));
                 .collect(HashMap::new, (map, entry) -> map.put(l1KeyMap.get(entry.getKey()), entry.getValue()), HashMap::putAll);
         System.out.println(l2HitMapTemp);
+
+        int count = 0;
+        boolean relesable = false;
+        while (!relesable) {
+            count++;
+            Thread.sleep(500);
+            System.out.println("in while count=" + count);
+            if (count % 10 == 0) {
+                relesable = true;
+            }
+        }
+
+        System.out.println("out while count=" + count);
     }
 }

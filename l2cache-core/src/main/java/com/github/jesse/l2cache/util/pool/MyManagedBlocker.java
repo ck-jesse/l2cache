@@ -37,24 +37,32 @@ public class MyManagedBlocker implements ForkJoinPool.ManagedBlocker {
         this.function = function;
     }
 
-
     @Override
     public boolean block() throws InterruptedException {
-        // 当阻塞条件满足时，返回 true，否则返回 false
+        if (null == result) {
+            // 执行阻塞操作，这可能是一个 IO 操作、等待锁等
+            result = function.apply(key);
+        }
+
+        // true 表示完成执行阻塞操作（正常结束或被中断），需要释放阻塞
         done = true;
-
-        // 执行阻塞操作，这可能是一个 IO 操作、等待锁等
-        result = function.apply(key);
-
-        // 返回 true 表示阻塞成功，返回 false 表示阻塞被中断
-        return false;
+        return true;
     }
 
+    /**
+     * 判断是否可以释放阻塞
+     * <p>
+     * 建议：方法 isReleasable()在 ForkJoinPool.managedBlock 中被调用，需要特别注意返回true和false，返回值不同造成的结果不一样，需要结合源码进行了解。
+     * <p>
+     * 返回 true，表示释放阻塞，如果第一次执行isReleasable()就返回true，那么block()方法不会被执行，也就是说不会执行具体的业务逻辑。
+     * 返回 false，表示继续阻塞，会通过 ForkJoinPool.tryCompensate() 尝试释放或创建一个补偿线程来处理阻塞。
+     * <p>
+     *
+     * @return true，表示释放阻塞，false，表示继续阻塞
+     */
     @Override
     public boolean isReleasable() {
-        // 判断是否可以释放阻塞
-        // 返回 true，表示可以释放阻塞，返回 false，表示继续阻塞
-        return done;
+        return done || result != null;
     }
 
     public Object getResult() {

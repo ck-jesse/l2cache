@@ -27,7 +27,7 @@ public class CustomForkJoinWorkerThreadFactory implements ForkJoinPool.ForkJoinW
     /**
      * 线程编号
      */
-    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final AtomicInteger threadNumber = new AtomicInteger(0);
 
     public CustomForkJoinWorkerThreadFactory() {
         this.threadNamePrefix = PoolConsts.DEFAULT_THREAD_NAME_PREFIX;
@@ -46,12 +46,12 @@ public class CustomForkJoinWorkerThreadFactory implements ForkJoinPool.ForkJoinW
         int threadNum = threadNumber.incrementAndGet();
         String newThreadName = getNewThreadName(threadNum);
         if (logger.isDebugEnabled()) {
-            logger.debug("create thread, threadNum={}, newThreadName={}, pool={}", threadNumber.get(), newThreadName, pool.toString());
+            logger.debug("create thread, newThreadName={}, pool={}", newThreadName, pool.toString());
         }
 
         // 当线程编号大于等于最大线程编号时，将线程编号重置
         if (threadNum >= PoolConsts.MAX_THREAD_NUMBER) {
-            threadNumber.compareAndSet(threadNum, 1);
+            threadNumber.compareAndSet(threadNum, 0);
         }
 
         // 使用自定义线程名称

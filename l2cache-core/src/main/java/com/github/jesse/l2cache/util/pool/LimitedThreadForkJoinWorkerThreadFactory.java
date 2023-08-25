@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 1、支持自定义线程名字
  * 2、适用于面对IO阻塞型任务时，通过扩展线程池中的线程数，来提高执行效率的场景，配合ManagedBlocker使用
  * 注意：需通过LimitedThreadForkJoinWorkerThreadFactory，限制ForkJoinPool中创建的最大线程数，避免无限制的创建线程，导致OOM
- *
+ * <p>
  * TODO 暂未找到方法对ForkJoinPool的线程回收进行精确控制，因此废弃该类
  *
  * @author chenck
@@ -37,12 +37,12 @@ public class LimitedThreadForkJoinWorkerThreadFactory implements ForkJoinPool.Fo
     /**
      * 线程编号，用于给线程命名
      */
-    private final AtomicInteger threadNumber = new AtomicInteger(1);
+    private final AtomicInteger threadNumber = new AtomicInteger(0);
 
     /**
      * 线程数量，用于控制创建线程的数量
      */
-    private final AtomicInteger threadCount = new AtomicInteger(1);
+    private final AtomicInteger threadCount = new AtomicInteger(0);
 
     public LimitedThreadForkJoinWorkerThreadFactory(int maxThreads) {
         this.maxThreads = maxThreads;
@@ -82,13 +82,13 @@ public class LimitedThreadForkJoinWorkerThreadFactory implements ForkJoinPool.Fo
             int threadNum = threadNumber.incrementAndGet();
             String newThreadName = getNewThreadName(threadNum);
             if (logger.isDebugEnabled()) {
-                logger.debug("create thread, threadNum={}, threadCount={}, maxThreads={}, newThreadName={}, pool={}", threadNumber.get(), threadCount.get(), maxThreads, newThreadName, pool.toString());
+                logger.debug("create thread, threadCount={}, maxThreads={}, newThreadName={}, pool={}", threadCount.get(), maxThreads, newThreadName, pool.toString());
             }
-            System.out.println("create thread, threadCount=" + threadCount + ", maxThreads=" + maxThreads + " , pool=" + pool.toString() + "newThreadName=" + newThreadName);
+            System.out.println("create thread, threadCount=" + threadCount + ", maxThreads=" + maxThreads + ", newThreadName=" + newThreadName + " , pool=" + pool.toString());
 
             // 当线程编号大于等于最大线程编号时，将线程编号重置
             if (threadNum >= PoolConsts.MAX_THREAD_NUMBER) {
-                threadNumber.compareAndSet(threadNum, 1);
+                threadNumber.compareAndSet(threadNum, 0);
             }
 
             // 使用自定义线程名称
@@ -98,9 +98,9 @@ public class LimitedThreadForkJoinWorkerThreadFactory implements ForkJoinPool.Fo
         // 如果当前线程数量超过最大线程数，则不创建新线程，并将threadCount-1
         threadCount.decrementAndGet();
         if (logger.isDebugEnabled()) {
-            logger.debug("Exceeded maximum number of threads, threadNum={}, threadCount={}, maxThreads={}, pool={}", threadNumber.get(), threadCount.get(), maxThreads, pool.toString());
+            logger.debug("Exceeded maximum number of threads, threadCount={}, maxThreads={}, threadNum={}, pool={}", threadCount.get(), maxThreads, threadNumber.get(), pool.toString());
         }
-        System.out.println("Exceeded maximum number of threads, threadNum=" + threadNumber.get() + ", threadCount=" + threadCount.get() + ", maxThreads=" + maxThreads + " , pool=" + pool.toString());
+        System.out.println("Exceeded maximum number of threads, threadName=" + Thread.currentThread().getName() + ", threadCount=" + threadCount.get() + ", maxThreads=" + maxThreads + ", threadNum=" + threadNumber.get() + " , pool=" + pool.toString());
         return null;
     }
 

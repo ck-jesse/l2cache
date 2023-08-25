@@ -26,8 +26,9 @@ public class CustomForkJoinWorkerThread extends ForkJoinWorkerThread {
 
     /**
      * 线程终止时，执行的清理动作
-     * 问：为什么自定义线程的onTermination()方法，不会在线程回收时被调用？
-     * 答：onTermination() 方法仅在线程执行任务时抛出未捕获异常的情况下被调用，它并不是在线程被回收时执行的方法。
+     * 【场景1：不结合ManagedBlocker的情况下】
+     * 已验证：在线程执行完任务，且没有窃取到其他任务时，会执行 onTermination()
+     * 具体见：CustomForkJoinWorkerThreadFactoryTest
      */
     @Override
     protected void onTermination(Throwable exception) {
