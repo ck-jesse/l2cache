@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class NewBrandCacheControllerTest {
 
-    private static final String HOST = "http://127.0.0.1:8081";
+    private static final String HOST = "http://127.0.0.1:8080";
 
     RestTemplate restTemplate = new RestTemplate();
 

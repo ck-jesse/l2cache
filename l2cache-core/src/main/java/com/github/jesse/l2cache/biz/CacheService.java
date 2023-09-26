@@ -58,7 +58,14 @@ public interface CacheService<K, R> {
      *
      * @return 缓存key
      */
-    String buildCacheKey(K key);
+    default String buildCacheKey(K key) {
+        // key为基础数据类型，则直接转换为String（简化开发）
+        if (key instanceof CharSequence || key instanceof Number) {
+            return String.valueOf(key);
+        }
+        // key为自定义DTO，则限制必须实现该方法，自行构建缓存key
+        throw new IllegalStateException("key为自定义DTO，请自行构建缓存key " + key.toString());
+    }
 
     /**
      * 查询单个缓存数据
