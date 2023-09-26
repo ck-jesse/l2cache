@@ -81,6 +81,8 @@ l2cache:
         goodsPriceRevisionListCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         actDiscountCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         brandParentFirstPushCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
+        # cacheName中含有: / * 等特殊字符，需要加 "[ ]"
+        "[userCache:v1]": initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
     # 二级缓存
     redis:
       # 加载数据时，是否加锁
