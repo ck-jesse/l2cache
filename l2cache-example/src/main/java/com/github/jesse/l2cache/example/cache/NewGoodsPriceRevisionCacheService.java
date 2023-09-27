@@ -33,7 +33,8 @@ public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<Good
     @Override
     public String buildCacheKey(GoodsPriceRevisionIdsReqDTO goodsPriceRevisionIdsReqDTO) {
         StringBuilder sb = new StringBuilder();
-        sb.append(goodsPriceRevisionIdsReqDTO.getGoodsId());
+        sb.append("tenantId");// 可在此处动态拼接多租户ID
+        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsId());
         sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGroupId());
         sb.append("_").append(goodsPriceRevisionIdsReqDTO.getOrganizationId());
         sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
