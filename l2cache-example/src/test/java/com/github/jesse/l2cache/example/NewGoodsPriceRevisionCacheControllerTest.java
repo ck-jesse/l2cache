@@ -25,8 +25,6 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         String url = HOST + "/new/revision/get";
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         ResponseEntity result = restTemplate.postForEntity(url, param, GoodsPriceRevisionRespBO.class);
@@ -39,8 +37,6 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         ResponseEntity result = restTemplate.postForEntity(url, param, GoodsPriceRevisionRespBO.class);
@@ -53,8 +49,6 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO reqDTO = new GoodsPriceRevisionIdsReqDTO();
         reqDTO.setGoodsGroupId(1);
-        reqDTO.setOrganizationId(2);
-        reqDTO.setGroupId(3);
         reqDTO.setGoodsId(1001);
 
         GoodsPriceRevisionRespBO respBO = new GoodsPriceRevisionRespBO();
@@ -81,8 +75,6 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         ResponseEntity result = restTemplate.postForEntity(url, param, GoodsPriceRevisionRespBO.class);
@@ -95,8 +87,6 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         ResponseEntity result = restTemplate.postForEntity(url, param, Boolean.class);
@@ -109,14 +99,10 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         GoodsPriceRevisionIdsReqDTO param2 = new GoodsPriceRevisionIdsReqDTO();
         param2.setGoodsGroupId(1);
-        param2.setOrganizationId(2);
-        param2.setGroupId(3);
         param2.setGoodsId(1002);
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
@@ -133,14 +119,10 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         GoodsPriceRevisionIdsReqDTO param2 = new GoodsPriceRevisionIdsReqDTO();
         param2.setGoodsGroupId(1);
-        param2.setOrganizationId(2);
-        param2.setGroupId(3);
         param2.setGoodsId(1002);
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
@@ -157,14 +139,10 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
         param.setGoodsGroupId(1);
-        param.setOrganizationId(2);
-        param.setGroupId(3);
         param.setGoodsId(1001);
 
         GoodsPriceRevisionIdsReqDTO param2 = new GoodsPriceRevisionIdsReqDTO();
         param2.setGoodsGroupId(1);
-        param2.setOrganizationId(2);
-        param2.setGroupId(3);
         param2.setGoodsId(1002);
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();

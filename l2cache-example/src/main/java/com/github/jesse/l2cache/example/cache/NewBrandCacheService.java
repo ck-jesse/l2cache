@@ -32,17 +32,7 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
 
     @Override
     public String buildCacheKey(Integer brandId) {
-        // 方式1:
         return String.valueOf(brandId);
-
-        // 方式2：
-        /*
-        StringBuilder sb = new StringBuilder();
-        sb.append("tenantId");// 可在此处动态拼接多租户ID
-        sb.append("_");
-        sb.append(brandId);
-        return sb.toString();
-        */
     }
 
     @Override

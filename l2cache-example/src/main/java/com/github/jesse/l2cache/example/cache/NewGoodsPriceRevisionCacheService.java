@@ -33,11 +33,12 @@ public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<Good
     @Override
     public String buildCacheKey(GoodsPriceRevisionIdsReqDTO goodsPriceRevisionIdsReqDTO) {
         StringBuilder sb = new StringBuilder();
-        sb.append("tenantId");// 可在此处动态拼接多租户ID
+        // 可在此处动态拼接多租户ID，分隔符也可按照自己的述求进行选择
+        // 比如冒号 ":"，冒号的用处，当缓存在redis中时，冒号可以查看
+        // 比如下划线 "_"，下划线就仅仅是一个普通的分隔符了
+        sb.append(goodsPriceRevisionIdsReqDTO.getTenantId());
+        sb.append(":").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
         sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsId());
-        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGroupId());
-        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getOrganizationId());
-        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
         return sb.toString();
     }
 

@@ -44,13 +44,22 @@ public interface CacheService<K, R> {
 
     /**
      * 构建缓存key
-     * 注：
-     * 1.该方法可自定义拼接DTO中多个字段作为一个缓存key
+     * <p>
+     * 1.该方法可自定义拼接DTO中多个字段作为一个缓存key，可以按需构建缓存key，比如拼接租户id等
      * 2.如果构建的缓存key是被l2cache的Cache对象所使用，则key中无需拼接CacheName，因为CacheName会在l2cache中自动构建好。
      * 3.如果构建的缓存key不是被l2cache的Cache对象所使用，则key中需要拼接CacheName，适用于直接通过 RedissonClient 等来操作缓存的场景。
      * <p>
-     * 前提：key是Integer类型
+     * 缓存key的说明：
+     * 一级缓存(本地缓存)：cacheKey的前缀不含cacheName，由于本地缓存只需保证一个缓存维度下cacheKey的唯一性即可，所以无需包含cacheName，还有一个好处是，可以减小key的长度，节省内存空间。
+     * 二级缓存(远程缓存)：cacheKey的前缀包含cacheName，由于远程缓存是集中式缓存(如redis)，需要通过cacheName+cacheKey来保证唯一性，因此，二级缓存会将cacheName作为cacheKey的前缀。
+     *
+     * 缓存key的案例：
+     * 一级缓存(本地缓存)：goodsGroupId_goodsId
+     * 二级缓存(远程缓存)：goodsPriceRevisionCache:goodsGroupId_goodsId
+     *
+     * <p>
      * 问题还原：
+     * 前提：key是Integer类型
      * 1）先通过CacheService.getOrLoad(key)加载数据到本地缓存，此时，本地缓存中key的类型为Integer
      * 2）再通过CacheService.get(buildCacheKey(key))方法获取缓存数据，由于buildCacheKey(key)的将key转换为了String类型，所以根据这个String类型的key无法从本地缓存获取到缓存数据，会在本地缓存中再次缓存一个key为String类型的缓存，也就是本来是一个缓存，现在变为了2个缓存，一个key为Integer类型，一个key为String类型
      * 解决方案：CacheService.buildCacheKey()方法返回类型从String修改为Object即可
