@@ -120,5 +120,11 @@ L2Cache 并没有重复造轮子，它只是将目前市面上比较成熟、经
 
 最后，欢迎你 Fork PR 成为项目贡献者。
 
-# 八、已知用户
+# 八、联系方式
+微信：chenck1112
+
+![weixin](https://gitee.com/ck-jesse/l2cache/raw/master/img/weixin.jpg)
+
+
+# 九、已知用户
 按照注册顺序，欢迎更多访问公司在[#26](https://github.com/ck-jesse/l2cache/issues/26)注册（仅限开源用户）。
