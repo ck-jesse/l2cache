@@ -22,6 +22,8 @@ l2cache:
     allowNullValues: true
     # 空值过期时间，单位秒
     nullValueExpireTimeSeconds: 30
+    # 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认true，简化缓存配置
+    useL1ReplaceL2ExpireTime: true
     # 缓存类型
     cacheType: composite
     # 组合缓存配置
@@ -73,7 +75,7 @@ l2cache:
         userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
         # 无过期时间配置
         queryUserSync: initialCapacity=10,maximumSize=20,refreshAfterWrite=1m,recordStats
-        brandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=24h,recordStats
+        brandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
         timeCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=30d,recordStats
         homeGoodsGroupPageCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         homeGoodsGroupCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
@@ -91,12 +93,11 @@ l2cache:
       tryLock: true
       # 批量操作的大小，可以理解为是分页
       batchPageSize: 3
-      # 缓存过期时间(ms)
-      #expireTime: 30000
-      # 缓存最大空闲时间(ms)
-      #maxIdleTime: 30000
-      # 最大缓存数
-      #maxSize: 200
+      # 默认缓存过期时间(ms)
+      expireTime: 86400000
+      # 针对cacheName维度的过期时间集合，单位ms
+      expireTimeCacheNameMap:
+        brandCache: 86400000
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
     # 缓存同步策略配置

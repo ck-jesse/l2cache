@@ -38,10 +38,9 @@ public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPr
     @Override
     public String buildCacheKey(GoodsPriceRevisionIdsReqDTO goodsPriceRevisionIdsReqDTO) {
         StringBuilder sb = new StringBuilder();
-        sb.append(goodsPriceRevisionIdsReqDTO.getGoodsId());
-        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGroupId());
-        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getOrganizationId());
-        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
+        sb.append(goodsPriceRevisionIdsReqDTO.getTenantId());
+        sb.append(":").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
+        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsId());
         return sb.toString();
     }
 

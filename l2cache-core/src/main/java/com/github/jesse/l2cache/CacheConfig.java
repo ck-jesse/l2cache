@@ -8,6 +8,7 @@ import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.consts.HotkeyType;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.*;
 @Getter
 @Setter
 @Accessors(chain = true)
+@ToString
 public class CacheConfig {
 
     /**
@@ -63,6 +65,12 @@ public class CacheConfig {
     private String logLevel = CacheConsts.LOG_DEBUG;
 
     /**
+     * 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认为true
+     * 注：目的是为了简化缓存配置，且保证一级缓存和二级缓存的配置一致。因此在使用混合缓存时，只需要配置一级缓存即可。
+     */
+    private boolean useL1ReplaceL2ExpireTime = true;
+
+    /**
      * 缓存类型，默认 COMPOSITE 组合缓存
      *
      * @see CacheType
@@ -86,6 +94,7 @@ public class CacheConfig {
     @Getter
     @Setter
     @Accessors(chain = true)
+    @ToString
     public static class Composite implements Config {
         /**
          * 一级缓存类型
@@ -128,6 +137,7 @@ public class CacheConfig {
     @Getter
     @Setter
     @Accessors(chain = true)
+    @ToString
     public static class Caffeine implements Config {
         /**
          * 是否自动刷新过期缓存 true 表示是(默认)，false 表示否
@@ -178,6 +188,7 @@ public class CacheConfig {
     @Getter
     @Setter
     @Accessors(chain = true)
+    @ToString
     public static class Guava implements Config {
         /**
          * 是否自动刷新过期缓存 true 表示是(默认)，false 表示否
@@ -212,6 +223,7 @@ public class CacheConfig {
     @Getter
     @Setter
     @Accessors(chain = true)
+    @ToString
     public static class Redis implements Config {
 
         /**
@@ -325,6 +337,7 @@ public class CacheConfig {
     @Getter
     @Setter
     @Accessors(chain = true)
+    @ToString
     public static class CacheSyncPolicy implements Config {
 
         /**
@@ -356,6 +369,7 @@ public class CacheConfig {
     @Getter
     @Setter
     @Accessors(chain = true)
+    @ToString
     public static class HotKey implements Config {
         /**
          * 热key类型，默认 NONE 没有集成自动发现功能
@@ -372,6 +386,7 @@ public class CacheConfig {
         @Getter
         @Setter
         @Accessors(chain = true)
+        @ToString
         public static class JdHotKey implements Config {
 
             /**

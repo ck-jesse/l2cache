@@ -25,8 +25,6 @@ public class BrandCacheController {
     public GoodsPriceRevisionRespBO priceGet() {
         GoodsPriceRevisionIdsReqDTO dto = new GoodsPriceRevisionIdsReqDTO();
         dto.setGoodsGroupId(0);
-        dto.setOrganizationId(0);
-        dto.setGroupId(0);
         dto.setGoodsId(0);
         return goodsPriceRevisionCacheService.get(dto);
     }
@@ -35,8 +33,6 @@ public class BrandCacheController {
     public GoodsPriceRevisionRespBO priceGetOrLoad() {
         GoodsPriceRevisionIdsReqDTO dto = new GoodsPriceRevisionIdsReqDTO();
         dto.setGoodsGroupId(0);
-        dto.setOrganizationId(0);
-        dto.setGroupId(0);
         dto.setGoodsId(0);
         return goodsPriceRevisionCacheService.getOrLoad(dto);
     }

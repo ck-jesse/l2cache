@@ -44,21 +44,27 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
     protected RedissonRBucketCache buildActualCache(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
         CacheConfig.Redis redis = this.getCacheConfig().getRedis();
 
-        // 获取一级缓存对应CacheSpec
-        // 二级缓存的过期时间和最大缓存数量从一级缓存上取，保证一级缓存和二级缓存的配置一致
+        Long redisExpireTime = redis.getExpireTimeCacheNameMap().getOrDefault(cacheName, redis.getExpireTime());
+
+        // 不使用一级缓存的过期时间来替换二级缓存的过期时间
+        if (!cacheConfig.isUseL1ReplaceL2ExpireTime()) {
+            logger.info("create a RedissonRBucketCache instance, 采用CacheConfig.Redis的值, cacheName={}, redisExpireTime={}", cacheName, redisExpireTime);
+            return new RedissonRBucketCache(cacheName, cacheConfig, redissonClient);
+        }
+
+        // 使用一级缓存的过期时间来替换二级缓存的过期时间。简化缓存配置，且保证一级缓存和二级缓存的配置一致。
         CacheSpec cacheSpec = CacheSupport.getCacheSpec(cacheConfig.getComposite().getL1CacheType(), cacheName);
         if (null != cacheSpec) {
             // 覆盖CacheConfig.Redis的默认值
-            if (cacheSpec.getExpireTime() < 0) {
+            if (cacheSpec.getExpireTime() <= 0) {
                 redis.getExpireTimeCacheNameMap().put(cacheName, 0L);// 0 表示无过期时间
             } else {
                 redis.getExpireTimeCacheNameMap().put(cacheName, cacheSpec.getExpireTime());
             }
-            logger.info("采用一级缓存上expireTime, 覆盖CacheConfig.Redis的默认值, cacheName={}, cacheSpec={}", cacheName, cacheSpec.toString());
+            logger.info("create a RedissonRBucketCache instance, 采用一级缓存上的expireTime, 覆盖CacheConfig.Redis的默认值, cacheName={}, redisExpireTime={}, expireTime={}", cacheName, redisExpireTime, cacheSpec.getExpireTime());
         } else {
-            logger.info("采用CacheConfig.Redis的值, cacheName={}, redis={}", cacheName, redis.toString());
+            logger.info("create a RedissonRBucketCache instance, 采用CacheConfig.Redis的值, 因为一级缓存的CacheSpec为空，cacheName={}, redisExpireTime={}", cacheName, redisExpireTime);
         }
-        logger.info("create a RedissonRBucketCache instance, cacheName={}", cacheName);
         return new RedissonRBucketCache(cacheName, cacheConfig, redissonClient);
     }
 }
