@@ -7,7 +7,7 @@
     <groupId>io.github.ck-jesse</groupId>
     <artifactId>l2cache</artifactId>
     <name>l2cache</name>
-    <version>1.0.37</version>
+    <version>1.0.38</version>
     <packaging>pom</packaging>
     <description>二级缓存组件</description>
     <url>https://github.com/ck-jesse/l2cache</url>
@@ -301,7 +301,7 @@
                         </executions>
                     </plugin>
 
-                    <!-- 自动发布暂存仓库中的组件，简化部署到中央仓库的步骤，只需无需每次去登陆 https://oss.sonatype.org/ 手动发布 -->
+                    <!-- 自动发布暂存仓库中的组件，简化部署到中央仓库的步骤，无需每次去登陆 https://oss.sonatype.org/ 手动发布 -->
                     <!--
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
