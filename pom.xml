@@ -9,7 +9,7 @@
     <name>l2cache</name>
     <version>1.0.38</version>
     <packaging>pom</packaging>
-    <description>二级缓存组件</description>
+    <description>分布式二级缓存框架</description>
     <url>https://github.com/ck-jesse/l2cache</url>
 
     <modules>
