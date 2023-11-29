@@ -58,6 +58,13 @@ public class NewBrandCacheControllerTest {
     }
 
     @Test
+    public void clear() {
+        String url = HOST + "/new/brand/clear";
+        Boolean result = restTemplate.getForObject(url, Boolean.class);
+        System.out.println(result);
+    }
+
+    @Test
     public void batchGet() {
         String url = HOST + "/new/brand/batchGet";
         BrandIdListBO param = new BrandIdListBO();

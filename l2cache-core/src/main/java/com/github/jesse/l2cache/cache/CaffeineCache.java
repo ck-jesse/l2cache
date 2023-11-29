@@ -208,7 +208,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void clear() {
-        logger.info("clear cache, cacheName={}", this.getCacheName());
+        logger.info("clear cache, cacheName={}, deleteCount={}", this.getCacheName(), caffeineCache.asMap().size());
         caffeineCache.invalidateAll();
         if (null != nullValueCache) {
             nullValueCache.invalidateAll();

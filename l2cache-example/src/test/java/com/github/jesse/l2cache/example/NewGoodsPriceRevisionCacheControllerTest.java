@@ -97,6 +97,13 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         ResponseEntity result = restTemplate.postForEntity(url, param, Boolean.class);
         System.out.println(JSON.toJSONString(result));
     }
+    @Test
+    public void clear() {
+        String url = HOST + "/new/revision/clear";
+
+        Boolean result = restTemplate.getForObject(url, Boolean.class);
+        System.out.println(result);
+    }
 
     @Test
     public void batchGet() {
@@ -122,11 +129,11 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
         GoodsPriceRevisionIdsReqDTO param = null;
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 10000; i++) {
             param = new GoodsPriceRevisionIdsReqDTO();
             param.setTenantId(1);
             param.setGoodsGroupId(1);
-            param.setGoodsId(1000 + i);
+            param.setGoodsId(5000 + i);
             keyList.add(param);
         }
 

@@ -238,7 +238,15 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public void clear() {
-        logger.warn("not support clear all cache, cacheName={}", this.getCacheName());
+        String pattern = this.getCacheName() + CacheConsts.SPLIT + CacheConsts.ASTERISK;
+
+        logger.warn("clear cache start, pattern={}", pattern);
+
+        // 非Batch模式(非pipeline mode)，通过 SCAN 操作遍历key，每个 SCAN 操作每个请求最多加载50个key
+        RKeys keys = redissonClient.getKeys();
+        long deleteCount = keys.deleteByPattern(pattern);
+
+        logger.warn("clear cache end, pattern={}, deleteCount={}", pattern, deleteCount);
     }
 
     @Override

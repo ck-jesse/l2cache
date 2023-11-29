@@ -51,6 +51,12 @@ public class NewGoodsPriceRevisionCacheController {
         return true;
     }
 
+    @RequestMapping(value = "/clear")
+    public Boolean clear() {
+        newGoodsPriceRevisionCacheService.clear();
+        return true;
+    }
+
     @PostMapping(value = "/batchGet")
     public Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> batchGet(@RequestBody List<GoodsPriceRevisionIdsReqDTO> keyList) {
         Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> map = newGoodsPriceRevisionCacheService.batchGet(keyList);

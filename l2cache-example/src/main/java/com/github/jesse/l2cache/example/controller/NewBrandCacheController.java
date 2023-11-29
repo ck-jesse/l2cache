@@ -46,6 +46,12 @@ public class NewBrandCacheController {
         return true;
     }
 
+    @RequestMapping(value = "/clear")
+    public Boolean clear() {
+        newBrandCacheService.clear();
+        return true;
+    }
+
     @PostMapping(value = "/batchGet")
     public Map<Integer, BrandRespBO> batchGet(@RequestBody BrandIdListBO bo) {
         Map<Integer, BrandRespBO> map = newBrandCacheService.batchGet(bo.getBrandIdList());

@@ -139,10 +139,17 @@ public interface CacheService<K, R> {
 
 
     /**
-     * 淘汰缓存
+     * 淘汰缓存（缓存key维度）
      */
     default void evict(K key) {
         this.getNativeL2cache().evict(this.buildCacheKey(key));
+    }
+
+    /**
+     * 淘汰缓存（缓存名称维度）
+     */
+    default void clear() {
+        this.getNativeL2cache().clear();
     }
 
     /**

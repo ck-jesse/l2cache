@@ -16,6 +16,10 @@ public class CacheConsts {
      * 分隔符
      */
     public static final String SPLIT = ":";
+    /**
+     * 通配符 *
+     */
+    public static final String ASTERISK = "*";
 
     /**
      * 日志级别
@@ -37,6 +41,6 @@ public class CacheConsts {
     /**
      * 是否打印详细日志
      */
-    public static final String PRINT_DETAIL_LOG ="on";
-    public static final String NOT_PRINT_DETAIL_LOG ="off";
+    public static final String PRINT_DETAIL_LOG = "on";
+    public static final String NOT_PRINT_DETAIL_LOG = "off";
 }
