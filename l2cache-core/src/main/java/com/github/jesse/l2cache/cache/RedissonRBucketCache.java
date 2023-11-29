@@ -46,14 +46,10 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      */
     private RedissonClient redissonClient;
 
-    private RMap<Object, Object> map;
-
     /**
-     * 记录是否启用过副本，只要启用过，则记录为true
-     * 场景1：如果先开启副本开关，再停用副本开关，然后再开启副本开关，那么可能会存在副本数据不一致的情况，通过该属性来控制，只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致。
-     * 场景2：如果先开启副本开关，然后停止服务，服务停止期间，停用副本开关，然后启动服务后再启用副本开关，那么这种场景则会没办法保证一致性，这种场景只能将缓存过期时间减小，再过期后再进行开启。
+     * RMap 用于获取分布式锁
      */
-    private AtomicBoolean openedDuplicate = new AtomicBoolean();
+    private RMap<Object, Object> map;
 
     public RedissonRBucketCache(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
         super(cacheName, cacheConfig);
@@ -71,34 +67,6 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public Object buildKey(Object key) {
-        String cacheKey = (String) buildKeyBase(key);
-        if (!this.checkDuplicateKey(cacheKey)) {
-            return cacheKey;
-        }
-        // 根据 随机数 构建缓存key，用于获取缓存
-        int duplicateSize = this.getDuplicateSize(key.toString());
-        if (duplicateSize <= 0) {
-            return cacheKey;
-        }
-        int duplicateIndex = RandomUtil.getRandomInt(0, duplicateSize);
-        return this.buildKeyByDuplicate(key.toString(), duplicateIndex);
-    }
-
-    /**
-     * 根据 复制品下标 构建缓存key
-     * 注：用于操作复制品缓存数据
-     *
-     * @param duplicateIndex 复制品下标
-     */
-    private Object buildKeyByDuplicate(Object key, int duplicateIndex) {
-        return this.buildKeyBase(key.toString() + CacheConsts.SPLIT + duplicateIndex);
-    }
-
-    /**
-     * 构建基础缓存key
-     * 注：用于操作基本的缓存key
-     */
-    private Object buildKeyBase(Object key) {
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }
@@ -219,7 +187,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public void put(Object key, Object value) {
-        String cacheKey = (String) buildKeyBase(key);
+        String cacheKey = (String) buildKey(key);
         RBucket<Object> bucket = getBucket(cacheKey);
         if (!isAllowNullValues() && value == null) {
             boolean flag = bucket.delete();
@@ -231,21 +199,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         // 过期时间处理
         long expireTime = this.expireTimeDeal(value);
         if (expireTime > 0) {
-            //bucket.set(value, expireTime, TimeUnit.MILLISECONDS);
             Object oldValue = bucket.getAndSet(value, expireTime, TimeUnit.MILLISECONDS);
             logger.info("put cache, cacheName={}, expireTime={} ms, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, cacheKey, value, oldValue);
         } else {
-            //bucket.set(value);
             Object oldValue = bucket.getAndSet(value);
             logger.info("put cache, cacheName={}, key={}, value={}, oldValue={}", this.getCacheName(), cacheKey, value, oldValue);
-        }
-
-        // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
-        if (this.checkDuplicateKey(cacheKey)) {
-            this.duplicatePut(key, value);
-        } else if (openedDuplicate.get()) {
-            logger.warn("只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 put cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
-            this.duplicateEvict(key);
         }
     }
 
@@ -255,7 +213,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             // 不允许为null，且cacheValue为null，则直接获取旧的缓存项并返回
             return this.get(key);
         }
-        String cacheKey = (String) buildKeyBase(key);
+        String cacheKey = (String) buildKey(key);
         RBucket<Object> bucket = getBucket(cacheKey);
         Object oldValue = bucket.get();
         // 过期时间处理
@@ -268,32 +226,14 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             rslt = bucket.trySet(value);
             logger.info("putIfAbsent cache, cacheName={}, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), rslt, cacheKey, value, oldValue);
         }
-        // key复制品处理
-        if (rslt) {
-            // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
-            if (this.checkDuplicateKey(cacheKey)) {
-                this.duplicateTrySet(key, value);
-            } else if (openedDuplicate.get()) {
-                logger.warn("只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 trySet cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
-                this.duplicateEvict(key);
-            }
-        }
         return fromStoreValue(oldValue);
     }
 
     @Override
     public void evict(Object key) {
-        String cacheKey = (String) buildKeyBase(key);
+        String cacheKey = (String) buildKey(key);
         boolean result = getBucket(cacheKey).delete();
-        logger.info("evict cache, cacheName={}, key={}, openedDuplicate={}, result={}", this.getCacheName(), cacheKey, openedDuplicate.get(), result);
-
-        // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
-        if (this.checkDuplicateKey(cacheKey)) {
-            this.duplicateEvict(key);
-        } else if (openedDuplicate.get()) {
-            logger.warn("只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 evict cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
-            this.duplicateEvict(key);
-        }
+        logger.info("evict cache, cacheName={}, key={}, result={}", this.getCacheName(), cacheKey, result);
     }
 
     @Override
@@ -303,7 +243,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
 
     @Override
     public boolean isExists(Object key) {
-        String cacheKey = (String) buildKeyBase(key);
+        String cacheKey = (String) buildKey(key);
         boolean rslt = getBucket(cacheKey).isExists();
         if (logger.isDebugEnabled()) {
             logger.debug("key is exists, cacheName={}, key={}, rslt={}", this.getCacheName(), cacheKey, rslt);
@@ -337,7 +277,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         keyListCollect.forEach(keyList -> {
             RBatch batch = redissonClient.createBatch();
             keyList.forEach(key -> {
-                String cacheKey = (String) buildKeyBase(keyMap.get(key));
+                String cacheKey = (String) buildKey(keyMap.get(key));
                 RFuture<Object> async = batch.getBucket(cacheKey).getAsync();
                 // 注：onComplete() 是在 batch.execute() 执行之后执行的，所以其中的操作不会增加batch操作的耗时。
                 async.onComplete(new BiConsumerWrapper((value, exception) -> {
@@ -394,7 +334,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
             // 方案一：增加nettyThreads（官方的方法，但很难精确到具体的值，因为压测的量不同的情况下，可能情况都不同，所以建议第二种方案）
             // 方案二：直接单个缓存写入，不使用RBatch进行批量写入操作（但增加了交互次数）。
             keyList.forEach(key -> {
-                String cacheKey = (String) buildKeyBase(key);
+                String cacheKey = (String) buildKey(key);
                 Object value = toStoreValue(dataMap.get(key));
                 // 过期时间处理
                 long expireTime = this.expireTimeDeal(value);
@@ -405,22 +345,9 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                     batch.getBucket(cacheKey).setAsync(value);
                     logger.info("batchPut cache, key={}, value={}", cacheKey, value);
                 }
-                // TODO 副本的逻辑需要去掉
-                // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
-                if (this.checkDuplicateKey(cacheKey)) {
-                    int duplicateSize = getDuplicateSize(cacheKey);
-                    this.duplicatePutBuild(key, value, batch, duplicateSize);
-                    // 用于记录开启过副本
-                    if (openedDuplicate.compareAndSet(false, true)) {
-                        logger.info("batchPut openedDuplicate set true, cacheName={}, key={}, duplicateSize={}", this.getCacheName(), cacheKey, duplicateSize);
-                    }
-                } else if (openedDuplicate.get()) {
-                    logger.warn("只要启用过副本则不管副本存不存在都淘汰一次副本，保证数据一致 batchPut cache, cacheName={}, key={}, openedDuplicate={}", this.getCacheName(), cacheKey, openedDuplicate.get());
-                    this.duplicateEvictBuild(key, batch, getDuplicateSize(cacheKey));
-                }
             });
             BatchResult result = batch.execute();
-            logger.info("batchPut cache, cacheName={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
+            // logger.info("batchPut cache, cacheName={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
         });
         logger.info("batchPut cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
     }
@@ -439,7 +366,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         keyListCollect.forEach(keyList -> {
             RBatch batch = redissonClient.createBatch();
             keyList.forEach(entry -> {
-                String cacheKey = (String) buildKeyBase(entry.getValue());
+                String cacheKey = (String) buildKey(entry.getValue());
                 RFuture<Object> async = batch.getBucket(cacheKey).getAndDeleteAsync();
                 // 注：onComplete() 是在 batch.execute() 执行之后执行的，所以其中的操作不会增加batch操作的耗时。
                 async.onComplete(new BiConsumerWrapper((value, exception) -> {
@@ -451,7 +378,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 }));
             });
             BatchResult result = batch.execute();
-            logger.info("batchEvict cache, cacheName={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
+            // logger.info("batchEvict cache, cacheName={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
         });
         logger.info("batchEvict cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), keyMap.size());
     }
@@ -472,223 +399,5 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         }
         return expireTime;
     }
-
-    /**
-     * 副本Put
-     * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
-     * 以redis内存空间来降低单分片压力。
-     */
-    private void duplicatePut(Object key, Object value) {
-        String cacheKey = (String) buildKeyBase(key);
-        int duplicateSize = getDuplicateSize(cacheKey);
-        boolean check = this.checkSaveDuplicate(cacheKey, value, duplicateSize);
-        if (!check) {
-            return;
-        }
-
-        RBatch batch = redissonClient.createBatch();
-
-        this.duplicatePutBuild(key, value, batch, duplicateSize);
-
-        // 用于记录开启过副本
-        if (openedDuplicate.compareAndSet(false, true)) {
-            logger.info("duplicatePut openedDuplicate set true, cacheName={}, key={}, duplicateSize={}", this.getCacheName(), cacheKey, duplicateSize);
-        }
-        BatchResult result = batch.execute();
-        logger.info("duplicatePut put succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), cacheKey, result.getResponses().size(), result.getSyncedSlaves());
-    }
-
-    /**
-     * 构建 set 批量命令
-     */
-    private void duplicatePutBuild(Object key, Object value, RBatch batch, int duplicateSize) {
-        String cacheKey = (String) buildKeyBase(key);
-        boolean check = this.checkSaveDuplicate(cacheKey, value, duplicateSize);
-        if (!check) {
-            return;
-        }
-
-        value = toStoreValue(value);
-        // 过期时间处理
-        long expireTime = this.expireTimeDeal(value);
-
-        String tempKey = "";
-        for (int i = 0; i < duplicateSize; i++) {
-            tempKey = (String) buildKeyByDuplicate(key.toString(), i);
-            if (expireTime > 0) {
-                batch.getBucket(tempKey).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
-                logger.info("duplicatePut put, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
-            } else {
-                batch.getBucket(tempKey).setAsync(value);
-                logger.info("duplicatePut put, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
-            }
-        }
-    }
-
-    /**
-     * 副本TrySet
-     */
-    private void duplicateTrySet(Object key, Object value) {
-        String cacheKey = (String) buildKeyBase(key);
-        int duplicateSize = getDuplicateSize(cacheKey);
-        boolean check = this.checkSaveDuplicate(cacheKey, value, duplicateSize);
-        if (!check) {
-            return;
-        }
-
-        RBatch batch = redissonClient.createBatch();
-
-        this.duplicateTrySetBuild(key, value, batch, duplicateSize);
-
-        // 用于记录开启过副本
-        if (openedDuplicate.compareAndSet(false, true)) {
-            logger.info("duplicateTrySet openedDuplicate set true, cacheName={}, key={}", this.getCacheName(), cacheKey);
-        }
-        BatchResult result = batch.execute();
-        logger.info("duplicateTrySet trySet succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), cacheKey, result.getResponses().size(), result.getSyncedSlaves());
-    }
-
-    /**
-     * 构建 trySet 批量命令
-     */
-    private void duplicateTrySetBuild(Object key, Object value, RBatch batch, int duplicateSize) {
-        String cacheKey = (String) buildKeyBase(key);
-        boolean check = this.checkSaveDuplicate(cacheKey, value, duplicateSize);
-        if (!check) {
-            return;
-        }
-
-        value = toStoreValue(value);
-        // 过期时间处理
-        long expireTime = this.expireTimeDeal(value);
-
-        String tempKey = "";
-        for (int i = 0; i < duplicateSize; i++) {
-            tempKey = (String) buildKeyByDuplicate(key.toString(), i);
-            if (expireTime > 0) {
-                batch.getBucket(tempKey).trySetAsync(value, expireTime, TimeUnit.MILLISECONDS);
-                logger.info("duplicateTrySet trySet, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, tempKey, value);
-            } else {
-                batch.getBucket(tempKey).trySetAsync(value);
-                logger.info("duplicateTrySet trySet, cacheName={}, key={}, value={}", this.getCacheName(), tempKey, value);
-            }
-        }
-    }
-
-    /**
-     * 淘汰副本
-     */
-    private void duplicateEvict(Object key) {
-        String cacheKey = (String) buildKeyBase(key);
-        int duplicateSize = getDuplicateSize(cacheKey);
-        boolean check = this.checkSaveDuplicate(cacheKey, null, duplicateSize);
-        if (!check) {
-            return;
-        }
-        RBatch batch = redissonClient.createBatch();
-
-        this.duplicateEvictBuild(key, batch, duplicateSize);
-
-        // 用于记录开启过副本
-        if (openedDuplicate.compareAndSet(false, true)) {
-            logger.info("duplicateEvict openedDuplicate set true, cacheName={}, key={}", this.getCacheName(), cacheKey);
-        }
-        BatchResult result = batch.execute();
-        logger.info("duplicateEvict evict succ, cacheName={}, key={}, size={}, syncedSlaves={}", this.getCacheName(), cacheKey, result.getResponses().size(), result.getSyncedSlaves());
-    }
-
-    /**
-     * 构建 delete 批量命令
-     */
-    private void duplicateEvictBuild(Object key, RBatch batch, int duplicateSize) {
-        String cacheKey = (String) buildKeyBase(key);
-        boolean check = this.checkSaveDuplicate(cacheKey, null, duplicateSize);
-        if (!check) {
-            return;
-        }
-
-        String tempKey = "";
-        for (int i = 0; i < duplicateSize; i++) {
-            tempKey = (String) buildKeyByDuplicate(key.toString(), i);
-            batch.getBucket(tempKey).deleteAsync();
-            logger.info("duplicateEvict evict, cacheName={}, key={}", this.getCacheName(), tempKey);
-        }
-    }
-
-    /**
-     * 检查是否是副本key
-     *
-     * @param cacheKey 已经构建好的key
-     */
-    private boolean checkDuplicateKey(String cacheKey) {
-        if (!redis.isDuplicate()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("checkDuplicateKey, isDuplicate is false, cacheName={}, isDuplicate={}, key={}", this.getCacheName(), redis.isDuplicate(), cacheKey);
-            }
-            return false;
-        }
-        if (redis.isDuplicateALlKey()) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("checkDuplicateKey key, isDuplicateALlKey is true, cacheName={}, isDuplicateALlKey={}, key={}", this.getCacheName(), redis.isDuplicateALlKey(), cacheKey);
-            }
-            return true;
-        }
-        if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
-            Integer duplicateSize = redis.getDuplicateKeyMap().get(cacheKey);
-            if (null == duplicateSize || duplicateSize <= 0) {
-                logger.warn("checkDuplicateKey key, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
-                return false;
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("checkDuplicateKey key, matched key, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
-            }
-            return true;
-        }
-        if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
-            Integer duplicateSize = redis.getDuplicateCacheNameMap().get(this.getCacheName());
-            if (null == duplicateSize || duplicateSize <= 0) {
-                logger.warn("checkDuplicateKey cacheName, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
-                return false;
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("checkDuplicateKey cacheName, matched cacheName, cacheName={}, duplicateSize={}, key={}", this.getCacheName(), duplicateSize, cacheKey);
-            }
-            return true;
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("checkDuplicateKey, not matched, cacheName={}, key={}", this.getCacheName(), cacheKey);
-        }
-        return false;
-    }
-
-    /**
-     * 检查是否需要保存副本
-     */
-    private boolean checkSaveDuplicate(String cacheKey, Object value, int duplicateSize) {
-        if (value instanceof NullValue) {
-            logger.info("duplicatePut not put, value is NullValue, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, cacheKey, value);
-            return false;
-        }
-        if (duplicateSize <= 0) {
-            logger.warn("duplicatePut not put, duplicateSize less than 0, cacheName={}, duplicateSize={}, key={}, value={}", this.getCacheName(), duplicateSize, cacheKey, value);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * 获取cacheKey的副本数量
-     * 副本数量的优先级：单个key维度 > cacheName维度 > 默认副本数量
-     */
-    private int getDuplicateSize(String cacheKey) {
-        if (redis.getDuplicateKeyMap().containsKey(cacheKey)) {
-            return redis.getDuplicateKeyMap().get(cacheKey);
-        }
-        if (redis.getDuplicateCacheNameMap().containsKey(this.getCacheName())) {
-            return redis.getDuplicateCacheNameMap().get(this.getCacheName());
-        }
-        return redis.getDefaultDuplicateSize();
-    }
-
 
 }
