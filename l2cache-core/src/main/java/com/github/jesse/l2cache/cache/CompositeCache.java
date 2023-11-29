@@ -457,4 +457,38 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
     }
+
+    @Override
+    public <K> void batchEvict(Map<K, Object> keyMap) {
+        if (CollectionUtil.isEmpty(keyMap)) {
+            return;
+        }
+        // 获取一级缓存key
+        Map<K, Object> l1CacheMap = new HashMap<>();
+        if (ifL1Open()) {
+            l1CacheMap.putAll(keyMap);
+            logger.info("batchEvict 全部key走本地缓存, cacheName={}, l1CacheMapSize={}", this.getCacheName(), keyMap.size());
+        } else {
+            keyMap.entrySet().stream().filter(entry -> ifL1OpenByKey(entry.getValue())).forEach(entry -> l1CacheMap.put(entry.getKey(), entry.getValue()));
+            logger.info("batchEvict 部分key走本地缓存, cacheName={}, l1CacheMapSize={}", this.getCacheName(), l1CacheMap.size());
+        }
+
+        // 批量删除一级缓存
+        if (!CollectionUtil.isEmpty(l1CacheMap)) {
+            level1Cache.batchEvict(l1CacheMap);
+        }
+
+        if (composite.isL2BatchEvict()) {
+            // 批量删除二级缓存（通过管道批量evict）
+            level2Cache.batchEvict(keyMap);
+        } else {
+            // 循环evict单个缓存
+            logger.info("batchEvict level2Cache start, cacheName={}, totalKeyMapSize={}", this.getCacheName(), l1CacheMap.size());
+            l1CacheMap.entrySet().forEach(entry -> {
+                level2Cache.evict(entry.getValue());
+            });
+            logger.info("batchEvict level2Cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), l1CacheMap.size());
+        }
+    }
+
 }

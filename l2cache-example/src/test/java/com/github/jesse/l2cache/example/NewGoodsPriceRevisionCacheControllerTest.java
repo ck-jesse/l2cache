@@ -24,6 +24,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
     public void get() {
         String url = HOST + "/new/revision/get";
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
+        param.setTenantId(1);
         param.setGoodsGroupId(1);
         param.setGoodsId(1001);
 
@@ -36,6 +37,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         String url = HOST + "/new/revision/getOrLoad";
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
+        param.setTenantId(1);
         param.setGoodsGroupId(1);
         param.setGoodsId(1001);
 
@@ -48,6 +50,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         String url = HOST + "/new/revision/put";
 
         GoodsPriceRevisionIdsReqDTO reqDTO = new GoodsPriceRevisionIdsReqDTO();
+        reqDTO.setTenantId(1);
         reqDTO.setGoodsGroupId(1);
         reqDTO.setGoodsId(1001);
 
@@ -74,6 +77,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         String url = HOST + "/new/revision/reload";
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
+        param.setTenantId(1);
         param.setGoodsGroupId(1);
         param.setGoodsId(1001);
 
@@ -86,6 +90,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         String url = HOST + "/new/revision/evict";
 
         GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
+        param.setTenantId(1);
         param.setGoodsGroupId(1);
         param.setGoodsId(1001);
 
@@ -97,17 +102,15 @@ public class NewGoodsPriceRevisionCacheControllerTest {
     public void batchGet() {
         String url = HOST + "/new/revision/batchGet";
 
-        GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
-        param.setGoodsGroupId(1);
-        param.setGoodsId(1001);
-
-        GoodsPriceRevisionIdsReqDTO param2 = new GoodsPriceRevisionIdsReqDTO();
-        param2.setGoodsGroupId(1);
-        param2.setGoodsId(1002);
-
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
-        keyList.add(param);
-        keyList.add(param2);
+        GoodsPriceRevisionIdsReqDTO param = null;
+        for (int i = 1; i <= 5; i++) {
+            param = new GoodsPriceRevisionIdsReqDTO();
+            param.setTenantId(1);
+            param.setGoodsGroupId(1);
+            param.setGoodsId(1000 + i);
+            keyList.add(param);
+        }
 
         ResponseEntity result = restTemplate.postForEntity(url, keyList, Map.class);
         System.out.println(JSON.toJSONString(result));
@@ -117,17 +120,15 @@ public class NewGoodsPriceRevisionCacheControllerTest {
     public void batchGetOrLoad() {
         String url = HOST + "/new/revision/batchGetOrLoad";
 
-        GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
-        param.setGoodsGroupId(1);
-        param.setGoodsId(1001);
-
-        GoodsPriceRevisionIdsReqDTO param2 = new GoodsPriceRevisionIdsReqDTO();
-        param2.setGoodsGroupId(1);
-        param2.setGoodsId(1002);
-
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
-        keyList.add(param);
-        keyList.add(param2);
+        GoodsPriceRevisionIdsReqDTO param = null;
+        for (int i = 1; i <= 10; i++) {
+            param = new GoodsPriceRevisionIdsReqDTO();
+            param.setTenantId(1);
+            param.setGoodsGroupId(1);
+            param.setGoodsId(1000 + i);
+            keyList.add(param);
+        }
 
         ResponseEntity result = restTemplate.postForEntity(url, keyList, Map.class);
         System.out.println(JSON.toJSONString(result));
@@ -137,21 +138,36 @@ public class NewGoodsPriceRevisionCacheControllerTest {
     public void batchReload() {
         String url = HOST + "/new/revision/batchReload";
 
-        GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
-        param.setGoodsGroupId(1);
-        param.setGoodsId(1001);
-
-        GoodsPriceRevisionIdsReqDTO param2 = new GoodsPriceRevisionIdsReqDTO();
-        param2.setGoodsGroupId(1);
-        param2.setGoodsId(1002);
-
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
-        keyList.add(param);
-        keyList.add(param2);
+        GoodsPriceRevisionIdsReqDTO param = null;
+        for (int i = 1; i <= 5; i++) {
+            param = new GoodsPriceRevisionIdsReqDTO();
+            param.setTenantId(1);
+            param.setGoodsGroupId(1);
+            param.setGoodsId(1000 + i);
+            keyList.add(param);
+        }
 
         ResponseEntity result = restTemplate.postForEntity(url, keyList, Map.class);
         System.out.println(JSON.toJSONString(result));
     }
 
+    @Test
+    public void batchEvict() {
+        String url = HOST + "/new/revision/batchEvict";
+
+        List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
+        GoodsPriceRevisionIdsReqDTO param = null;
+        for (int i = 1; i <= 7; i++) {
+            param = new GoodsPriceRevisionIdsReqDTO();
+            param.setTenantId(1);
+            param.setGoodsGroupId(1);
+            param.setGoodsId(1000 + i);
+            keyList.add(param);
+        }
+
+        ResponseEntity result = restTemplate.postForEntity(url, keyList, Boolean.class);
+        System.out.println(JSON.toJSONString(result));
+    }
 
 }

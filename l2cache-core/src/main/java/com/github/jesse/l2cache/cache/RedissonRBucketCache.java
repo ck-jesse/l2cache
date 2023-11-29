@@ -102,9 +102,8 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }
-        StringBuilder sb = new StringBuilder(this.getCacheName()).append(CacheConsts.SPLIT);
-        sb.append(key.toString());
-        return sb.toString();
+        StringBuilder cacheKey = new StringBuilder(this.getCacheName()).append(CacheConsts.SPLIT).append(key.toString());
+        return cacheKey.toString();
     }
 
     @Override
@@ -343,11 +342,11 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 // 注：onComplete() 是在 batch.execute() 执行之后执行的，所以其中的操作不会增加batch操作的耗时。
                 async.onComplete(new BiConsumerWrapper((value, exception) -> {
                     if (exception != null) {
-                        logger.warn("batchGet cache error, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception.getMessage());
+                        logger.warn("batchGet cache error, cacheKey={}, value={}, exception={}", cacheKey, value, exception.getMessage());
                         return;
                     }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
+                        logger.debug("batchGet cache, cacheKey={}, value={}", cacheKey, value);
                     }
 
                     // value=null表示key不存在，则不将key包含在返回数据中
@@ -363,39 +362,13 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                     // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
                     if (returnNullValueKey) {
                         hitMap.put(key, null);
-                        LogUtil.log(logger, cacheConfig.getLogLevel(), "[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
+                        LogUtil.log(logger, cacheConfig.getLogLevel(), "[RedissonRBucketCache] batchGet cache, cacheKey={}, value={}, returnNullValueKey={}", cacheKey, value, returnNullValueKey);
                         return;
                     }
                 }));
-//                async.onComplete((value, exception) -> {
-//                    if (exception != null) {
-//                        logger.warn("batchGet cache error, cacheName={}, cacheKey={}, value={}, exception={}", this.getCacheName(), cacheKey, value, exception.getMessage());
-//                        return;
-//                    }
-//                    if (logger.isDebugEnabled()) {
-//                        logger.debug("batchGet cache, cacheName={}, cacheKey={}, value={}", this.getCacheName(), cacheKey, value);
-//                    }
-//
-//                    // value=null表示key不存在，则不将key包含在返回数据中
-//                    if (value == null) {
-//                        return;
-//                    }
-//                    V warpValue = (V) fromStoreValue(value);
-//                    if (warpValue != null) {
-//                        hitMap.put(key, warpValue);
-//                        return;
-//                    }
-//                    // value=NullValue，且returnNullValueKey=true，则将key包含在返回数据中
-//                    // 目的：batchGetOrLoad中调用batchGet时，可以过滤掉值为NullValue的key，防止缓存穿透到下一层
-//                    if (returnNullValueKey) {
-//                        hitMap.put(key, null);
-//                        LogUtil.log(logger, cacheConfig.getLogLevel(), "[RedissonRBucketCache] batchGet cache, cacheName={}, cacheKey={}, value={}, returnNullValueKey={}", this.getCacheName(), cacheKey, value, returnNullValueKey);
-//                        return;
-//                    }
-//                });
             });
             BatchResult result = batch.execute();
-            LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), keyList.size(), hitMap.size());
+            LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache, cacheName={}, currKeyListSize={}, hitMapSize={}", this.getCacheName(), keyList.size(), hitMap.size());
         });
         LogUtil.logDetailPrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}, hitMap={}", this.getCacheName(), keyMap.size(), hitMap.size(), hitMap);
         LogUtil.logSimplePrint(logger, redis.getPrintDetailLogSwitch(), "[RedissonRBucketCache] batchGet cache end, cacheName={}, cacheKeyMapSize={}, hitMapSize={}", this.getCacheName(), keyMap.size(), hitMap.size());
@@ -427,10 +400,10 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 long expireTime = this.expireTimeDeal(value);
                 if (expireTime > 0) {
                     batch.getBucket(cacheKey).setAsync(value, expireTime, TimeUnit.MILLISECONDS);
-                    logger.info("batchPut cache, cacheName={}, expireTime={} ms, key={}, value={}", this.getCacheName(), expireTime, cacheKey, value);
+                    logger.info("batchPut cache, expireTime={} ms, key={}, value={}", expireTime, cacheKey, value);
                 } else {
                     batch.getBucket(cacheKey).setAsync(value);
-                    logger.info("batchPut cache, cacheName={}, key={}, value={}", this.getCacheName(), cacheKey, value);
+                    logger.info("batchPut cache, key={}, value={}", cacheKey, value);
                 }
                 // TODO 副本的逻辑需要去掉
                 // 必须先检查 checkDuplicateKey()，为false时，再检查openedDuplicate
@@ -447,9 +420,40 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
                 }
             });
             BatchResult result = batch.execute();
-            logger.info("batchPut cache, cacheName={}, totalKeyMapSize={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), dataMap.size(), keyList.size(), result.getSyncedSlaves());
+            logger.info("batchPut cache, cacheName={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
         });
         logger.info("batchPut cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
+    }
+
+
+    @Override
+    public <K> void batchEvict(Map<K, Object> keyMap) {
+        if (null == keyMap || keyMap.size() == 0) {
+            return;
+        }
+        logger.info("batchEvict cache start, cacheName={}, totalKeyMapSize={}", this.getCacheName(), keyMap.size());
+        // 集合切分
+        List<List<Map.Entry<K, Object>>> keyListCollect = Lists.partition(new ArrayList<>(keyMap.entrySet()), redis.getBatchPageSize());
+
+        // for循环分执行batch,减少瞬间redisson的netty堆外内存溢出
+        keyListCollect.forEach(keyList -> {
+            RBatch batch = redissonClient.createBatch();
+            keyList.forEach(entry -> {
+                String cacheKey = (String) buildKeyBase(entry.getValue());
+                RFuture<Object> async = batch.getBucket(cacheKey).getAndDeleteAsync();
+                // 注：onComplete() 是在 batch.execute() 执行之后执行的，所以其中的操作不会增加batch操作的耗时。
+                async.onComplete(new BiConsumerWrapper((value, exception) -> {
+                    if (exception != null) {
+                        logger.warn("batchEvict cache error, cacheKey={}, value={}, exception={}", cacheKey, value, exception.getMessage());
+                        return;
+                    }
+                    logger.info("batchEvict cache, cacheKey={}, value={}", cacheKey, value);
+                }));
+            });
+            BatchResult result = batch.execute();
+            logger.info("batchEvict cache, cacheName={}, currKeyListSize={}, syncedSlaves={}", this.getCacheName(), keyList.size(), result.getSyncedSlaves());
+        });
+        logger.info("batchEvict cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), keyMap.size());
     }
 
     // ----------下面为私有方法

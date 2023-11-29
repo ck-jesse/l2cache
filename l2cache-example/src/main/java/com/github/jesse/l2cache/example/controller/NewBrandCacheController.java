@@ -63,4 +63,10 @@ public class NewBrandCacheController {
         Map<Integer, BrandRespBO> map = newBrandCacheService.batchReload(bo.getBrandIdList());
         return map;
     }
+
+    @RequestMapping(value = "/batchEvict")
+    public Boolean batchEvict(@RequestBody BrandIdListBO bo) {
+        newBrandCacheService.batchEvict(bo.getBrandIdList());
+        return true;
+    }
 }

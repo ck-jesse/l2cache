@@ -52,7 +52,7 @@ public interface CacheService<K, R> {
      * 缓存key的说明：
      * 一级缓存(本地缓存)：cacheKey的前缀不含cacheName，由于本地缓存只需保证一个缓存维度下cacheKey的唯一性即可，所以无需包含cacheName，还有一个好处是，可以减小key的长度，节省内存空间。
      * 二级缓存(远程缓存)：cacheKey的前缀包含cacheName，由于远程缓存是集中式缓存(如redis)，需要通过cacheName+cacheKey来保证唯一性，因此，二级缓存会将cacheName作为cacheKey的前缀。
-     *
+     * <p>
      * 缓存key的案例：
      * 一级缓存(本地缓存)：goodsGroupId_goodsId
      * 二级缓存(远程缓存)：goodsPriceRevisionCache:goodsGroupId_goodsId
@@ -186,4 +186,10 @@ public interface CacheService<K, R> {
         return value;
     }
 
+    /**
+     * 批量evict
+     */
+    default void batchEvict(List<K> keyList) {
+        this.getNativeL2cache().batchEvict(keyList, k -> this.buildCacheKey(k));
+    }
 }

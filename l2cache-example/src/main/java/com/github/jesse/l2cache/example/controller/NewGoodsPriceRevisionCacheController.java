@@ -68,4 +68,10 @@ public class NewGoodsPriceRevisionCacheController {
         Map<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> map = newGoodsPriceRevisionCacheService.batchReload(keyList);
         return map;
     }
+
+    @PostMapping(value = "/batchEvict")
+    public Boolean batchEvict(@RequestBody List<GoodsPriceRevisionIdsReqDTO> keyList) {
+        newGoodsPriceRevisionCacheService.batchEvict(keyList);
+        return true;
+    }
 }

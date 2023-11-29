@@ -290,4 +290,45 @@ public interface Cache extends Serializable {
         });
         logger.info("[{}] batchPut cache, cacheName={}, size={}", this.getClass().getSimpleName(), this.getCacheName(), dataMap.size());
     }
+
+    /**
+     * 批量evict
+     *
+     * @param keyList 业务维度的key集合（K可能是自定义DTO）
+     */
+    default <K> void batchEvict(List<K> keyList) {
+        this.batchEvict(keyList, null);
+    }
+
+    /**
+     * 批量evict
+     *
+     * @param keyList         业务维度的key集合（K可能是自定义DTO）
+     * @param cacheKeyBuilder 自定义的cacheKey构建器
+     */
+    default <K> void batchEvict(List<K> keyList, Function<K, Object> cacheKeyBuilder) {
+        // 将keyList 转换为cacheKey，因K可能是自定义DTO，同时包含去重的能力
+        Map<K, Object> keyMap = new HashMap<>();// <K, cacheKey>
+        if (null != cacheKeyBuilder) {
+            keyList.forEach(key -> keyMap.put(key, cacheKeyBuilder.apply(key)));
+        } else {
+            keyList.forEach(key -> keyMap.put(key, key));
+        }
+        this.batchEvict(keyMap);
+    }
+
+    /**
+     * 批量evict
+     *
+     * @param keyMap 缓存key集合, Map<K=表示DTO或其他基本类型, Object=完整的cacheKey>
+     */
+    default <K> void batchEvict(Map<K, Object> keyMap) {
+        if (CollectionUtil.isEmpty(keyMap)) {
+            return;
+        }
+        keyMap.entrySet().forEach(entry -> {
+            this.evict(entry.getValue());
+        });
+        logger.info("[{}] batchEvict cache, cacheName={}, size={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.size());
+    }
 }

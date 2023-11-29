@@ -105,11 +105,17 @@ public class CacheConfig {
          */
         private String l2CacheType = CacheType.REDIS.name();
         /**
-         * CompositeCache.batchPut()中往l2中是通过batchPut()还是循环put()来缓存数据，默认false
+         * CompositeCache.batchPut()中往l2中是通过batchPut()还是循环put()来处理缓存数据，默认false
          * true 表示调用l2的batchPut()来缓存数据
          * false 表示循环调用l2的put()来缓存数据
          */
         private boolean l2BatchPut = false;
+        /**
+         * CompositeCache.batchEvict()中往l2中是通过batchEvict()还是循环调用evict()来处理缓存数据，默认false
+         * true 表示调用l2的batchEvict()
+         * false 表示循环调用l2的evict()
+         */
+        private boolean l2BatchEvict = false;
         /**
          * 是否全部启用一级缓存，默认false
          */

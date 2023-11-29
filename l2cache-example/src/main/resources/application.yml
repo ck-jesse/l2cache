@@ -1,6 +1,6 @@
 #server:
-  #servlet:
-  #  context-path: /l2cache-example
+#servlet:
+#  context-path: /l2cache-example
 
 logging:
   level:
@@ -32,6 +32,10 @@ l2cache:
       l1CacheType: caffeine
       # 二级缓存类型
       l2CacheType: redis
+      # 二级缓存是否通过batchPut()来处理缓存数据，默认false
+      l2BatchPut: true
+      # 二级缓存是否通过batchEvict()来处理缓存数据，默认false
+      l2BatchEvict: true
       # 是否全部启用一级缓存，默认false
       l1AllOpen: false
       # 是否手动启用一级缓存，默认false
@@ -80,7 +84,7 @@ l2cache:
         homeGoodsGroupPageCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         homeGoodsGroupCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         purchaseWouldCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
-        goodsPriceRevisionListCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        goodsPriceRevisionCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         actDiscountCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         brandParentFirstPushCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
         # cacheName中含有: / * 等特殊字符，需要加 "[ ]"

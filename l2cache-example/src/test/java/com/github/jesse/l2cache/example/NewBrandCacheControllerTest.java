@@ -74,6 +74,8 @@ public class NewBrandCacheControllerTest {
         param.addBrandId(1001);
         param.addBrandId(1002);
         param.addBrandId(1003);
+        param.addBrandId(1004);
+        param.addBrandId(1005);
         ResponseEntity result = restTemplate.postForEntity(url, param, Map.class);
         System.out.println(JSON.toJSONString(result));
     }
@@ -89,5 +91,16 @@ public class NewBrandCacheControllerTest {
         System.out.println(JSON.toJSONString(result));
     }
 
+    @Test
+    public void batchEvict() {
+        String url = HOST + "/new/brand/batchEvict";
+
+        BrandIdListBO param = new BrandIdListBO();
+        param.addBrandId(1001);
+        param.addBrandId(1002);
+        param.addBrandId(1003);
+        ResponseEntity result = restTemplate.postForEntity(url, param, Boolean.class);
+        System.out.println(JSON.toJSONString(result));
+    }
 
 }
