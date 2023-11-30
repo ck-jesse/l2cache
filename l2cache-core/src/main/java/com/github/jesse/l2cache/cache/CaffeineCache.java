@@ -185,6 +185,11 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     }
 
     @Override
+    public long size() {
+        return caffeineCache.asMap().size();
+    }
+
+    @Override
     public Set<Object> keys() {
         return caffeineCache.asMap().keySet();
     }

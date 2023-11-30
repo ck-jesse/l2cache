@@ -169,6 +169,11 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
     }
 
     @Override
+    public long size() {
+        return guavaCache.asMap().size();
+    }
+
+    @Override
     public Set<Object> keys() {
         return guavaCache.asMap().keySet();
     }

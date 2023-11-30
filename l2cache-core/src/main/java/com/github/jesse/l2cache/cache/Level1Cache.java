@@ -77,6 +77,11 @@ public interface Level1Cache extends Cache {
     void refreshAllExpireCache();
 
     /**
+     * returns the number in this cache
+     */
+    long size();
+
+    /**
      * return all keys
      */
     default Set<Object> keys() {
