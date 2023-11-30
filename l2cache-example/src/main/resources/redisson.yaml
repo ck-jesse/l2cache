@@ -7,9 +7,9 @@ singleServerConfig:
   # 连接空闲超时，单位：毫秒，默认10000
   idleConnectionTimeout: 10000
   # 连接超时，单位：毫秒，默认10000
-  connectTimeout: 10000
+  connectTimeout: 1000
   # 命令等待超时，单位：毫秒，默认3000
-  timeout: 3000
+  timeout: 1000
   # 命令失败重试次数，默认3
   retryAttempts: 3
   # 命令重试发送时间间隔，单位：毫秒，默认1500

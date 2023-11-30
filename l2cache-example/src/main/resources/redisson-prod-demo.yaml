@@ -1,0 +1,36 @@
+# 一个8c16g的商品中心pod的生产配置（nacos）
+# cluster sentinel with high availability
+singleServerConfig:
+  address: "redis://xx.redis.rds.aliyuncs.com:6379"
+  # default 10000 milliseconds
+  idleConnectionTimeout: 10000
+  # default 10000 milliseconds
+  connectTimeout: 1000
+  # default 3000 milliseconds
+  timeout: 1000
+  # default 3
+  retryAttempts: 3
+  # default 1500 milliseconds
+  retryInterval: 1500
+  # default 5
+  subscriptionsPerConnection: 5
+  # default 30000
+  pingConnectionInterval: 5000
+  # default null
+  clientName: null
+  # default 1
+  subscriptionConnectionMinimumIdleSize: 1
+  # default 50
+  subscriptionConnectionPoolSize: 50
+  # default 24
+  connectionMinimumIdleSize: 100
+  # default 64
+  connectionPoolSize: 300
+  # default 0
+  database: 0
+# default 16, 0 means current_processors_amount * 2
+threads: 128
+# default 32, 0 means current_processors_amount * 2
+nettyThreads: 256
+# key/value codec, default JsonJacksonCodec
+# codec: !<org.redisson.codec.JsonJacksonCodec> {}
