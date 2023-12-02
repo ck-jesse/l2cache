@@ -56,8 +56,6 @@ l2cache:
         - goodsSpecCache
     # 一级缓存
     caffeine:
-      # 是否构建异步Caffeine true 是 false 否
-      asyncCache: false
       # 是否自动刷新过期缓存 true 是 false 否
       autoRefreshExpireCache: false
       # 缓存刷新调度线程池的大小
