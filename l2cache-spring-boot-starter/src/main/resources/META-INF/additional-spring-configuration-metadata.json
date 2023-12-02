@@ -1,85 +1,446 @@
 {
+  "groups": [
+    {
+      "name": "l2cache",
+      "type": "com.github.jesse.l2cache.spring.L2CacheProperties",
+      "sourceType": "com.github.jesse.l2cache.spring.L2CacheProperties"
+    },
+    {
+      "name": "l2cache.config",
+      "type": "com.github.jesse.l2cache.CacheConfig",
+      "sourceType": "com.github.jesse.l2cache.spring.L2CacheProperties",
+      "sourceMethod": "getConfig()"
+    },
+    {
+      "name": "l2cache.config.cache-sync-policy",
+      "type": "com.github.jesse.l2cache.CacheConfig$CacheSyncPolicy",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "sourceMethod": "getCacheSyncPolicy()"
+    },
+    {
+      "name": "l2cache.config.caffeine",
+      "type": "com.github.jesse.l2cache.CacheConfig$Caffeine",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "sourceMethod": "getCaffeine()"
+    },
+    {
+      "name": "l2cache.config.composite",
+      "type": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "sourceMethod": "getComposite()"
+    },
+    {
+      "name": "l2cache.config.guava",
+      "type": "com.github.jesse.l2cache.CacheConfig$Guava",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "sourceMethod": "getGuava()"
+    },
+    {
+      "name": "l2cache.config.hot-key",
+      "type": "com.github.jesse.l2cache.CacheConfig$HotKey",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "sourceMethod": "getHotKey()"
+    },
+    {
+      "name": "l2cache.config.hot-key.jd-hot-key",
+      "type": "com.github.jesse.l2cache.CacheConfig$HotKey$JdHotKey",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$HotKey",
+      "sourceMethod": "getJdHotKey()"
+    },
+    {
+      "name": "l2cache.config.redis",
+      "type": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "sourceMethod": "getRedis()"
+    }
+  ],
   "properties": [
     {
-      "name": "l2cache.instanceId",
+      "name": "l2cache.config.allow-null-values",
+      "type": "java.lang.Boolean",
+      "description": "是否存储空值，设置为true时，可防止缓存穿透",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "l2cache.config.cache-sync-policy.async",
+      "type": "java.lang.Boolean",
+      "description": "是否支持异步发送消息",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$CacheSyncPolicy",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.cache-sync-policy.props",
+      "type": "java.util.Properties",
+      "description": "具体的属性配置 定义一个通用的属性字段，不同的MQ可配置各自的属性即可。 如:kafka 的属性配置则完全与原生的配置保持一致",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$CacheSyncPolicy"
+    },
+    {
+      "name": "l2cache.config.cache-sync-policy.topic",
       "type": "java.lang.String",
-      "description": "缓存实例id，默认值为UUID.",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig"
+      "description": "缓存更新时通知其他节点的topic名称",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$CacheSyncPolicy",
+      "defaultValue": "l2cache"
     },
     {
-      "name": "l2cache.allowNullValues",
-      "type": "java.lang.Boolean",
-      "description": "是否存储空值，默认true，防止缓存穿透.",
+      "name": "l2cache.config.cache-sync-policy.type",
+      "type": "java.lang.String",
+      "description": "策略类型 @see CacheSyncPolicyType",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$CacheSyncPolicy"
+    },
+    {
+      "name": "l2cache.config.cache-type",
+      "type": "java.lang.String",
+      "description": "缓存类型，默认 COMPOSITE 组合缓存 @see CacheType",
       "sourceType": "com.github.jesse.l2cache.CacheConfig",
-      "defaultValue": true
+      "defaultValue": "composite"
     },
     {
-      "name": "l2cache.dynamic",
+      "name": "l2cache.config.caffeine.auto-refresh-expire-cache",
       "type": "java.lang.Boolean",
-      "description": "是否动态根据cacheName创建Cache的实现，默认true.",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig",
-      "defaultValue": true
-    },
-    {
-      "name": "l2cache.caffeine.asyncCache",
-      "type": "java.lang.Boolean",
-      "description": "是否异步缓存，true 表示是，false 表示否.",
+      "description": "是否自动刷新过期缓存 true 表示是(默认)，false 表示否",
       "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
       "defaultValue": false
     },
     {
-      "name": "l2cache.caffeine.autoRefreshExpireCache",
-      "type": "java.lang.Boolean",
-      "description": "是否自动刷新过期缓存，true 表示是，false 表示否.",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
-      "defaultValue": true
-    },
-    {
-      "name": "l2cache.caffeine.refreshPoolSize",
-      "type": "java.lang.Integer",
-      "description": "缓存刷新调度线程池的大小.",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
-      "defaultValue": 1
-    },
-    {
-      "name": "l2cache.caffeine.refreshPeriod",
-      "type": "java.lang.Long",
-      "description": "缓存刷新的频率(秒).",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
-      "defaultValue": 5
-    },
-    {
-      "name": "l2cache.caffeine.defaultSpec",
+      "name": "l2cache.config.caffeine.batch-get-log-level",
       "type": "java.lang.String",
-      "description": "创建缓存的默认配置. See CaffeineSpec for more details on the spec format.",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
-      "defaultValue": "initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats"
-    },
-    {
-      "name": "l2cache.caffeine.specs",
-      "type": "java.util.Map<java.lang.String, java.lang.String>",
-      "description": "创建缓存的配置集合，可以设置某个缓存名称的缓存配置. Map<缓存名称，缓存配置>.",
+      "description": "批量获取操作日志级别，因批量获取时，日志量非常大，而且每一条日志都是打印全量的数据，会对性能有影响，所以此参数可用于控制是否打印日志",
       "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine"
     },
     {
-      "name": "l2cache.redis.keyPrefix",
+      "name": "l2cache.config.caffeine.default-spec",
       "type": "java.lang.String",
-      "description": "缓存Key prefix.",
+      "description": "The spec to use to create caches. See CaffeineSpec for more details on the spec format.",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine"
+    },
+    {
+      "name": "l2cache.config.caffeine.enable-mdc-fork-join-pool",
+      "type": "java.lang.Boolean",
+      "description": "是否启用自定义 MdcForkJoinPool，用于链路追踪",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
+      "defaultValue": true
+    },
+    {
+      "name": "l2cache.config.caffeine.publish-msg-period-milli-seconds",
+      "type": "java.lang.Long",
+      "description": "同一个key的发布消息频率(毫秒)",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
+      "defaultValue": 500
+    },
+    {
+      "name": "l2cache.config.caffeine.refresh-period",
+      "type": "java.lang.Long",
+      "description": "缓存刷新的频率(秒)",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine",
+      "defaultValue": 30
+    },
+    {
+      "name": "l2cache.config.caffeine.refresh-pool-size",
+      "type": "java.lang.Integer",
+      "description": "缓存刷新调度线程池的大小 默认为 CPU数 * 2",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine"
+    },
+    {
+      "name": "l2cache.config.caffeine.specs",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "The spec to use to create caches. See CaffeineSpec for more details on the spec format. <key,value>=<cacheName, spec>",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Caffeine"
+    },
+    {
+      "name": "l2cache.config.composite.l1-all-open",
+      "type": "java.lang.Boolean",
+      "description": "是否全部启用一级缓存，默认false",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.composite.l1-cache-type",
+      "type": "java.lang.String",
+      "description": "一级缓存类型",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "defaultValue": "caffeine"
+    },
+    {
+      "name": "l2cache.config.composite.l1-manual",
+      "type": "java.lang.Boolean",
+      "description": "是否手动启用一级缓存，默认false",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.composite.l1-manual-cache-name-set",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "手动配置走一级缓存的缓存名字集合，针对cacheName维度",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite"
+    },
+    {
+      "name": "l2cache.config.composite.l1-manual-key-set",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "手动配置走一级缓存的缓存key集合，针对单个key维度",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite"
+    },
+    {
+      "name": "l2cache.config.composite.l2-batch-evict",
+      "type": "java.lang.Boolean",
+      "description": "CompositeCache.batchEvict()中往l2中是通过batchEvict()还是循环调用evict()来处理缓存数据，默认false true 表示调用l2的batchEvict() false 表示循环调用l2的evict()",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.composite.l2-batch-put",
+      "type": "java.lang.Boolean",
+      "description": "CompositeCache.batchPut()中往l2中是通过batchPut()还是循环put()来处理缓存数据，默认false true 表示调用l2的batchPut()来缓存数据 false 表示循环调用l2的put()来缓存数据",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.composite.l2-cache-type",
+      "type": "java.lang.String",
+      "description": "二级缓存类型",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Composite",
+      "defaultValue": "redis"
+    },
+    {
+      "name": "l2cache.config.dynamic",
+      "type": "java.lang.Boolean",
+      "description": "是否动态根据cacheName创建Cache的实现，默认true",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "l2cache.config.guava.auto-refresh-expire-cache",
+      "type": "java.lang.Boolean",
+      "description": "是否自动刷新过期缓存 true 表示是(默认)，false 表示否",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Guava",
+      "defaultValue": true
+    },
+    {
+      "name": "l2cache.config.guava.default-spec",
+      "type": "java.lang.String",
+      "description": "The spec to use to create caches. See CaffeineSpec for more details on the spec format.",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Guava"
+    },
+    {
+      "name": "l2cache.config.guava.refresh-period",
+      "type": "java.lang.Long",
+      "description": "缓存刷新的频率(秒)",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Guava",
+      "defaultValue": 30
+    },
+    {
+      "name": "l2cache.config.guava.refresh-pool-size",
+      "type": "java.lang.Integer",
+      "description": "缓存刷新调度线程池的大小",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Guava"
+    },
+    {
+      "name": "l2cache.config.guava.specs",
+      "type": "java.util.Map<java.lang.String,java.lang.String>",
+      "description": "The spec to use to create caches. See CaffeineSpec for more details on the spec format. <key,value>=<cacheName, spec>",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Guava"
+    },
+    {
+      "name": "l2cache.config.hot-key.hotkey-type",
+      "type": "java.lang.String",
+      "description": "热key类型，默认 NONE 没有集成自动发现功能 @see HotkeyType",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$HotKey",
+      "defaultValue": "none"
+    },
+    {
+      "name": "l2cache.config.hot-key.jd-hot-key.etcd-url",
+      "type": "java.lang.String",
+      "description": "ETCD 服务器地址",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$HotKey$JdHotKey"
+    },
+    {
+      "name": "l2cache.config.hot-key.jd-hot-key.service-name",
+      "type": "java.lang.String",
+      "description": "服务名称 需要在dashboard进行注册",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$HotKey$JdHotKey",
+      "defaultValue": "default"
+    },
+    {
+      "name": "l2cache.config.instance-id",
+      "type": "java.lang.String",
+      "description": "缓存实例id",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig"
+    },
+    {
+      "name": "l2cache.config.log-level",
+      "type": "java.lang.String",
+      "description": "简单处理：日志级别配置，所以此参数可用于控制是否打印日志 原因：一方面日志量太多影响性能，一方面日志量太多存储成本高",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig"
+    },
+    {
+      "name": "l2cache.config.null-value-clear-period-seconds",
+      "type": "java.lang.Long",
+      "description": "NullValue 的清理频率(秒)",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "defaultValue": 10
+    },
+    {
+      "name": "l2cache.config.null-value-expire-time-seconds",
+      "type": "java.lang.Long",
+      "description": "NullValue的过期时间，单位秒，默认30秒 用于淘汰NullValue的值 注：当缓存项的过期时间小于该值时，则NullValue不会淘汰",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "defaultValue": 60
+    },
+    {
+      "name": "l2cache.config.null-value-max-size",
+      "type": "java.lang.Long",
+      "description": "NullValue 的最大数量，防止出现内存溢出 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "defaultValue": 3000
+    },
+    {
+      "name": "l2cache.config.redis.batch-get-log-level",
+      "type": "java.lang.String",
+      "description": "批量获取操作日志级别，因批量获取时，日志量非常大，而且每一条日志都是打印全量的数据，会对性能有影响，所以此参数可用于控制是否打印日志",
       "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis"
     },
     {
-      "name": "l2cache.redis.useKeyPrefix",
+      "name": "l2cache.config.redis.batch-page-size",
+      "type": "java.lang.Integer",
+      "description": "批量操作的大小，可以理解为是分页",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "defaultValue": 50
+    },
+    {
+      "name": "l2cache.config.redis.default-duplicate-size",
+      "type": "java.lang.Integer",
+      "description": "默认副本数量",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "defaultValue": 10
+    },
+    {
+      "name": "l2cache.config.redis.duplicate",
       "type": "java.lang.Boolean",
-      "description": "是否使用缓存Key prefix.",
+      "description": "是否启用副本，默认false 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。 以redis内存空间来降低单分片压力。",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.redis.duplicate-a-ll-key",
+      "type": "java.lang.Boolean",
+      "description": "针对所有key启用副本",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.redis.duplicate-cache-name-map",
+      "type": "java.util.Map<java.lang.String,java.lang.Integer>",
+      "description": "副本缓存名字集合，针对cacheName维度 <cacheName,副本数量>",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis"
+    },
+    {
+      "name": "l2cache.config.redis.duplicate-key-map",
+      "type": "java.util.Map<java.lang.String,java.lang.Integer>",
+      "description": "副本缓存key集合，针对单个key维度 <key,副本数量>",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis"
+    },
+    {
+      "name": "l2cache.config.redis.expire-time",
+      "type": "java.lang.Long",
+      "description": "缓存过期时间(ms) 注：作为默认的缓存过期时间，如果一级缓存设置了过期时间，则以一级缓存的过期时间为准。 目的是为了支持cacheName维度的缓存过期时间设置",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "defaultValue": 0
+    },
+    {
+      "name": "l2cache.config.redis.expire-time-cache-name-map",
+      "type": "java.util.Map<java.lang.String,java.lang.Long>",
+      "description": "针对cacheName维度过期时间集合 <cacheName,过期时间(ms)>",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis"
+    },
+    {
+      "name": "l2cache.config.redis.lock",
+      "type": "java.lang.Boolean",
+      "description": "加载数据时，是否加锁",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
+      "defaultValue": false
+    },
+    {
+      "name": "l2cache.config.redis.print-detail-log-switch",
+      "type": "java.lang.String",
+      "description": "是否打印详细日志，方便问题排查",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis"
+    },
+    {
+      "name": "l2cache.config.redis.redisson-yaml-config",
+      "type": "java.lang.String",
+      "description": "Redisson 的yaml配置文件",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis"
+    },
+    {
+      "name": "l2cache.config.redis.try-lock",
+      "type": "java.lang.Boolean",
+      "description": "加载数据时是调用tryLock()，还是lock() 注： tryLock() 只有一个请求执行加载动作，其他并发请求，直接返回失败 lock() 只有一个请求执行加载动作，其他并发请求，会阻塞直到获得锁",
       "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
       "defaultValue": true
     },
     {
-      "name": "l2cache.redis.topic",
-      "type": "java.lang.String",
-      "description": "缓存更新时通知其他节点的topic名称.",
-      "sourceType": "com.github.jesse.l2cache.CacheConfig$Redis",
-      "defaultValue": "cache:caffeine:redis:topic"
+      "name": "l2cache.config.use-l1-replace-l2-expire-time",
+      "type": "java.lang.Boolean",
+      "description": "是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认为true 注：目的是为了简化缓存配置，且保证一级缓存和二级缓存的配置一致。因此在使用混合缓存时，只需要配置一级缓存即可。",
+      "sourceType": "com.github.jesse.l2cache.CacheConfig",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "l2cache.config.cache-sync-policy.type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "com.github.jesse.l2cache.consts.CacheSyncPolicyType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "l2cache.config.cache-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "com.github.jesse.l2cache.consts.CacheType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "l2cache.config.composite.l1-cache-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "com.github.jesse.l2cache.consts.CacheType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "l2cache.config.composite.l2-cache-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "com.github.jesse.l2cache.consts.CacheType"
+          }
+        }
+      ]
+    },
+    {
+      "name": "l2cache.config.hot-key.hotkey-type",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "com.github.jesse.l2cache.consts.HotkeyType"
+          }
+        }
+      ]
     }
   ]
 }
