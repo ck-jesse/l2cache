@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.spring;
 
-import com.github.jesse.l2cache.spring.config.JdHotKeyConfiguration;
+import com.github.jesse.l2cache.spring.config.HotKeyConfiguration;
 import com.github.jesse.l2cache.spring.config.L2CacheConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-@Import({L2CacheConfiguration.class, JdHotKeyConfiguration.class})
+@Import({L2CacheConfiguration.class, HotKeyConfiguration.class})
 @Configuration
 public @interface EnableL2Cache {
 

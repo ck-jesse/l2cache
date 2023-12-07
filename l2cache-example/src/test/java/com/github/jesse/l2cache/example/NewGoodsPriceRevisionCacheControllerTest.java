@@ -33,6 +33,21 @@ public class NewGoodsPriceRevisionCacheControllerTest {
     }
 
     @Test
+    public void get1() {
+        String url = HOST + "/new/revision/get";
+        GoodsPriceRevisionIdsReqDTO param = new GoodsPriceRevisionIdsReqDTO();
+        param.setTenantId(1);
+        param.setGoodsGroupId(1);
+        param.setGoodsId(5001);
+
+        System.out.println(JSON.toJSONString(param));
+        for (int i = 0; i < 10; i++) {
+            ResponseEntity result = restTemplate.postForEntity(url, param, GoodsPriceRevisionRespBO.class);
+            System.out.println(JSON.toJSONString(result));
+        }
+    }
+
+    @Test
     public void getOrLoad() {
         String url = HOST + "/new/revision/getOrLoad";
 
@@ -97,6 +112,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
         ResponseEntity result = restTemplate.postForEntity(url, param, Boolean.class);
         System.out.println(JSON.toJSONString(result));
     }
+
     @Test
     public void clear() {
         String url = HOST + "/new/revision/clear";
@@ -129,7 +145,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
         GoodsPriceRevisionIdsReqDTO param = null;
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 10; i++) {
             param = new GoodsPriceRevisionIdsReqDTO();
             param.setTenantId(1);
             param.setGoodsGroupId(1);
@@ -165,11 +181,11 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
         GoodsPriceRevisionIdsReqDTO param = null;
-        for (int i = 1; i <= 7; i++) {
+        for (int i = 1; i <= 10000; i++) {
             param = new GoodsPriceRevisionIdsReqDTO();
             param.setTenantId(1);
             param.setGoodsGroupId(1);
-            param.setGoodsId(1000 + i);
+            param.setGoodsId(5000 + i);
             keyList.add(param);
         }
 

@@ -1,2 +1,3 @@
 none=com.github.jesse.l2cache.hotkey.NoneHotKey
 jd=com.github.jesse.l2cache.hotkey.JdHotKey
+sentinel=com.github.jesse.l2cache.hotkey.SentinelHotKey

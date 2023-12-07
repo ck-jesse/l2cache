@@ -55,6 +55,8 @@ l2cache:
         - goodsSpecCache
         - goodsPriceRevisionCache
         - brandCache
+        - newBrandCache
+        #- newGoodsPriceRevisionCache
     # 一级缓存
     caffeine:
       # 是否自动刷新过期缓存 true 是 false 否
@@ -71,7 +73,7 @@ l2cache:
       # 基于注解的推荐用法：refreshAfterWrite 和 实现CacheService接口，并定义@Cacheable(sync=true)
       # 注意：当缓存项在有效期内重复利用率很低时，不适合用本地缓存，如3千万用户参加抢购活动，用户信息的缓存，则不能用本地缓存。
       # 因为超过最大数量限制时，再往里面添加元素，会异步按照LFU淘汰元素，若未及时淘汰，在大量用户请求的情况，会导致堆内存飙升，频繁的FullGC和YoungGC，最终导致OOM。
-      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=2m,softValues,recordStats
+      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=30m,softValues,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
         #userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=2m
@@ -80,6 +82,7 @@ l2cache:
         # 无过期时间配置
         queryUserSync: initialCapacity=10,maximumSize=20,refreshAfterWrite=1m,recordStats
         brandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
+        newBrandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
         timeCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=30d,recordStats
         homeGoodsGroupPageCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
         homeGoodsGroupCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
@@ -139,11 +142,32 @@ l2cache:
       #  max.poll.records: 10
       #  # 设置poll最大时间间隔（默认3s）
       #  max.poll.interval.ms: 3000
-#    # 热key探测
-#    hotkey:
-#      # 热key探测类型
-#      hotkeyType: jd
-#      jdHotKey:
-#        serviceName: weeget-bullet-goods-rest
-#        #etcd的地址，如有多个用逗号分隔
-#        etcdUrl: http://127.0.0.1:2379
+    # 热key探测
+    hotkey:
+      # 热key探测类型,支持 none、jd、sentinel
+      hotkeyType: sentinel
+      sentinel:
+        # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
+        # 若未配置默认规则，则仅针对 paramFlowRules 中的配置进行热点参数探测
+        # 注：规则具体的配置是针对ParamFlowRule的配置
+        defaultRule:
+          grade: 1
+          paramIdx: 0
+          count: 5
+        paramFlowRules:
+          # 案例1
+          # resourceName 资源名称，通常设置为缓存名称
+          - resource: newBrandCache
+            # 流量控制的阈值类型，0表示线程数，1表示qps，默认1
+            grade: 1
+            # 参数下标，默认为0
+            paramIdx: 0
+            # 阈值计数
+            count: 3
+          # 案例2
+          - resource: newGoodsPriceRevisionCache
+            count: 3
+      # jd:
+      # serviceName: weeget-bullet-goods-rest
+      # #etcd的地址，如有多个用逗号分隔
+      # etcdUrl: http://127.0.0.1:2379

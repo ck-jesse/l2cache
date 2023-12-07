@@ -9,8 +9,10 @@ package com.github.jesse.l2cache.consts;
 public enum HotkeyType {
     // 没有引入热key功能
     NONE,
-    // 京东
+    // 京东 hotkey
     JD,
+    // 阿里 sentinel
+    SENTINEL,
     ;
 
     public static HotkeyType getHotkeyType(String type) {
@@ -22,4 +24,5 @@ public enum HotkeyType {
         }
         return null;
     }
+
 }

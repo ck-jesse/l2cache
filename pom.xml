@@ -34,6 +34,7 @@
         <lombok.version>1.18.12</lombok.version>
         <junit.version>4.13.1</junit.version>
         <hutool.version>5.8.17</hutool.version>
+        <sentinel.version>1.8.5</sentinel.version>
     </properties>
 
     <dependencyManagement>
@@ -119,6 +120,14 @@
                 <artifactId>jd-hotkey-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- sentinel-parameter-flow 热点参数限流 -->
+            <dependency>
+                <groupId>com.alibaba.csp</groupId>
+                <artifactId>sentinel-parameter-flow-control</artifactId>
+                <version>${sentinel.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

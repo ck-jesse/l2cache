@@ -2,6 +2,7 @@ package com.github.jesse.l2cache;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheSyncPolicyType;
 import com.github.jesse.l2cache.consts.CacheType;
@@ -384,7 +385,9 @@ public class CacheConfig {
          */
         private String hotkeyType = HotkeyType.NONE.name();
 
-        private final JdHotKey jdHotKey = new JdHotKey();
+        private final JdHotKey jd = new JdHotKey();
+
+        private final SentinelHotKey sentinel = new SentinelHotKey();
 
         /**
          * 京东热key发现配置
@@ -404,6 +407,27 @@ public class CacheConfig {
              * ETCD 服务器地址
              */
             private String etcdUrl;
+        }
+
+        /**
+         * 阿里sentinel热key发现配置
+         */
+        @Getter
+        @Setter
+        @Accessors(chain = true)
+        @ToString
+        public static class SentinelHotKey implements Config {
+
+            /**
+             * 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
+             * 若未配置默认规则，则仅针对 paramFlowRules 中的配置进行热点参数探测
+             */
+            private ParamFlowRule defaultRule;
+
+            /**
+             * 热点参数规则
+             */
+            private List<ParamFlowRule> paramFlowRules = new ArrayList<>();
         }
     }
 

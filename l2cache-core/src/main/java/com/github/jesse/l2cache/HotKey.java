@@ -3,7 +3,7 @@ package com.github.jesse.l2cache;
 import com.github.jesse.l2cache.spi.SPI;
 
 import java.io.Serializable;
-import java.util.function.Function;
+import java.util.List;
 
 /**
  * 热key自动识别
@@ -11,12 +11,19 @@ import java.util.function.Function;
  * @author zengjucai
  * @date 2021/6/10 13:45
  */
-@SPI
+@SPI("sentinel")
 public interface HotKey extends Serializable {
 
     /**
-     * 是否为热key
+     * 初始化
      */
-    <K> boolean ifHotKey(K key, Function<K, Object> cacheKeyBuilder);
+    void init(CacheConfig.HotKey hotKeyConfig, List<String> cacheNameList);
+
+    /**
+     * 是否为热key
+     *
+     * @return 返回 true 表示热key
+     */
+    boolean isHotKey(String cacheName, String key);
 
 }

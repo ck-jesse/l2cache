@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> {
 
-    public static final String CACHE_NAME = "goodsPriceRevisionCache";
+    public static final String CACHE_NAME = "newGoodsPriceRevisionCache";
 
     @Override
     public String getCacheName() {

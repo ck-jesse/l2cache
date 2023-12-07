@@ -1,14 +1,11 @@
 package com.github.jesse.l2cache.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheConfig;
-import com.github.jesse.l2cache.HotKey;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheType;
-import com.github.jesse.l2cache.consts.HotkeyType;
-import com.github.jesse.l2cache.spi.ServiceLoader;
+import com.github.jesse.l2cache.hotkey.HotKeySupport;
 import com.github.jesse.l2cache.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -256,31 +253,10 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
         // 是否为热key
-        if (ifHotKey(key)) {
+        if (HotKeySupport.isHotkey(hotkeyType, this.getCacheName(), key.toString())) {
             return true;
         }
         return false;
-    }
-
-    /**
-     * 判断是否为热key
-     *
-     * @param key
-     * @return
-     */
-    private boolean ifHotKey(Object key) {
-        // 自定义cacheKey的构建方式
-        Function<Object, Object> cacheKeyBuilder = info -> buildKeyBase(info);
-        // 没有配置热key识别，则直接返回
-        if (HotkeyType.NONE.name().equalsIgnoreCase(hotkeyType)) {
-            return false;
-        }
-        HotKey hotKey = ServiceLoader.load(HotKey.class, hotkeyType);
-        if (ObjectUtil.isNull(hotKey)) {
-            logger.error("invalid hotkeyType, hotkeyType={}", hotkeyType);
-            return false;
-        }
-        return hotKey.ifHotKey(key, cacheKeyBuilder);
     }
 
     /**
