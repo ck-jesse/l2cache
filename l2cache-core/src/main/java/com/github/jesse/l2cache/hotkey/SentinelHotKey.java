@@ -52,6 +52,7 @@ public class SentinelHotKey implements HotKey {
 
         // 设置热点参数规则
         if (rules.size() > 0) {
+            // 加载规则，静态限流
             ParamFlowRuleManager.loadRules(rules);
         }
     }
