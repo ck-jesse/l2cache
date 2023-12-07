@@ -144,7 +144,7 @@ l2cache:
       #  max.poll.interval.ms: 3000
     # 热key探测
     hotkey:
-      # 热key探测类型,支持 none、jd、sentinel
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机
       hotkeyType: sentinel
       sentinel:
         # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
