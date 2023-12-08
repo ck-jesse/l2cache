@@ -362,7 +362,7 @@ public class CacheConfig {
         /**
          * 是否支持异步发送消息
          */
-        private boolean isAsync;
+        private boolean async;
 
         /**
          * 具体的属性配置
