@@ -10,7 +10,7 @@ import java.util.List;
 public class NoneHotkeyService implements HotkeyService {
 
     @Override
-    public void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList) {
+    public void init(CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
 
     }
 

@@ -23,9 +23,9 @@ import java.util.List;
 public class SentinelHotkeyService implements HotkeyService {
 
     @Override
-    public void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList) {
-        ParamFlowRule defaultRule = hotkey.getSentinel().getDefaultRule();
-        List<ParamFlowRule> rules = hotkey.getSentinel().getRules();
+    public void init(CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
+        ParamFlowRule defaultRule = hotKeyConfig.getSentinel().getDefaultRule();
+        List<ParamFlowRule> rules = hotKeyConfig.getSentinel().getRules();
 
         // 若配置了默认规则，则针对所有的cacheName，生成其默认的热点参数规则
         // 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测

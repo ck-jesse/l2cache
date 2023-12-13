@@ -399,6 +399,7 @@
       "type": "java.lang.Integer",
       "description": "ParamFlowRule: Parameter index",
       "sourceType": "com.github.jesse.l2cache.CacheConfig$Hotkey$SentinelHotkey",
+      "defaultValue": 0
     },
     {
       "name": "l2cache.config.hotkey.sentinel.default-rule.count",
@@ -412,6 +413,7 @@
       "description": "ParamFlowRule: 热点参数规则列表",
       "sourceType": "com.github.jesse.l2cache.CacheConfig$Hotkey$SentinelHotkey"
     }
+
   ],
 
   "hints": [

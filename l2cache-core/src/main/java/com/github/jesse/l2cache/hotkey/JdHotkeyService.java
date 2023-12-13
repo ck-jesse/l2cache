@@ -20,8 +20,8 @@ import java.util.List;
 public class JdHotkeyService implements HotkeyService {
 
     @Override
-    public void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList) {
-        CacheConfig.Hotkey.JdHotkey jdHotKey = hotkey.getJd();
+    public void init(CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
+        CacheConfig.Hotkey.JdHotkey jdHotKey = hotKeyConfig.getJd();
         if (StrUtil.isBlank(jdHotKey.getEtcdUrl())) {
             throw new IllegalStateException("jdHotKey not found etcd url yaml config file:" + jdHotKey);
         }
