@@ -8,7 +8,7 @@ import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
 import com.github.jesse.l2cache.CacheConfig;
-import com.github.jesse.l2cache.HotKey;
+import com.github.jesse.l2cache.HotkeyService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -20,15 +20,15 @@ import java.util.List;
  * @date 2023/12/6 15:37
  */
 @Slf4j
-public class SentinelHotKey implements HotKey {
+public class SentinelHotkeyService implements HotkeyService {
 
     @Override
-    public void init(CacheConfig.HotKey hotKeyConfig, List<String> cacheNameList) {
-        ParamFlowRule defaultRule = hotKeyConfig.getSentinel().getDefaultRule();
-        List<ParamFlowRule> rules = hotKeyConfig.getSentinel().getParamFlowRules();
+    public void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList) {
+        ParamFlowRule defaultRule = hotkey.getSentinel().getDefaultRule();
+        List<ParamFlowRule> rules = hotkey.getSentinel().getRules();
 
         // 若配置了默认规则，则针对所有的cacheName，生成其默认的热点参数规则
-        // 若未配置默认规则，则仅针对 paramFlowRules 中的配置进行热点参数探测
+        // 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测
         if (null != defaultRule) {
             for (String cacheName : cacheNameList) {
                 // 检查是否使用默认的热点参数规则
@@ -58,7 +58,7 @@ public class SentinelHotKey implements HotKey {
     }
 
     @Override
-    public boolean isHotKey(String cacheName, String key) {
+    public boolean isHotkey(String cacheName, String key) {
         Entry entry = null;
         try {
             entry = SphU.entry(cacheName, EntryType.IN, 1, key);

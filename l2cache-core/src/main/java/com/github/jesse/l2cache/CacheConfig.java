@@ -27,7 +27,7 @@ import java.util.*;
 public class CacheConfig {
 
     /**
-     * 缓存实例id
+     * 缓存实例id，默认值为基于Snowflake的简单ID
      */
     private String instanceId = "C" + IdUtil.getSnowflakeNextIdStr();
 
@@ -84,7 +84,7 @@ public class CacheConfig {
     private final Guava guava = new Guava();
     private final Redis redis = new Redis();
     private final CacheSyncPolicy cacheSyncPolicy = new CacheSyncPolicy();
-    private final HotKey hotKey = new HotKey();
+    private final Hotkey hotKey = new Hotkey();
 
     public interface Config {
     }
@@ -275,35 +275,6 @@ public class CacheConfig {
         private String printDetailLogSwitch = CacheConsts.NOT_PRINT_DETAIL_LOG;
 
         /**
-         * 是否启用副本，默认false
-         * 主要解决单个redis分片上热点key的问题，相当于原来存一份数据，现在存多份相同的数据，将热key的压力分散到多个分片。
-         * 以redis内存空间来降低单分片压力。
-         */
-        private boolean duplicate = false;
-
-        /**
-         * 针对所有key启用副本
-         */
-        private boolean duplicateALlKey = false;
-
-        /**
-         * 默认副本数量
-         */
-        private int defaultDuplicateSize = 10;
-
-        /**
-         * 副本缓存key集合，针对单个key维度
-         * <key,副本数量>
-         */
-        private Map<String, Integer> duplicateKeyMap = new HashMap<>();
-
-        /**
-         * 副本缓存名字集合，针对cacheName维度
-         * <cacheName,副本数量>
-         */
-        private Map<String, Integer> duplicateCacheNameMap = new HashMap<>();
-
-        /**
          * Redisson 的yaml配置文件
          */
         private String redissonYamlConfig;
@@ -377,17 +348,17 @@ public class CacheConfig {
     @Setter
     @Accessors(chain = true)
     @ToString
-    public static class HotKey implements Config {
+    public static class Hotkey implements Config {
         /**
          * 热key类型，默认 NONE 没有集成自动发现功能
          *
          * @see HotkeyType
          */
-        private String hotkeyType = HotkeyType.NONE.name();
+        private String type = HotkeyType.NONE.name();
 
-        private final JdHotKey jd = new JdHotKey();
+        private final JdHotkey jd = new JdHotkey();
 
-        private final SentinelHotKey sentinel = new SentinelHotKey();
+        private final SentinelHotkey sentinel = new SentinelHotkey();
 
         /**
          * 京东热key发现配置
@@ -396,7 +367,7 @@ public class CacheConfig {
         @Setter
         @Accessors(chain = true)
         @ToString
-        public static class JdHotKey implements Config {
+        public static class JdHotkey implements Config {
 
             /**
              * 服务名称
@@ -416,18 +387,19 @@ public class CacheConfig {
         @Setter
         @Accessors(chain = true)
         @ToString
-        public static class SentinelHotKey implements Config {
+        public static class SentinelHotkey implements Config {
 
             /**
+             * 默认热点参数规则
              * 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
-             * 若未配置默认规则，则仅针对 paramFlowRules 中的配置进行热点参数探测
+             * 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测
              */
             private ParamFlowRule defaultRule;
 
             /**
-             * 热点参数规则
+             * 热点参数规则列表
              */
-            private List<ParamFlowRule> paramFlowRules = new ArrayList<>();
+            private List<ParamFlowRule> rules = new ArrayList<>();
         }
     }
 

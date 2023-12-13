@@ -45,7 +45,7 @@ public abstract class AbstractAdaptingCache implements Cache {
         if (this.nullValueExpireTimeSeconds < 0) {
             this.nullValueExpireTimeSeconds = 60;
         }
-        this.hotkeyType = cacheConfig.getHotKey().getHotkeyType();
+        this.hotkeyType = cacheConfig.getHotKey().getType();
     }
 
     @Override

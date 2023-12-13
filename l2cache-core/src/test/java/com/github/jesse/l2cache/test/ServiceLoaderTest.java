@@ -4,7 +4,7 @@ import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.HotKey;
+import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 
 import java.util.Collections;
@@ -32,10 +32,10 @@ public class ServiceLoaderTest {
 
         StringBuilder key = new StringBuilder(resourceName).append(":").append(123);
 
-        HotKey hotKey = ServiceLoader.load(HotKey.class, "sentinel");
+        HotkeyService hotkeyService = ServiceLoader.load(HotkeyService.class, "sentinel");
 
         for (int i = 0; i < 1000; i++) {
-            boolean isHotKey = hotKey.isHotKey("goodsCache1", key.toString());
+            boolean isHotKey = hotkeyService.isHotkey("goodsCache1", key.toString());
             System.out.println("i=" + i + " " + isHotKey);
         }
 

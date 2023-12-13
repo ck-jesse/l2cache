@@ -144,29 +144,29 @@ l2cache:
       #  max.poll.interval.ms: 3000
     # 热key探测
     hotkey:
-      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机
-      hotkeyType: sentinel
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none
+      type: sentinel
       sentinel:
         # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
-        # 若未配置默认规则，则仅针对 paramFlowRules 中的配置进行热点参数探测
+        # 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测
         # 注：规则具体的配置是针对ParamFlowRule的配置
-        defaultRule:
+        default-rule:
           grade: 1
-          paramIdx: 0
-          count: 5
-        paramFlowRules:
+          param-idx: 0
+          count: 6
+        rules:
           # 案例1
           # resourceName 资源名称，通常设置为缓存名称
           - resource: newBrandCache
             # 流量控制的阈值类型，0表示线程数，1表示qps，默认1
             grade: 1
-            # 参数下标，默认为0
+            # 参数下标
             paramIdx: 0
             # 阈值计数
             count: 3
           # 案例2
           - resource: newGoodsPriceRevisionCache
-            count: 3
+            count: 5
       # jd:
       # serviceName: weeget-bullet-goods-rest
       # #etcd的地址，如有多个用逗号分隔

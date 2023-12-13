@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.hotkey;
 
 import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.CacheConfig;
-import com.github.jesse.l2cache.HotKey;
+import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.jd.platform.hotkey.client.ClientStarter;
 import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
@@ -17,11 +17,11 @@ import java.util.List;
  * @Date: 2021/6/10 13:45
  */
 @Slf4j
-public class JdHotKey implements HotKey {
+public class JdHotkeyService implements HotkeyService {
 
     @Override
-    public void init(CacheConfig.HotKey hotKeyConfig, List<String> cacheNameList) {
-        CacheConfig.HotKey.JdHotKey jdHotKey = hotKeyConfig.getJd();
+    public void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList) {
+        CacheConfig.Hotkey.JdHotkey jdHotKey = hotkey.getJd();
         if (StrUtil.isBlank(jdHotKey.getEtcdUrl())) {
             throw new IllegalStateException("jdHotKey not found etcd url yaml config file:" + jdHotKey);
         }
@@ -32,7 +32,7 @@ public class JdHotKey implements HotKey {
     }
 
     @Override
-    public boolean isHotKey(String cacheName, String key) {
+    public boolean isHotkey(String cacheName, String key) {
         StringBuilder sb = new StringBuilder(cacheName).append(CacheConsts.SPLIT).append(key);
         return JdHotKeyStore.isHotKey(sb.toString());
     }

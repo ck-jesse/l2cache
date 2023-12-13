@@ -12,18 +12,18 @@ import java.util.List;
  * @date 2021/6/10 13:45
  */
 @SPI("sentinel")
-public interface HotKey extends Serializable {
+public interface HotkeyService extends Serializable {
 
     /**
      * 初始化
      */
-    void init(CacheConfig.HotKey hotKeyConfig, List<String> cacheNameList);
+    void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList);
 
     /**
      * 是否为热key
      *
      * @return 返回 true 表示热key
      */
-    boolean isHotKey(String cacheName, String key);
+    boolean isHotkey(String cacheName, String key);
 
 }

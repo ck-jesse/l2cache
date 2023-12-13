@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.spring.config;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.github.jesse.l2cache.CacheConfig;
-import com.github.jesse.l2cache.HotKey;
+import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.biz.CacheService;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 import com.github.jesse.l2cache.spring.L2CacheProperties;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 @Slf4j
 @Configuration
-@ConditionalOnProperty(name = "l2cache.config.hotkey.hotkeyType")
+@ConditionalOnProperty(name = "l2cache.config.hotkey.type")
 public class HotKeyConfiguration {
 
     @Autowired
@@ -34,20 +34,20 @@ public class HotKeyConfiguration {
 
     @PostConstruct
     public void init() {
-        CacheConfig.HotKey hotKeyConfig = l2CacheProperties.getConfig().getHotKey();
-        if (ObjectUtil.isEmpty(hotKeyConfig.getHotkeyType())) {
-            log.error("未配置hotkeyType，不进行初始化");
+        CacheConfig.Hotkey hotKey = l2CacheProperties.getConfig().getHotKey();
+        if (ObjectUtil.isEmpty(hotKey.getType())) {
+            log.error("未配置 hotkey type，不进行初始化");
             return;
         }
 
-        HotKey hotKey = ServiceLoader.load(HotKey.class, hotKeyConfig.getHotkeyType());
-        if (ObjectUtil.isNull(hotKey)) {
-            log.error("非法的 hotkeyType,无匹配的HotKey实现类, hotkeyType={}", hotKeyConfig.getHotkeyType());
+        HotkeyService hotkeyService = ServiceLoader.load(HotkeyService.class, hotKey.getType());
+        if (ObjectUtil.isNull(hotkeyService)) {
+            log.error("非法的 hotkey type,无匹配的HotkeyService实现类, hotkey type={}", hotKey.getType());
             return;
         }
 
-        hotKey.init(hotKeyConfig, getAllCacheName());
-        log.info("HotKey实例初始化成功, hotkeyType={}", hotKeyConfig.getHotkeyType());
+        hotkeyService.init(hotKey, getAllCacheName());
+        log.info("Hotkey实例初始化成功, hotkey type={}", hotKey.getType());
     }
 
     /**
