@@ -5,7 +5,7 @@ import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheType;
-import com.github.jesse.l2cache.hotkey.HotKeySupport;
+import com.github.jesse.l2cache.hotkey.HotKeyFacade;
 import com.github.jesse.l2cache.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -253,7 +253,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
         // 是否为热key
-        if (HotKeySupport.isHotkey(hotkeyType, this.getCacheName(), key.toString())) {
+        if (HotKeyFacade.isHotkey(hotkeyType, this.getCacheName(), key.toString())) {
             return true;
         }
         return false;

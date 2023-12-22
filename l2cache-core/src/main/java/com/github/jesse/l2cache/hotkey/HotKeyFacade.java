@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * @date 2023/12/6 16:02
  */
 @Slf4j
-public class HotKeySupport {
+public class HotKeyFacade {
 
     /**
      * 统一的入口：判断是否为热key
