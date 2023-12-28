@@ -16,6 +16,28 @@
 </dependency>
 ```
 
+- 常见问题：在项目中引入l2cache后，项目启动失败。
+- 原因分析：由于项目和l2cache中依赖的spring相关包版本不一致，导致启动失败。
+- 解决方案：建议排除掉l2cache中的依赖，使用项目中的版本。
+
+```xml
+<dependency>
+    <groupId>io.github.ck-jesse</groupId>
+    <artifactId>l2cache-spring-boot-starter</artifactId>
+    <version>x.x.x</version>
+    <exclusions>
+        <exclusion>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework.boot</groupId>
+        </exclusion>
+        <exclusion>
+            <artifactId>spring-cloud-context</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
 
 ## 2、Spring配置
 具体代码示例参考：[l2cache](https://github.com/ck-jesse/l2cache) 中的 `l2cache-example` 模块。
