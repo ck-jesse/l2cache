@@ -29,7 +29,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- spring-cloud-context 用于l2cache配置的动态刷新 -->
+        <!-- spring-cloud-context 基于@RefreshScope实现CacheConfig属性的动态刷新 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-context</artifactId>

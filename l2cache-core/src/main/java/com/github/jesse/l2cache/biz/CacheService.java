@@ -90,6 +90,27 @@ public interface CacheService<K, R> {
      */
     Map<K, R> queryDataList(List<K> keyList);
 
+    /**
+     * 更新业务数据，可以是 update 或 insert 数据
+     */
+    default void updateData(K key, R value) {
+        // 默认直接抛出异常，也就是说强制开发人员在使用该方法时，必须实现该方法，否则直接抛异常
+        throw new L2CacheException("未实现方法updateData()，请检查代码");
+    }
+
+    /**
+     * 数据更新策略：先更新DB，再删除缓存。
+     * 注：
+     * 1、抽象到此处，目的是为了简化单个业务维度更新数据时的开发。
+     * 2、对于一个业务操作，涉及多个缓存维度的场景，暂不支持，需要
+     */
+    default void update(K key, R value) {
+        // 更新业务数据
+        this.updateData(key, value);
+        // 删除缓存，延迟双删暂不做实现
+        this.evict(key);
+    }
+
     // ---------------------------------------------------
     // 第二部分：缓存操作，将缓存操作封装为默认方法实现，简化业务开发
     // ---------------------------------------------------
