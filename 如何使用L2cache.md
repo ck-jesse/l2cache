@@ -117,6 +117,36 @@ l2cache:
       type: redis
       # 缓存更新时通知其他节点的topic名称
       topic: l2cache
+    # 热key探测
+    hotkey:
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none
+      type: sentinel
+      sentinel:
+        # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
+        # 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测
+        # 注：规则具体的配置是针对ParamFlowRule的配置
+        default-rule:
+          grade: 1
+          param-idx: 0
+          count: 6
+        rules:
+          # 案例1
+          # resourceName 资源名称，通常设置为缓存名称
+          - resource: newBrandCache
+            # 流量控制的阈值类型，0表示线程数，1表示qps，默认1
+            grade: 1
+            # 参数下标
+            paramIdx: 0
+            # 阈值计数
+            count: 3
+          # 案例2
+          - resource: newGoodsPriceRevisionCache
+            count: 5
+      # jd:
+      # serviceName: goods-rest
+      # #etcd的地址，如有多个用逗号分隔
+      # etcdUrl: http://127.0.0.1:2379
+
 ```
 
 注：
@@ -236,29 +266,93 @@ l2cache:
   config:
     # 缓存同步策略配置
     cacheSyncPolicy:
-      # 策略类型 kafka / redis
+      # 策略类型 kafka / redis，推荐使用redis
       type: redis
       # 缓存更新时通知其他节点的topic名称
       topic: l2cache
 ```
 
+- **1、为什么推荐使用Redis的pubsub，而不是kafka等MQ？**
+- 1）复用Redis中间件，可少依赖一个中间件，降低维护成本和复杂度
+- 2）利用Redis的pubsub的特性，在消费者重启时，无需处理重启之前的消息，避免做无用功
+
+
+- **2、Redis的pubsub有和特性？**
+- 两个特性：1、Redis消息不持久化，2、生产者发送一个消息，如果没有消费者，消息将会被直接丢弃。
+- 由于缓存的使用要求是不强求保证强一致性，只需保证最终一致性即可。因此刚好利用上面两个特性，当某个消费者重启时，正好无需去处理那些重启之前的消息，消息丢了就丢了，对本地缓存无影响。因为请求进来时，会再从redis中获取缓存信息并缓存到本地缓存。
+
+
 ### 6、热key探测配置
+
+- 1、不启用热key探测：type配置为none，或者不配置hotkey相关属性
 ```yaml
 l2cache:
   config:
     # 热key探测 
     hotkey:
-      # 热key探测类型
-      hotkeyType: jd
-      jdHotKey:
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none，不启用热key探测。
+      type: none
+```
+
+- 2、基于jd-hotkey的热key探测配置（jd-hotkey的搭建请参考官方，相对复杂，因为需要搭建一个server端）
+```yaml
+l2cache:
+  config:
+    # 热key探测 
+    hotkey:
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none
+      type: jd
+      jd:
         serviceName: weeget-bullet-goods-rest
         #etcd的地址，如有多个用逗号分隔
         etcdUrl: http://127.0.0.1:2379
 ```
 
+- 3、基于sentinel的热key探测配置【推荐，因sentinel单机版本不依赖其他组件或服务，相对简单】
+```yaml
+l2cache:
+  config:
+    # 热key探测
+    hotkey:
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none
+      type: sentinel
+      sentinel:
+        # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
+        # 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测
+        # 注：规则具体的配置是针对ParamFlowRule的配置
+        default-rule:
+          grade: 1
+          param-idx: 0
+          count: 6
+        rules:
+          # 案例1
+          # resourceName 资源名称，通常设置为缓存名称
+          - resource: newBrandCache
+            # 流量控制的阈值类型，0表示线程数，1表示qps，默认1
+            grade: 1
+            # 参数下标
+            paramIdx: 0
+            # 阈值计数
+            count: 3
+          # 案例2
+          - resource: newGoodsPriceRevisionCache
+            count: 5
+```
+
+
+
 ## 3、代码中的使用
 
-### 方式一：基于 CacheService 缓存层来使用（推荐）
+### 方式一：基于 CacheService 缓存层来使用（推荐-最佳实践）
+
+- **问：为什么推荐CacheService 缓存层的这种模式，而不推荐使用更灵活的注解模式？如@Cacheable 等。**
+- 答：随着系统的持续迭代，通过注解的方式，你会发现，这种缓存注解的代码是散落在程序各处的，当你想要维护时会无能为力。因此抽象出来一个CacheService缓存层，来统一定义并封装对缓存的通用操作，规范缓存操作，简化开发，你会发现这种方式真的很香。
+
+
+- **问：CacheService 缓存层这种模式，适用于什么场景？**
+- 答：1、适用于需要新引入缓存的系统； 2、适用于想规范统一缓存操作的项目，尤其是哪些缓存操作已经遍地开花的项目。
+
+
 ```java
 /**
  * CacheService 的demo案例

@@ -109,7 +109,7 @@ l2cache:
       redissonYamlConfig: redisson.yaml
     # 缓存同步策略配置
     cacheSyncPolicy:
-      # 策略类型 kafka / redis
+      # 策略类型 kafka / redis，推荐使用redis
       type: redis
       # 缓存更新时通知其他节点的topic名称
       topic: l2cache
@@ -144,7 +144,7 @@ l2cache:
       #  max.poll.interval.ms: 3000
     # 热key探测
     hotkey:
-      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none，不启用热key探测。
       type: sentinel
       sentinel:
         # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
