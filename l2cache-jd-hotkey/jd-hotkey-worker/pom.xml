@@ -11,7 +11,7 @@
 
     <groupId>io.github.ck-jesse</groupId>
     <artifactId>jd-hotkey-worker</artifactId>
-    <version>1.0.38</version>
+    <version>1.0.39</version>
     <name>jd-hotkey-worker</name>
     <packaging>jar</packaging>
 
