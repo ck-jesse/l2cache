@@ -19,7 +19,7 @@
         <fastjson.version>1.2.83</fastjson.version>
         <hp-etcd.version>0.0.16</hp-etcd.version>
         <caffeine.version>2.8.2</caffeine.version>
-        <hutool.version>5.8.17</hutool.version>
+        <hutool.version>5.8.21</hutool.version>
     </properties>
 
     <dependencies>
