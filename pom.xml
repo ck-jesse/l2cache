@@ -34,7 +34,7 @@
         <kafka-clients.version>3.4.0</kafka-clients.version>
         <lombok.version>1.18.12</lombok.version>
         <junit.version>4.13.1</junit.version>
-        <hutool.version>5.8.17</hutool.version>
+        <hutool.version>5.8.21</hutool.version>
         <sentinel.version>1.8.5</sentinel.version>
     </properties>
 
