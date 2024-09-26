@@ -35,7 +35,7 @@ public class RedisCacheTest {
                 .setLock(true)
 //                .setMaxIdleTime(2000)
 //                .setMaxSize(20)
-                .setDuplicate(false)
+//                .setDuplicate(false)
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient
@@ -49,10 +49,10 @@ public class RedisCacheTest {
         cache = builder.build("redisCache");
 //        cache = builder.build("redisCache2");
 
-        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
+//        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
 
 
-        cacheConfig.getRedis().getDuplicateKeyMap().put("redisCache:key1", 5);
+//        cacheConfig.getRedis().getDuplicateKeyMap().put("redisCache:key1", 5);
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);

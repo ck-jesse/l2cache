@@ -31,9 +31,9 @@ public class RedisCacheTest1 {
                 .getRedis()
                 .setExpireTime(300000)
                 .setLock(true)
-                .setDuplicate(true)
-                .setDuplicateALlKey(false)
-                .setDefaultDuplicateSize(2)
+//                .setDuplicate(true)
+//                .setDuplicateALlKey(false)
+//                .setDefaultDuplicateSize(2)
                 .setRedissonYamlConfig("redisson.yaml");
 
         // 模拟应用中已经存在 RedissonClient
@@ -46,8 +46,8 @@ public class RedisCacheTest1 {
         // 构建cache
         cache = builder.build("redisCache");
 
-        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
-        cacheConfig.getRedis().getDuplicateKeyMap().put("redisCache:user_key", 5);
+//        cacheConfig.getRedis().getDuplicateCacheNameMap().put(cache.getCacheName(), 3);
+//        cacheConfig.getRedis().getDuplicateKeyMap().put("redisCache:user_key", 5);
 
         callable = new Callable<String>() {
             AtomicInteger count = new AtomicInteger(1);
@@ -102,11 +102,11 @@ public class RedisCacheTest1 {
         String key = "key";
         String value = "valueaaaaaa";
 
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
         cache.put(key, value);
         printCache(key);
 
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
         cache.put(key, value);
         printCache(key);
 
@@ -114,7 +114,7 @@ public class RedisCacheTest1 {
         System.out.println(String.format("get key=%s, value=%s", key, value));
         System.out.println();
 
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
         // 2 put and get(key, type)
         String key1 = "key111";
         cache.put(key1, "NullValue.INSTANCEaaaaaa");
@@ -133,7 +133,7 @@ public class RedisCacheTest1 {
         String value = cache.get(key, callable);
         System.out.println(String.format("get key=%s, value=%s", key, value));
 
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
         System.out.println(cache.get(key));
     }
 
@@ -141,11 +141,11 @@ public class RedisCacheTest1 {
     public void putIfAbsentTest() throws InterruptedException {
         String key = "key2";
         String value = "value2";
-        cacheConfig.getRedis().setDuplicate(true);
+//        cacheConfig.getRedis().setDuplicate(true);
         cache.put(key, value);
         printCache(key);
 
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
         // key1 已经存在，所有putIfAbsent失败，并返回已经存在的值value1
         Object oldValue = cache.putIfAbsent(key, "value123");
         System.out.println(String.format("putIfAbsent key=%s, oldValue=%s", key, oldValue));
@@ -165,12 +165,12 @@ public class RedisCacheTest1 {
         String key = "key1";
         String value = "value1";
         // 此时会有副本
-        cacheConfig.getRedis().setDuplicate(true);
+//        cacheConfig.getRedis().setDuplicate(true);
         cache.put(key, value);
         System.out.println(String.format("put key=%s, value=%s", key, value));
         System.out.println();
 
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
 
         printCache(key);
         // 删除指定的缓存项
@@ -178,11 +178,11 @@ public class RedisCacheTest1 {
         printCache(key);
 
         // 此时会有副本
-        cacheConfig.getRedis().setDuplicate(true);
+//        cacheConfig.getRedis().setDuplicate(true);
         cache.put(key, "valuebbbb");
 
         // 此时副本会删除
-        cacheConfig.getRedis().setDuplicate(false);
+//        cacheConfig.getRedis().setDuplicate(false);
         cache.put(key, "valuecccc");
     }
 

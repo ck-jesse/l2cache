@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 
+@Deprecated
 public class CaffeineTestControllerTest {
 
     private static final String HOST = "http://127.0.0.1:8080";
