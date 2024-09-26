@@ -25,7 +25,7 @@ l2cache:
     # 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认true，简化缓存配置
     useL1ReplaceL2ExpireTime: true
     # 缓存类型
-    cacheType: composite
+    cacheType: COMPOSITE
     # 组合缓存配置
     composite:
       # 一级缓存类型

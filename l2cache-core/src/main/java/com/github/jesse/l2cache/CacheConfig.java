@@ -78,6 +78,10 @@ public class CacheConfig {
      */
     private String cacheType = CacheType.COMPOSITE.name();
 
+    // 缓存类型，统一处理为小写
+    public String getCacheType() {
+        return StrUtil.isBlank(cacheType) ? CacheType.COMPOSITE.name().toLowerCase() : cacheType.toLowerCase();
+    }
 
     private final Composite composite = new Composite();
     private final Caffeine caffeine = new Caffeine();
@@ -136,6 +140,15 @@ public class CacheConfig {
          * 手动配置走一级缓存的缓存名字集合，针对cacheName维度
          */
         private Set<String> l1ManualCacheNameSet = new HashSet<>();
+
+        // 缓存类型，统一处理为小写
+        public String getL1CacheType() {
+            return StrUtil.isBlank(l1CacheType) ? CacheType.CAFFEINE.name().toLowerCase() : l1CacheType.toLowerCase();
+        }
+
+        public String getL2CacheType() {
+            return StrUtil.isBlank(l2CacheType) ? CacheType.REDIS.name().toLowerCase() : l2CacheType.toLowerCase();
+        }
     }
 
     /**
