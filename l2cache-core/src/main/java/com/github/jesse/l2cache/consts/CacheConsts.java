@@ -11,11 +11,14 @@ public class CacheConsts {
      */
     public static final String CACHE_REFRESH = "refresh";
     public static final String CACHE_CLEAR = "clear";
+    public static final String CACHE_HOTKEY = "hotkey";
+    public static final String CACHE_HOTKEY_EVIT = "hotkey_evit";
 
     /**
      * 分隔符
      */
     public static final String SPLIT = ":";
+    public static final String SPLIT_UNDERLINE = "_";
     /**
      * 通配符 *
      */

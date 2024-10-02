@@ -12,6 +12,10 @@ import java.util.List;
 
 /**
  * 京东热key探测
+ * <p>
+ * jd hotkey client 会将本地的hotkey统计信息，上报给到worker端，worker识别到是hotkey后，会通知到其他的client，将hotkey缓存到本地缓存
+ * <p>
+ * https://gitee.com/jd-platform-opensource/hotkey
  *
  * @Author: zengjucai
  * @Date: 2021/6/10 13:45
@@ -32,7 +36,7 @@ public class JdHotkeyService implements HotkeyService {
     }
 
     @Override
-    public boolean isHotkey(String cacheName, String key) {
+    public boolean isHotkey(String level1CacheType, String cacheName, String key) {
         StringBuilder sb = new StringBuilder(cacheName).append(CacheConsts.SPLIT).append(key);
         return JdHotKeyStore.isHotKey(sb.toString());
     }

@@ -24,6 +24,14 @@ public interface HotkeyService extends Serializable {
      *
      * @return 返回 true 表示热key
      */
-    boolean isHotkey(String cacheName, String key);
+    boolean isHotkey(String level1CacheType, String cacheName, String key);
+
+    default void setInstanceId(String instanceId) {
+
+    }
+
+    default void setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy) {
+
+    }
 
 }

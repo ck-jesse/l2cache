@@ -55,7 +55,7 @@ l2cache:
         - goodsSpecCache
         - goodsPriceRevisionCache
         - brandCache
-        - newBrandCache
+        #- newBrandCache
         #- newGoodsPriceRevisionCache
     # 一级缓存
     caffeine:
@@ -154,6 +154,7 @@ l2cache:
           grade: 1
           param-idx: 0
           count: 6
+          durationInSec: 1
         rules:
           # 案例1
           # resourceName 资源名称，通常设置为缓存名称
@@ -164,6 +165,8 @@ l2cache:
             paramIdx: 0
             # 阈值计数
             count: 3
+            # 统计窗口时间长度（单位为秒），默认为1
+            durationInSec: 5
           # 案例2
           - resource: newGoodsPriceRevisionCache
             count: 5

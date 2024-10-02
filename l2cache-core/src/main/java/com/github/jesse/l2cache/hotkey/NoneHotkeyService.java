@@ -15,7 +15,7 @@ public class NoneHotkeyService implements HotkeyService {
     }
 
     @Override
-    public boolean isHotkey(String cacheName, String key) {
+    public boolean isHotkey(String level1CacheType, String cacheName, String key) {
         return false;
     }
 }

@@ -39,7 +39,7 @@
         <appender-ref ref="STDOUT" />
     </root> -->
     <!-- 定义日志输出的package包名 -->
-    <root level="INFO">
+    <root level="DEBUG">
 <!--        <appender-ref ref="backlog"/>-->
         <appender-ref ref="STDOUT"/>
     </root>

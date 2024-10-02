@@ -17,8 +17,10 @@ public class HotKeyFacade {
 
     /**
      * 统一的入口：判断是否为热key
+     *
+     * @param level1CacheType 一级缓存的缓存类型
      */
-    public static boolean isHotkey(String hotkeyType, String cacheName, String key) {
+    public static boolean isHotkey(String hotkeyType, String level1CacheType, String cacheName, String key) {
         // 热key类型为空，则直接返回
         if (ObjectUtil.isEmpty(hotkeyType)) {
             return false;
@@ -35,6 +37,6 @@ public class HotKeyFacade {
             log.error("非法的 hotkeyType,无匹配的HotKey实现类, hotkeyType={}", hotkeyType);
             return false;
         }
-        return hotkeyService.isHotkey(cacheName, key);
+        return hotkeyService.isHotkey(level1CacheType, cacheName, key);
     }
 }

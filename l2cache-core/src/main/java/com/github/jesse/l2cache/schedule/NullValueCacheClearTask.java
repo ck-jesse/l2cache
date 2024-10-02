@@ -29,7 +29,7 @@ public class NullValueCacheClearTask implements Runnable {
     public void run() {
         long clearBeforeSize = nullValueCache.estimatedSize();
         // 每次执行设置trace_id，便于排查问题
-        MDC.put(CacheConsts.SID, CacheConsts.PREFIX_CLEAR_NULL_VALUE + CacheConsts.SPLIT + RandomUtil.getUUID());
+        MDC.put(CacheConsts.TRACE_ID, CacheConsts.PREFIX_CLEAR_NULL_VALUE + CacheConsts.SPLIT + RandomUtil.getUUID());
         try {
             if (clearBeforeSize <= 0) {
                 return;
@@ -45,7 +45,7 @@ public class NullValueCacheClearTask implements Runnable {
         } catch (Exception e) {
             log.error("invalidate NullValue error, cacheName=" + this.cacheName + ", clearBeforeSize=" + clearBeforeSize + ", clearAfterSize=" + nullValueCache.estimatedSize(), e);
         } finally {
-            MDC.remove(CacheConsts.SID);
+            MDC.remove(CacheConsts.TRACE_ID);
         }
     }
 }

@@ -253,7 +253,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         }
 
         // 是否为热key
-        if (HotKeyFacade.isHotkey(hotkeyType, this.getCacheName(), key.toString())) {
+        if (HotKeyFacade.isHotkey(hotkeyType, this.getLevel1Cache().getCacheType(), this.getCacheName(), key.toString())) {
             return true;
         }
         return false;

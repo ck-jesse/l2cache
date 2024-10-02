@@ -4,6 +4,7 @@ import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.cache.Level1Cache;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.content.CacheSupport;
+import com.github.jesse.l2cache.hotkey.AutoDetectHotKeyCache;
 import com.github.jesse.l2cache.util.pool.MdcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,15 +38,32 @@ public class CacheMessageListener implements MessageListener {
             logger.info("[SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}, desc={}",
                     this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey(), message.getDesc());
 
-            Level1Cache level1Cache = getLevel1Cache(message);
+            // 缓存其他节点识别到的hotkey
+            if (CacheConsts.CACHE_HOTKEY.equals(message.getOptType())) {
+                AutoDetectHotKeyCache.put(message.getCacheName(), message.getKey(), Boolean.FALSE);
+                return;
+            }
+
+            Level1Cache level1Cache = CacheSupport.getLevel1Cache(message.getCacheType(), message.getCacheName());
             if (null == level1Cache) {
                 return;
             }
+
+            // 其他节点通知清除本地缓存和hotkey(暂未启用，先简化处理)
+            if (CacheConsts.CACHE_HOTKEY_EVIT.equals(message.getOptType())) {
+                level1Cache.clearLocalCache(message.getKey());
+                return;
+            }
+
+            // refresh 刷新缓存
             if (CacheConsts.CACHE_REFRESH.equals(message.getOptType())) {
                 level1Cache.refresh(message.getKey());
-            } else {
-                level1Cache.clearLocalCache(message.getKey());
+                return;
             }
+
+            // clear local cache
+            level1Cache.clearLocalCache(message.getKey());
+
         } catch (Exception e) {
             logger.error("[SyncCache] deal message error, currInstanceId=" + this.cacheInstanceId, e);
         } finally {
@@ -53,20 +71,4 @@ public class CacheMessageListener implements MessageListener {
         }
     }
 
-    /**
-     * 获取 Level1Cache
-     */
-    private Level1Cache getLevel1Cache(CacheMessage message) {
-        Cache cache = CacheSupport.getCache(message.getCacheType(), message.getCacheName());
-        if (null == cache) {
-            logger.warn("[SyncCache] cache is not exists or not instanced, cacheType=" + message.getCacheType() + ", " +
-                    "cacheName=" + message.getCacheName());
-            return null;
-        }
-        if (!(cache instanceof Level1Cache)) {
-            logger.warn("[SyncCache] cache must be implements Level1Cache, cacheType=" + message.getCacheType() + " " + cache.getClass().getName());
-            return null;
-        }
-        return (Level1Cache) cache;
-    }
 }

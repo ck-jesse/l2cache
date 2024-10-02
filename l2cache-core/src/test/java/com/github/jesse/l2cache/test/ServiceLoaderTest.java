@@ -35,7 +35,7 @@ public class ServiceLoaderTest {
         HotkeyService hotkeyService = ServiceLoader.load(HotkeyService.class, "sentinel");
 
         for (int i = 0; i < 1000; i++) {
-            boolean isHotKey = hotkeyService.isHotkey("goodsCache1", key.toString());
+            boolean isHotKey = hotkeyService.isHotkey("goodsCache1", "caffeine", key.toString());
             System.out.println("i=" + i + " " + isHotKey);
         }
 

@@ -3,6 +3,7 @@ package com.github.jesse.l2cache.cache;
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.content.NullValue;
+import com.github.jesse.l2cache.hotkey.AutoDetectHotKeyCache;
 import com.github.jesse.l2cache.schedule.NullValueCacheClearTask;
 import com.github.jesse.l2cache.schedule.NullValueClearSupport;
 import com.github.jesse.l2cache.schedule.RefreshExpiredCacheTask;
@@ -206,6 +207,10 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         if (null != nullValueCache) {
             nullValueCache.invalidate(key);
         }
+
+        // 移除热key标识
+        AutoDetectHotKeyCache.evit(this.getCacheName(), key);
+
         if (null != cacheSyncPolicy) {
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "evict"));
         }
@@ -245,6 +250,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             if (null != nullValueCache) {
                 nullValueCache.invalidate(key);
             }
+
+            // 移除热key标识
+            AutoDetectHotKeyCache.evit(this.getCacheName(), key);
         }
     }
 

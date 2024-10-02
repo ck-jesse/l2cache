@@ -4,6 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
 import com.github.jesse.l2cache.CacheSpec;
+import com.github.jesse.l2cache.cache.Level1Cache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CacheSupport {
 
+    private static final Logger logger = LoggerFactory.getLogger(CacheSupport.class);
     /**
      * 缓存容器
      * Map<cacheType,Map<cacheName,Cache>>
@@ -39,6 +43,22 @@ public class CacheSupport {
             return null;
         }
         return cacheMap.get(cacheName);
+    }
+
+    /**
+     * 获取 Level1Cache
+     */
+    public static Level1Cache getLevel1Cache(String level1CacheType, String cacheName) {
+        Cache cache = CacheSupport.getCache(level1CacheType, cacheName);
+        if (null == cache) {
+            logger.warn("Cache is not exists or not instanced, cacheType=" + level1CacheType + ", " + "cacheName=" + cacheName);
+            return null;
+        }
+        if (!(cache instanceof Level1Cache)) {
+            logger.warn("Cache must be implements Level1Cache, cacheType=" + level1CacheType + " " + cache.getClass().getName());
+            return null;
+        }
+        return (Level1Cache) cache;
     }
 
     /**

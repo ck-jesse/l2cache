@@ -2,6 +2,7 @@ package com.github.jesse.l2cache.cache;
 
 import com.github.jesse.l2cache.CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
+import com.github.jesse.l2cache.hotkey.AutoDetectHotKeyCache;
 import com.github.jesse.l2cache.schedule.NullValueCacheClearTask;
 import com.github.jesse.l2cache.schedule.NullValueClearSupport;
 import com.github.jesse.l2cache.schedule.RefreshExpiredCacheTask;
@@ -216,6 +217,9 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         } else {
             guavaCache.invalidate(key);
         }
+
+        // 移除热key标识
+        AutoDetectHotKeyCache.evit(this.getCacheName(), key);
     }
 
     @Override

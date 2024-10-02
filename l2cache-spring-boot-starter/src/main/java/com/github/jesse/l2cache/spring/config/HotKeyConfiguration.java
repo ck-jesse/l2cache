@@ -2,6 +2,7 @@ package com.github.jesse.l2cache.spring.config;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.biz.CacheService;
 import com.github.jesse.l2cache.spi.ServiceLoader;
@@ -47,6 +48,9 @@ public class HotKeyConfiguration {
         }
 
         hotkeyService.init(hotKey, getAllCacheName());
+        hotkeyService.setInstanceId(l2CacheProperties.getConfig().getInstanceId());
+        hotkeyService.setCacheSyncPolicy(ServiceLoader.load(CacheSyncPolicy.class, l2CacheProperties.getConfig().getCacheSyncPolicy().getType()));
+
         log.info("Hotkey实例初始化成功, hotkey type={}", hotKey.getType());
     }
 
