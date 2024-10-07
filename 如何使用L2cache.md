@@ -16,9 +16,10 @@
 </dependency>
 ```
 
-- 常见问题：在项目中引入l2cache后，项目启动失败。
+- 旧版本常见问题：在项目中引入l2cache后，项目启动失败。
 - 原因分析：由于项目和l2cache中依赖的spring相关包版本不一致，导致启动失败。
 - 解决方案：建议排除掉l2cache中的依赖，使用项目中的版本。
+- 新版本已将spring相关依赖的scope设置为provided，避免了依赖冲突问题。
 
 ```xml
 <dependency>
@@ -147,6 +148,46 @@ l2cache:
       # #etcd的地址，如有多个用逗号分隔
       # etcdUrl: http://127.0.0.1:2379
 
+```
+
+**Redisson和Spring集成**
+
+参考: [Integration with Spring - Redisson Reference Guide](https://redisson.org/docs/integration-with-spring/)
+
+可以不指定 `l2cache.config.redis.redissonYamlConfig` 而是使用通用的配置
+
+需要引入 `redisson-spring-boot-starter` 依赖无缝替换掉 `spring-boot-starter-data-redis`
+```xml
+<dependency>
+    <groupId>org.redisson</groupId>
+    <artifactId>redisson-spring-boot-starter</artifactId>
+</dependency>
+<!--注释掉原有的spring-boot-starter-data-redis-->
+<!--
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+-->
+```
+Spring Boot 2 通用配置
+```yaml
+spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    database: 0
+```
+Spring Boot 3 通用配置
+```yaml
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password:
+      database: 0
 ```
 
 注：

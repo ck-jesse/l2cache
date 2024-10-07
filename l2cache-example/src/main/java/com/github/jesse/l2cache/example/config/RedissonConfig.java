@@ -3,7 +3,6 @@ package com.github.jesse.l2cache.example.config;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
  * @author chenck
  * @date 2020/9/2 14:32
  */
-@RefreshScope
 @Slf4j
 @Configuration
 public class RedissonConfig {
