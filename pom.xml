@@ -27,7 +27,6 @@
 
         <!-- dependencies -->
         <spring-boot.version>2.3.0.RELEASE</spring-boot.version>
-        <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
         <caffeine.version>2.8.4</caffeine.version>
         <guava.version>32.1.2-jre</guava.version>
         <redisson.version>3.13.0</redisson.version>
@@ -49,15 +48,6 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- spring-cloud -->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring.cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
@@ -73,6 +63,12 @@
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
 
