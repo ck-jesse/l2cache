@@ -1,9 +1,10 @@
 package com.github.jesse.l2cache.test;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.builder.RedisCacheBuilder;
 import com.github.jesse.l2cache.cache.RedissonRBucketCache;
 import com.github.jesse.l2cache.consts.CacheType;
+import com.github.jesse.l2cache.content.RedissonSupport;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
@@ -20,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RedisCacheTest1 {
 
-    CacheConfig cacheConfig = new CacheConfig();
+    L2CacheConfig.CacheConfig cacheConfig = new L2CacheConfig.CacheConfig();
     RedissonRBucketCache cache;
     Callable<String> callable;
 
@@ -34,13 +35,18 @@ public class RedisCacheTest1 {
 //                .setDuplicate(true)
 //                .setDuplicateALlKey(false)
 //                .setDefaultDuplicateSize(2)
-                .setRedissonYamlConfig("redisson.yaml");
+//                .setRedissonYamlConfig("redisson.yaml")
+        ;
+
+        L2CacheConfig l2CacheConfig = new L2CacheConfig();
+        l2CacheConfig.setRedissonYamlConfig("redisson.yaml");
+        l2CacheConfig.setDefaultConfig(cacheConfig);
 
         // 模拟应用中已经存在 RedissonClient
-        RedissonClient redissonClient = Redisson.create(cacheConfig.getRedis().getRedissonConfig());
+        RedissonClient redissonClient = Redisson.create(RedissonSupport.getRedissonConfig(l2CacheConfig.getRedissonYamlConfig()));
 
         RedisCacheBuilder builder = (RedisCacheBuilder) new RedisCacheBuilder()
-                .setCacheConfig(cacheConfig)
+                .setL2CacheConfig(l2CacheConfig)
                 .setActualCacheClient(redissonClient);
 
         // 构建cache

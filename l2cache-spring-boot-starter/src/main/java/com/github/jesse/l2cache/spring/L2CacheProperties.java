@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.spring;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
@@ -17,13 +17,13 @@ public class L2CacheProperties {
     /**
      * 缓存配置
      */
-    private CacheConfig config;
+    private L2CacheConfig config;
 
-    public CacheConfig getConfig() {
+    public L2CacheConfig getConfig() {
         return config;
     }
 
-    public void setConfig(CacheConfig config) {
+    public void setConfig(L2CacheConfig config) {
         this.config = config;
     }
 }

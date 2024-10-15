@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.test;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.consts.CacheSyncPolicyType;
 import com.github.jesse.l2cache.sync.CacheMessageListener;
@@ -18,7 +18,7 @@ import java.util.Properties;
  * @date 2020/7/8 14:51
  */
 public class KafkaCacheSyncPolicyTest {
-    CacheConfig cacheConfig = new CacheConfig();
+    L2CacheConfig cacheConfig = new L2CacheConfig();
 
     @Before
     public void before() {
@@ -49,7 +49,7 @@ public class KafkaCacheSyncPolicyTest {
     public void test() {
         CacheSyncPolicy cacheSyncPolicy = new KafkaCacheSyncPolicy()
                 .setCacheConfig(cacheConfig)
-                .setCacheMessageListener(new CacheMessageListener(cacheConfig.getInstanceId()));
+                .setCacheMessageListener(new CacheMessageListener(L2CacheConfig.INSTANCE_ID));
         cacheSyncPolicy.connnect();
     }
 }

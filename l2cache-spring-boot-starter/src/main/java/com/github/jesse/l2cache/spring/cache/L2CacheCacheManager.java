@@ -1,8 +1,9 @@
 package com.github.jesse.l2cache.spring.cache;
 
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
 import com.github.jesse.l2cache.cache.expire.DefaultCacheExpiredListener;
 import com.github.jesse.l2cache.content.CacheSupport;
@@ -33,7 +34,7 @@ public class L2CacheCacheManager implements CacheManager {
      */
     private boolean dynamic = true;
 
-    private final CacheConfig cacheConfig;
+    private final L2CacheConfig l2CacheConfig;
 
     private CacheExpiredListener expiredListener;
 
@@ -41,13 +42,13 @@ public class L2CacheCacheManager implements CacheManager {
 
     private Object actualCacheClient;
 
-    public L2CacheCacheManager(CacheConfig cacheConfig) {
-        this(cacheConfig, null, defaultCacheExpiredListener);
+    public L2CacheCacheManager(L2CacheConfig l2CacheConfig) {
+        this(l2CacheConfig, null, defaultCacheExpiredListener);
     }
 
-    public L2CacheCacheManager(CacheConfig cacheConfig, CacheSyncPolicy cacheSyncPolicy, CacheExpiredListener expiredListener) {
-        this.dynamic = cacheConfig.isDynamic();
-        this.cacheConfig = cacheConfig;
+    public L2CacheCacheManager(L2CacheConfig l2CacheConfig, CacheSyncPolicy cacheSyncPolicy, CacheExpiredListener expiredListener) {
+        this.dynamic = l2CacheConfig.isDynamic();
+        this.l2CacheConfig = l2CacheConfig;
         if (null == expiredListener) {
             this.expiredListener = defaultCacheExpiredListener;
         } else {
@@ -63,7 +64,9 @@ public class L2CacheCacheManager implements CacheManager {
             synchronized (this.cacheMap) {
                 cache = this.cacheMap.get(name);
                 if (cache == null) {
-                    cache = createL2CacheSpringCache(cacheConfig.getCacheType(), name);
+                    L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.l2CacheConfig, name);
+
+                    cache = createL2CacheSpringCache(cacheConfig, name);
                     this.cacheMap.put(name, cache);
                 }
             }
@@ -82,9 +85,9 @@ public class L2CacheCacheManager implements CacheManager {
      * @param cacheName the name of the cache
      * @return the Spring L2CacheSpringCache adapter (or a decorator thereof)
      */
-    protected Cache createL2CacheSpringCache(String cacheType, String cacheName) {
+    protected Cache createL2CacheSpringCache(L2CacheConfig.CacheConfig cacheConfig, String cacheName) {
         DefaultCacheExpiredListener expiredListener = new DefaultCacheExpiredListener();
-        com.github.jesse.l2cache.Cache cache = this.getL2CacheInstance(cacheType, cacheName, expiredListener);
+        com.github.jesse.l2cache.Cache cache = this.getL2CacheInstance(cacheConfig.getCacheType(), cacheName, expiredListener);
         expiredListener.setCache(cache);
         return new L2CacheSpringCache(cacheName, cacheConfig, cache);
     }
@@ -99,12 +102,16 @@ public class L2CacheCacheManager implements CacheManager {
         }
         // 基于SPI机制构建CacheBuilder
         CacheBuilder cacheBuilder = ServiceLoader.load(CacheBuilder.class, cacheType);
-        cacheBuilder.setCacheConfig(this.cacheConfig);
+        cacheBuilder.setL2CacheConfig(this.l2CacheConfig);
         cacheBuilder.setExpiredListener(expiredListener);
         cacheBuilder.setCacheSyncPolicy(this.cacheSyncPolicy);
         cacheBuilder.setActualCacheClient(this.actualCacheClient);
 
         return CacheSupport.getCache(cacheType, cacheName, cacheBuilder);
+    }
+
+    public L2CacheConfig getL2CacheConfig() {
+        return l2CacheConfig;
     }
 
     public CacheExpiredListener getExpiredListener() {

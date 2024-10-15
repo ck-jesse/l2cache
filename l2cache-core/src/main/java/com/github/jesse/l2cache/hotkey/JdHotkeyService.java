@@ -1,7 +1,7 @@
 package com.github.jesse.l2cache.hotkey;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.jd.platform.hotkey.client.ClientStarter;
@@ -24,8 +24,8 @@ import java.util.List;
 public class JdHotkeyService implements HotkeyService {
 
     @Override
-    public void init(CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
-        CacheConfig.Hotkey.JdHotkey jdHotKey = hotKeyConfig.getJd();
+    public void init(L2CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
+        L2CacheConfig.Hotkey.JdHotkey jdHotKey = hotKeyConfig.getJd();
         if (StrUtil.isBlank(jdHotKey.getEtcdUrl())) {
             throw new IllegalStateException("jdHotKey not found etcd url yaml config file:" + jdHotKey);
         }

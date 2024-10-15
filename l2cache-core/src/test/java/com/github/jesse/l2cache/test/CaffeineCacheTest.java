@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.test;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.builder.CaffeineCacheBuilder;
 import com.github.jesse.l2cache.cache.CaffeineCache;
@@ -30,12 +30,14 @@ import java.util.function.Function;
  */
 public class CaffeineCacheTest {
 
-    CacheConfig cacheConfig = new CacheConfig();
+    L2CacheConfig l2CacheConfig = new L2CacheConfig();
     CaffeineCache cache;
     Callable<String> callable;
 
     @Before
     public void before() {
+        L2CacheConfig.CacheConfig cacheConfig = new L2CacheConfig.CacheConfig();
+        l2CacheConfig.setDefaultConfig(cacheConfig);
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.CAFFEINE.name())
                 .setAllowNullValues(true)
@@ -47,19 +49,19 @@ public class CaffeineCacheTest {
                 .setRefreshPeriod(5L)
         ;
 
-        cacheConfig.getCacheSyncPolicy()
+        l2CacheConfig.getCacheSyncPolicy()
                 .setType(CacheSyncPolicyType.REDIS.name());
 
         // 构建缓存同步策略
         CacheSyncPolicy cacheSyncPolicy = new RedisCacheSyncPolicy()
-                .setCacheConfig(cacheConfig)
-                .setCacheMessageListener(new CacheMessageListener(cacheConfig.getInstanceId()))
+                .setCacheConfig(l2CacheConfig)
+                .setCacheMessageListener(new CacheMessageListener(L2CacheConfig.INSTANCE_ID))
                 .setActualClient(Redisson.create());
         cacheSyncPolicy.connnect();//
 
         // 构建cache
         cache = (CaffeineCache) new CaffeineCacheBuilder()
-                .setCacheConfig(cacheConfig)
+                .setL2CacheConfig(l2CacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
                 .setCacheSyncPolicy(cacheSyncPolicy)
                 .build("localCache");
@@ -69,10 +71,10 @@ public class CaffeineCacheTest {
 
             @Override
             public String call() throws Exception {
-//                String result = "loader_value" + count.getAndAdd(1);
+                String result = "loader_value" + count.getAndAdd(1);
                 System.out.println("loader value from valueLoader, return " + count.getAndAdd(1));
-//                return result;
-                return null;
+                return result;
+//                return null;
             }
         };
 

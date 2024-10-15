@@ -7,7 +7,7 @@ import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRuleManager;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.consts.CacheConsts;
@@ -43,7 +43,7 @@ public class SentinelHotkeyService implements HotkeyService {
     }
 
     @Override
-    public void init(CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
+    public void init(L2CacheConfig.Hotkey hotKeyConfig, List<String> cacheNameList) {
         ParamFlowRule defaultRule = hotKeyConfig.getSentinel().getDefaultRule();
         List<ParamFlowRule> rules = hotKeyConfig.getSentinel().getRules();
 

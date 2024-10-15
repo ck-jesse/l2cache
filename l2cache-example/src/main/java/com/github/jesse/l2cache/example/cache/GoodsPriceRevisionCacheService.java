@@ -25,7 +25,6 @@ import java.util.function.Function;
  */
 @Component
 @Slf4j
-@Deprecated
 public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPriceRevisionIdsReqDTO, GoodsPriceRevisionRespBO> {
 
     public static final String CACHE_NAME = "goodsPriceRevisionCache";
@@ -39,30 +38,30 @@ public class GoodsPriceRevisionCacheService extends AbstractCacheService<GoodsPr
     public String buildCacheKey(GoodsPriceRevisionIdsReqDTO goodsPriceRevisionIdsReqDTO) {
         StringBuilder sb = new StringBuilder();
         sb.append(goodsPriceRevisionIdsReqDTO.getTenantId());
-        sb.append(":").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
+        sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
         sb.append("_").append(goodsPriceRevisionIdsReqDTO.getGoodsId());
         return sb.toString();
     }
 
-    @Cacheable(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_'+#dto.goodsGroupId", sync = true)
+    @Cacheable(value = CACHE_NAME, key = "#dto.tenantId+'_'+#dto.goodsGroupId+'_'" + "+#dto.goodsId", sync = true)
     @Override
     public GoodsPriceRevisionRespBO getOrLoad(GoodsPriceRevisionIdsReqDTO dto) {
         return this.reload(dto);
     }
 
-    @CachePut(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
+    @CachePut(value = CACHE_NAME, key = "#dto.tenantId+'_'+#dto.goodsGroupId+'_'" + "+#dto.goodsId")
     @Override
     public GoodsPriceRevisionRespBO put(GoodsPriceRevisionIdsReqDTO dto, GoodsPriceRevisionRespBO goodsPriceRevisionRespBO) {
         return goodsPriceRevisionRespBO;
     }
 
-    @CachePut(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
+    @CachePut(value = CACHE_NAME, key = "#dto.tenantId+'_'+#dto.goodsGroupId+'_'" + "+#dto.goodsId")
     @Override
     public GoodsPriceRevisionRespBO reload(GoodsPriceRevisionIdsReqDTO dto) {
         return this.queryData(dto);
     }
 
-    @CacheEvict(value = CACHE_NAME, key = "#dto.goodsId+'_'+#dto.groupId+'_'" + "+#dto.organizationId+'_' +#dto.goodsGroupId")
+    @CacheEvict(value = CACHE_NAME, key = "#dto.tenantId+'_'+#dto.goodsGroupId+'_'" + "+#dto.goodsId")
     @Override
     public void evict(GoodsPriceRevisionIdsReqDTO dto) {
         log.info("[evict] cacheName={}, goodsPriceRevisionIdsReqDTO={}", CACHE_NAME, JSON.toJSONString(dto));

@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.example;
+package com.github.jesse.l2cache.example.test;
 
 import org.springframework.util.ConcurrentReferenceHashMap;
 

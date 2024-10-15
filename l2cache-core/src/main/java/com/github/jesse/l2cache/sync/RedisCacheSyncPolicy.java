@@ -1,6 +1,7 @@
 package com.github.jesse.l2cache.sync;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.content.RedissonSupport;
 import com.github.jesse.l2cache.util.pool.RunnableMdcWarpper;
@@ -62,8 +63,8 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
             logger.info("already started");
             return;
         }
-        RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
-        this.topic = redissonClient.getTopic(this.getCacheConfig().getCacheSyncPolicy().getTopic());
+        RedissonClient redissonClient = getRedissonClient(this.getL2CacheConfig());
+        this.topic = redissonClient.getTopic(this.getL2CacheConfig().getCacheSyncPolicy().getTopic());
 
         // 订阅主题
         this.topic.addListener(CacheMessage.class, (channel, msg) -> {
@@ -76,8 +77,10 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
     public void publish(CacheMessage message) {
         poolExecutor.execute(new RunnableMdcWarpper(() -> {
             try {
-                Long publishMsgPeriodMilliSeconds = this.getCacheConfig().getCaffeine().getPublishMsgPeriodMilliSeconds();
-                RedissonClient redissonClient = getRedissonClient(this.getCacheConfig());
+                L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), message.getCacheName());
+
+                Long publishMsgPeriodMilliSeconds = cacheConfig.getCaffeine().getPublishMsgPeriodMilliSeconds();
+                RedissonClient redissonClient = getRedissonClient(this.getL2CacheConfig());
                 RLock lock = redissonClient.getLock(buildLockKey(message));
                 // 限制同一个key指定时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
                 if (!lock.tryLock(0, publishMsgPeriodMilliSeconds, TimeUnit.MILLISECONDS)) {
@@ -106,17 +109,17 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     }
 
-    protected RedissonClient getRedissonClient(CacheConfig cacheConfig) {
-        Object actualClient = this.getActualClient();
-        if (null != actualClient && actualClient instanceof RedissonClient) {
+    protected RedissonClient getRedissonClient(L2CacheConfig l2CacheConfig) {
+        RedissonClient actualClient = this.getActualClient();
+        if (null != actualClient) {
             if (logger.isDebugEnabled()) {
                 logger.debug("use setting RedissonClient instance");
             }
-            return (RedissonClient) actualClient;
+            return actualClient;
         }
 
         logger.info("get or create RedissonClient instance by cache config");
-        return RedissonSupport.getRedisson(cacheConfig);
+        return RedissonSupport.getRedisson(l2CacheConfig);
     }
 
     private String buildLockKey(CacheMessage message) {

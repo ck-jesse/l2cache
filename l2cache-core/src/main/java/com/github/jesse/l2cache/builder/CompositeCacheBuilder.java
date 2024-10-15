@@ -3,7 +3,8 @@ package com.github.jesse.l2cache.builder;
 import cn.hutool.core.util.StrUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.cache.CompositeCache;
@@ -19,8 +20,10 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
 
     @Override
     public CompositeCache build(String cacheName) {
-        String l1CacheType = this.getCacheConfig().getComposite().getL1CacheType();
-        String l2CacheType = this.getCacheConfig().getComposite().getL2CacheType();
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
+
+        String l1CacheType = cacheConfig.getComposite().getL1CacheType();
+        String l2CacheType = cacheConfig.getComposite().getL2CacheType();
         if (StrUtil.isEmpty(l1CacheType) && StrUtil.isEmpty(l2CacheType)) {
             throw new IllegalArgumentException("must be configured l1CacheType and l2CacheType");
         }
@@ -52,14 +55,14 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
             throw new IllegalArgumentException("level2Cache must be implements Level2Cache, l2CacheType=" + l2CacheType);
         }
 
-        return this.buildActualCache(cacheName, this.getCacheConfig(), (Level1Cache) level1Cache, (Level2Cache) level2Cache);
+        return this.buildActualCache(cacheName, cacheConfig, (Level1Cache) level1Cache, (Level2Cache) level2Cache, this.getL2CacheConfig().getHotkey().getType());
     }
 
     /**
      * 构建组合缓存，传入L1和L2是为了与应用中已经存在的L1和L2进行集成
      */
-    protected CompositeCache buildActualCache(String cacheName, CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache) {
-        return new CompositeCache(cacheName, cacheConfig, level1Cache, level2Cache);
+    protected CompositeCache buildActualCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache, String hotkeyType) {
+        return new CompositeCache(cacheName, cacheConfig, level1Cache, level2Cache, hotkeyType);
     }
 
     /**

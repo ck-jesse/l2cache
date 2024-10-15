@@ -2,12 +2,13 @@ package com.github.jesse.l2cache.test;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.cache.expire.DefaultCacheExpiredListener;
 import com.github.jesse.l2cache.builder.CaffeineCacheBuilder;
 import com.github.jesse.l2cache.builder.CompositeCacheBuilder;
 import com.github.jesse.l2cache.builder.RedisCacheBuilder;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -15,10 +16,17 @@ import org.junit.Test;
  * @date 2020/7/2 16:21
  */
 public class CacheBuilderTest {
+    L2CacheConfig l2CacheConfig = new L2CacheConfig();
+    L2CacheConfig.CacheConfig cacheConfig = new L2CacheConfig.CacheConfig();
+
+    @Before
+    public void before() {
+        l2CacheConfig.setDefaultConfig(cacheConfig);
+    }
 
     @Test
     public void caffeineCacheBuilderTest() throws InterruptedException {
-        CacheConfig cacheConfig = new CacheConfig();
+
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.CAFFEINE.name())
                 .setAllowNullValues(true)
@@ -27,7 +35,7 @@ public class CacheBuilderTest {
                 .setAutoRefreshExpireCache(true);
 
         Cache cache = new CaffeineCacheBuilder()
-                .setCacheConfig(cacheConfig)
+                .setL2CacheConfig(l2CacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
                 .setCacheSyncPolicy(null)
                 .build("test");
@@ -47,18 +55,19 @@ public class CacheBuilderTest {
 
     @Test
     public void compositeCacheBuilderTest() throws InterruptedException {
-        CacheConfig cacheConfig = new CacheConfig();
+
         // 组合缓存 CAFFEINE + NONE
         cacheConfig.setCacheType(CacheType.COMPOSITE.name())
                 .getComposite()
                 .setL1CacheType(CacheType.CAFFEINE.name())
-                .setL2CacheType(CacheType.NONE.name());
+                .setL2CacheType(CacheType.NONE.name())
+                .setL1AllOpen(true);
         cacheConfig.getCaffeine()
                 .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=2s,recordStats")
                 .setAutoRefreshExpireCache(true);
 
         Cache cache = new CompositeCacheBuilder()
-                .setCacheConfig(cacheConfig)
+                .setL2CacheConfig(l2CacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
                 .setCacheSyncPolicy(null)
                 .build("test");
@@ -79,16 +88,18 @@ public class CacheBuilderTest {
      */
     @Test
     public void redisCacheBuilderTest() throws InterruptedException {
-        CacheConfig cacheConfig = new CacheConfig();
+        l2CacheConfig.setRedissonYamlConfig("redisson.yaml");
+
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .getRedis()
                 .setExpireTime(1000)
 //                .setMaxIdleTime(5000)
 //                .setMaxSize(2)
-                .setRedissonYamlConfig("redisson.yaml");
+//                .setRedissonYamlConfig("redisson.yaml")
+        ;
 
-        CacheBuilder builder = new RedisCacheBuilder().setCacheConfig(cacheConfig);
+        CacheBuilder builder = new RedisCacheBuilder().setL2CacheConfig(l2CacheConfig);
         Cache cache1 = builder.build("test3");
         Cache cache2 = builder.build("test4");
 
@@ -114,16 +125,18 @@ public class CacheBuilderTest {
 
     @Test
     public void redisCacheBuilderTest1() throws InterruptedException {
-        CacheConfig cacheConfig = new CacheConfig();
+        l2CacheConfig.setRedissonYamlConfig("redisson.yaml");
+
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.REDIS.name())
                 .getRedis()
                 .setExpireTime(3000)
 //                .setMaxIdleTime(3000)
 //                .setMaxSize(2)
-                .setRedissonYamlConfig("redisson.yaml");
+//                .setRedissonYamlConfig("redisson.yaml");
+        ;
 
-        CacheBuilder builder = new RedisCacheBuilder().setCacheConfig(cacheConfig);
+        CacheBuilder builder = new RedisCacheBuilder().setL2CacheConfig(l2CacheConfig);
         Cache cache1 = builder.build("test1");
 
         String key = "key3";

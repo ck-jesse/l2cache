@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.Cache;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.content.NullValue;
@@ -11,7 +11,6 @@ import com.github.jesse.l2cache.load.ValueLoaderWarpper;
 import com.github.jesse.l2cache.load.ValueLoaderWarpperTemp;
 import com.github.jesse.l2cache.util.BiConsumerWrapper;
 import com.github.jesse.l2cache.util.LogUtil;
-import com.github.jesse.l2cache.util.RandomUtil;
 import com.github.jesse.l2cache.util.SpringCacheExceptionUtil;
 import com.google.common.collect.Lists;
 import org.redisson.api.*;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Redisson RBucket Cache
@@ -39,7 +37,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     /**
      * redis config
      */
-    private final CacheConfig.Redis redis;
+    private final L2CacheConfig.Redis redis;
 
     /**
      * RBucket String结构
@@ -51,7 +49,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      */
     private RMap<Object, Object> map;
 
-    public RedissonRBucketCache(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
+    public RedissonRBucketCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, RedissonClient redissonClient) {
         super(cacheName, cacheConfig);
         this.redis = cacheConfig.getRedis();
         this.redissonClient = redissonClient;

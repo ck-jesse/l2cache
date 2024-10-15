@@ -1,8 +1,9 @@
 package com.github.jesse.l2cache.builder;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.content.CustomGuavaCacheBuilderSpec;
 import com.github.jesse.l2cache.cache.GuavaCache;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
@@ -31,25 +32,29 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
 
     @Override
     public GuavaCache build(String cacheName) {
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
+
         // 构建 CacheSpec
         CacheSpec cacheSpec = this.parseSpec(cacheName);
 
         // 创建CustomCacheLoader
         // 保证一个GuavaCache对应一个CacheLoader，也就是cacheName维度进行隔离
-        CacheLoader customCacheLoader = CustomCacheLoader.newInstance(this.getCacheConfig().getInstanceId(),
+        CacheLoader customCacheLoader = CustomCacheLoader.newInstance(L2CacheConfig.INSTANCE_ID,
                 CacheType.GUAVA.name().toLowerCase(), cacheName, cacheSpec.getMaxSize());
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
-        customCacheLoader.setAllowNullValues(this.getCacheConfig().isAllowNullValues());
+        customCacheLoader.setAllowNullValues(cacheConfig.isAllowNullValues());
 
-        Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig(), customCacheLoader,
+        Cache<Object, Object> cache = this.buildActualCache(cacheName, cacheConfig, customCacheLoader,
                 this.getExpiredListener());
 
-        return new GuavaCache(cacheName, this.getCacheConfig(), customCacheLoader, this.getCacheSyncPolicy(), cache);
+        return new GuavaCache(cacheName, cacheConfig, customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
 
     @Override
     public CacheSpec parseSpec(String cacheName) {
-        this.buildGuavaCacheSpec(cacheName, this.getCacheConfig().getGuava());
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
+
+        this.buildGuavaCacheSpec(cacheName, cacheConfig.getGuava());
 
         CacheSpec cacheSpec = new CacheSpec();
         cacheSpec.setExpireTime(cacheBuilderSpec.getExpireTime());
@@ -60,10 +65,10 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
     /**
      * 构建实际缓存对象
      */
-    protected Cache<Object, Object> buildActualCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader,
+    protected Cache<Object, Object> buildActualCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, CacheLoader cacheLoader,
                                                      CacheExpiredListener listener) {
         // 解析spec
-        this.buildGuavaCacheSpec(cacheName, this.getCacheConfig().getGuava());
+        this.buildGuavaCacheSpec(cacheName, cacheConfig.getGuava());
 
         if (null != listener) {
             cacheBuilder.removalListener(notification -> {
@@ -87,7 +92,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
     /**
      * 获取 spec
      */
-    private String getSpec(String cacheName, CacheConfig.Guava guava) {
+    private String getSpec(String cacheName, L2CacheConfig.Guava guava) {
         if (StrUtil.isBlank(cacheName)) {
             return guava.getDefaultSpec();
         }
@@ -101,7 +106,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
     /**
      * 获取自定义的 GuavaCacheSpec
      */
-    private void buildGuavaCacheSpec(String cacheName, CacheConfig.Guava guava) {
+    private void buildGuavaCacheSpec(String cacheName, L2CacheConfig.Guava guava) {
         if (null != cacheBuilder) {
             return;
         }

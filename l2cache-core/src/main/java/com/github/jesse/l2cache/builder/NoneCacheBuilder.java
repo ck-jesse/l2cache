@@ -1,6 +1,8 @@
 package com.github.jesse.l2cache.builder;
 
 import com.github.jesse.l2cache.Cache;
+import com.github.jesse.l2cache.L2CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.cache.NoneCache;
 
 /**
@@ -10,6 +12,8 @@ import com.github.jesse.l2cache.cache.NoneCache;
 public class NoneCacheBuilder extends AbstractCacheBuilder<NoneCache> {
     @Override
     public Cache build(String cacheName) {
-        return new NoneCache(cacheName, this.getCacheConfig());
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
+        
+        return new NoneCache(cacheName, cacheConfig);
     }
 }

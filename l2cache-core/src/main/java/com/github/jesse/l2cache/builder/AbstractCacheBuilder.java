@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.builder;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
@@ -13,7 +13,7 @@ import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
  */
 public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuilder {
 
-    private CacheConfig cacheConfig;
+    private L2CacheConfig l2CacheConfig;
 
     private CacheExpiredListener expiredListener;
 
@@ -31,15 +31,15 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
 
     @Override
     public void copyFrom(CacheBuilder sourceBuilder) {
-        this.setCacheConfig(sourceBuilder.getCacheConfig());
+        this.setL2CacheConfig(sourceBuilder.getL2CacheConfig());
         this.setExpiredListener(sourceBuilder.getExpiredListener());
         this.setCacheSyncPolicy(sourceBuilder.getCacheSyncPolicy());
         this.setActualCacheClient(sourceBuilder.getActualCacheClient());
     }
 
     @Override
-    public CacheBuilder setCacheConfig(CacheConfig cacheConfig) {
-        this.cacheConfig = cacheConfig;
+    public CacheBuilder setL2CacheConfig(L2CacheConfig l2CacheConfig) {
+        this.l2CacheConfig = l2CacheConfig;
         return this;
     }
 
@@ -56,8 +56,8 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
     }
 
     @Override
-    public CacheConfig getCacheConfig() {
-        return this.cacheConfig;
+    public L2CacheConfig getL2CacheConfig() {
+        return this.l2CacheConfig;
     }
 
     @Override

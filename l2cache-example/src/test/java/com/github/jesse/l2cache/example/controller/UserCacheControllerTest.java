@@ -1,11 +1,11 @@
-package com.github.jesse.l2cache.example;
+package com.github.jesse.l2cache.example.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.github.jesse.l2cache.example.dto.User;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 
-public class ControllerTest {
+public class UserCacheControllerTest {
 
     private static final String HOST = "http://127.0.0.1:8080";
 

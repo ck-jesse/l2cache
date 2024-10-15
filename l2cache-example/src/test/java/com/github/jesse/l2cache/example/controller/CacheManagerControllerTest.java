@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.example;
+package com.github.jesse.l2cache.example.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.github.jesse.l2cache.util.ServiceResult;
@@ -22,7 +22,7 @@ public class CacheManagerControllerTest {
 
     @Test
     public void getCacheConfig() {
-        String url = HOST + "/l2cache/manager/getCacheConfig?cacheName=userCache";
+        String url = HOST + "/l2cache/manager/getCacheConfig?cacheName=newGoodsPriceRevisionCache";
 
         ServiceResult user = restTemplate.getForObject(url, ServiceResult.class);
         System.out.println(JSON.toJSONString(user));

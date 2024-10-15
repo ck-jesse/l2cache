@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.example;
+package com.github.jesse.l2cache.example.test;
 
 import com.github.jesse.l2cache.util.DateUtils;
 import com.github.jesse.l2cache.util.RandomUtil;

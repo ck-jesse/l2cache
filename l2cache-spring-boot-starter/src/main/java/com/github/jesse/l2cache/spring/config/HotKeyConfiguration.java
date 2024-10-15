@@ -1,7 +1,7 @@
 package com.github.jesse.l2cache.spring.config;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.HotkeyService;
 import com.github.jesse.l2cache.biz.CacheService;
@@ -35,23 +35,23 @@ public class HotKeyConfiguration {
 
     @PostConstruct
     public void init() {
-        CacheConfig.Hotkey hotKey = l2CacheProperties.getConfig().getHotKey();
-        if (ObjectUtil.isEmpty(hotKey.getType())) {
+        L2CacheConfig.Hotkey hotkey = l2CacheProperties.getConfig().getHotkey();
+        if (ObjectUtil.isEmpty(hotkey.getType())) {
             log.error("未配置 hotkey type，不进行初始化");
             return;
         }
 
-        HotkeyService hotkeyService = ServiceLoader.load(HotkeyService.class, hotKey.getType());
+        HotkeyService hotkeyService = ServiceLoader.load(HotkeyService.class, hotkey.getType());
         if (ObjectUtil.isNull(hotkeyService)) {
-            log.error("非法的 hotkey type,无匹配的HotkeyService实现类, hotkey type={}", hotKey.getType());
+            log.error("非法的 hotkey type,无匹配的HotkeyService实现类, hotkey type={}", hotkey.getType());
             return;
         }
 
-        hotkeyService.init(hotKey, getAllCacheName());
-        hotkeyService.setInstanceId(l2CacheProperties.getConfig().getInstanceId());
+        hotkeyService.init(hotkey, getAllCacheName());
+        hotkeyService.setInstanceId(L2CacheConfig.INSTANCE_ID);
         hotkeyService.setCacheSyncPolicy(ServiceLoader.load(CacheSyncPolicy.class, l2CacheProperties.getConfig().getCacheSyncPolicy().getType()));
 
-        log.info("Hotkey实例初始化成功, hotkey type={}", hotKey.getType());
+        log.info("Hotkey实例初始化成功, hotkey type={}", hotkey.getType());
     }
 
     /**

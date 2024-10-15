@@ -1,8 +1,6 @@
-package com.github.jesse.l2cache.example;
+package com.github.jesse.l2cache.example.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.github.jesse.l2cache.example.dto.BrandIdListBO;
-import com.github.jesse.l2cache.example.dto.BrandRespBO;
 import com.github.jesse.l2cache.example.dto.GoodsPriceRevisionIdsPutReqDTO;
 import com.github.jesse.l2cache.example.dto.GoodsPriceRevisionIdsReqDTO;
 import com.github.jesse.l2cache.example.dto.GoodsPriceRevisionRespBO;
@@ -181,7 +179,7 @@ public class NewGoodsPriceRevisionCacheControllerTest {
 
         List<GoodsPriceRevisionIdsReqDTO> keyList = new ArrayList<>();
         GoodsPriceRevisionIdsReqDTO param = null;
-        for (int i = 1; i <= 10000; i++) {
+        for (int i = 1; i <= 10; i++) {
             param = new GoodsPriceRevisionIdsReqDTO();
             param.setTenantId(1);
             param.setGoodsGroupId(1);

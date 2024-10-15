@@ -1,7 +1,8 @@
 package com.github.jesse.l2cache.sync;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
+import org.redisson.api.RedissonClient;
 
 /**
  * @author chenck
@@ -9,17 +10,17 @@ import com.github.jesse.l2cache.CacheSyncPolicy;
  */
 public abstract class AbstractCacheSyncPolicy implements CacheSyncPolicy {
 
-    private CacheConfig cacheConfig;
+    private L2CacheConfig cacheConfig;
     private MessageListener cacheMessageListener;
-    private Object actualClient;
+    private RedissonClient actualClient;
 
     @Override
-    public CacheConfig getCacheConfig() {
+    public L2CacheConfig getL2CacheConfig() {
         return this.cacheConfig;
     }
 
     @Override
-    public CacheSyncPolicy setCacheConfig(CacheConfig cacheConfig) {
+    public CacheSyncPolicy setCacheConfig(L2CacheConfig cacheConfig) {
         this.cacheConfig = cacheConfig;
         return this;
     }
@@ -36,12 +37,12 @@ public abstract class AbstractCacheSyncPolicy implements CacheSyncPolicy {
     }
 
     @Override
-    public Object getActualClient() {
+    public RedissonClient getActualClient() {
         return this.actualClient;
     }
 
     @Override
-    public CacheSyncPolicy setActualClient(Object actualClient) {
+    public CacheSyncPolicy setActualClient(RedissonClient actualClient) {
         this.actualClient = actualClient;
         return this;
     }

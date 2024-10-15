@@ -3,7 +3,7 @@ package com.github.jesse.l2cache.example.controller;
 import com.github.jesse.l2cache.cache.CompositeCache;
 import com.github.jesse.l2cache.cache.Level1Cache;
 import com.github.jesse.l2cache.consts.CacheConsts;
-import com.github.jesse.l2cache.example.service.CaffeineCacheService;
+import com.github.jesse.l2cache.example.cache.UserCacheService;
 import com.github.jesse.l2cache.example.dto.User;
 import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import lombok.extern.slf4j.Slf4j;
@@ -23,39 +23,40 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-public class CaffeineCacheController {
+@RequestMapping()
+public class UserCacheController {
 
     @Autowired
-    CaffeineCacheService caffeineCacheService;
+    UserCacheService userCacheService;
 
     @Autowired
     L2CacheCacheManager cacheManager;
 
     @RequestMapping(value = "/queryUser")
     public User queryUser(String userId) {
-        return caffeineCacheService.queryUser(userId);
+        return userCacheService.queryUser(userId);
     }
 
     @RequestMapping(value = "/queryUserSync")
     public User queryUserSync(String userId) {
-        return caffeineCacheService.queryUserSync(userId);
+        return userCacheService.queryUserSync(userId);
     }
 
     @RequestMapping(value = "/queryUserSyncList")
     public List<User> queryUserSyncList(String userId) {
-        return caffeineCacheService.queryUserSyncList(userId);
+        return userCacheService.queryUserSyncList(userId);
     }
 
     @RequestMapping(value = "/putUser")
     public String putUser(String userId) {
         User user = new User(userId, "addr");
-        caffeineCacheService.putUser(userId, user);
+        userCacheService.putUser(userId, user);
         return "success";
     }
 
     @RequestMapping(value = "/evictUserSync")
     public String evictUserSync(String userId) {
-        return caffeineCacheService.evictUserSync(userId);
+        return userCacheService.evictUserSync(userId);
     }
 
     /**
@@ -95,11 +96,11 @@ public class CaffeineCacheController {
 
     @PostMapping(value = "/batchGetUser")
     public Map<String, User> batchGetUser(@RequestBody List<String> userIdList) {
-        return caffeineCacheService.batchGetUser(userIdList);
+        return userCacheService.batchGetUser(userIdList);
     }
 
     @RequestMapping(value = "/batchGetOrLoadUser")
     public Map<String, User> batchGetOrLoadUser(@RequestBody List<String> userIdList) {
-        return caffeineCacheService.batchGetOrLoadUser(userIdList);
+        return userCacheService.batchGetOrLoadUser(userIdList);
     }
 }

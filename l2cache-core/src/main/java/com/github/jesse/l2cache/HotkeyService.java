@@ -17,7 +17,7 @@ public interface HotkeyService extends Serializable {
     /**
      * 初始化
      */
-    void init(CacheConfig.Hotkey hotkey, List<String> cacheNameList);
+    void init(L2CacheConfig.Hotkey hotkey, List<String> cacheNameList);
 
     /**
      * 是否为热key

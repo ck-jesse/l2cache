@@ -12,8 +12,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -24,35 +22,12 @@ import java.util.*;
 @Setter
 @Accessors(chain = true)
 @ToString
-public class CacheConfig {
+public class L2CacheConfig {
 
     /**
-     * 缓存实例id，默认值为基于Snowflake的简单ID
+     * 缓存实例id，唯一标识应分布式场景下的一个缓存实例节点，默认值为基于Snowflake的简单ID
      */
-    private String instanceId = "C" + IdUtil.getSnowflakeNextIdStr();
-
-    /**
-     * 是否存储空值，设置为true时，可防止缓存穿透
-     */
-    private boolean allowNullValues = true;
-
-    /**
-     * NullValue的过期时间，单位秒，默认30秒
-     * 用于淘汰NullValue的值
-     * 注：当缓存项的过期时间小于该值时，则NullValue不会淘汰
-     */
-    private long nullValueExpireTimeSeconds = 60;
-
-    /**
-     * NullValue 的最大数量，防止出现内存溢出
-     * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
-     */
-    private long nullValueMaxSize = 3000;
-
-    /**
-     * NullValue 的清理频率(秒)
-     */
-    private long nullValueClearPeriodSeconds = 10L;
+    public static final String INSTANCE_ID = "C" + IdUtil.getSnowflakeNextIdStr();
 
     /**
      * 是否动态根据cacheName创建Cache的实现，默认true
@@ -60,37 +35,97 @@ public class CacheConfig {
     private boolean dynamic = true;
 
     /**
-     * 简单处理：日志级别配置，所以此参数可用于控制是否打印日志
-     * 原因：一方面日志量太多影响性能，一方面日志量太多存储成本高
+     * Redisson 的yaml配置文件，默认取resources目录下的redisson.yaml文件
+     * <p>
+     * 注：将该属性从Redis中剥离出来，简化配置
      */
-    private String logLevel = CacheConsts.LOG_DEBUG;
+    private String redissonYamlConfig = "redisson.yaml";
 
     /**
-     * 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认为true
-     * 注：目的是为了简化缓存配置，且保证一级缓存和二级缓存的配置一致。因此在使用混合缓存时，只需要配置一级缓存即可。
+     * 默认缓存配置
      */
-    private boolean useL1ReplaceL2ExpireTime = true;
+    private CacheConfig defaultConfig = new CacheConfig();
 
     /**
-     * 缓存类型，默认 COMPOSITE 组合缓存
-     *
-     * @see CacheType
+     * 缓存配置集合（针对cacheName的个性化缓存配置）
+     * <key,value>=<cacheName, CacheConfig>=<缓存名称, 缓存配置>
      */
-    private String cacheType = CacheType.COMPOSITE.name();
+    private Map<String, CacheConfig> configMap = new HashMap<>();
 
-    // 缓存类型，统一处理为小写
-    public String getCacheType() {
-        return StrUtil.isBlank(cacheType) ? CacheType.COMPOSITE.name().toLowerCase() : cacheType.toLowerCase();
-    }
-
-    private final Composite composite = new Composite();
-    private final Caffeine caffeine = new Caffeine();
-    private final Guava guava = new Guava();
-    private final Redis redis = new Redis();
+    /**
+     * 缓存同步策略
+     * 注：将该属性从CacheConfig中剥离出来，简化配置和架构的复杂度（不支持单个cacheName的配置）
+     */
     private final CacheSyncPolicy cacheSyncPolicy = new CacheSyncPolicy();
-    private final Hotkey hotKey = new Hotkey();
+
+    /**
+     * 热key探测
+     * 注：将该属性从CacheConfig中剥离出来，简化配置和架构的复杂度（不支持单个cacheName的配置）
+     */
+    private final Hotkey hotkey = new Hotkey();
 
     public interface Config {
+    }
+
+    /**
+     * 缓存配置
+     */
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class CacheConfig implements Config {
+
+        /**
+         * 是否存储空值，设置为true时，可防止缓存穿透
+         */
+        private boolean allowNullValues = true;
+
+        /**
+         * NullValue的过期时间，单位秒，默认30秒
+         * 用于淘汰NullValue的值
+         * 注：当缓存项的过期时间小于该值时，则NullValue不会淘汰
+         */
+        private long nullValueExpireTimeSeconds = 60;
+
+        /**
+         * NullValue 的最大数量，防止出现内存溢出
+         * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
+         */
+        private long nullValueMaxSize = 3000;
+
+        /**
+         * NullValue 的清理频率(秒)
+         */
+        private long nullValueClearPeriodSeconds = 10L;
+
+        /**
+         * 简单处理：日志级别配置，所以此参数可用于控制是否打印日志
+         * 原因：一方面日志量太多影响性能，一方面日志量太多存储成本高
+         */
+        private String logLevel = CacheConsts.LOG_DEBUG;
+
+        /**
+         * 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认为true
+         * 注：目的是为了简化缓存配置，且保证一级缓存和二级缓存的配置一致。因此在使用混合缓存时，只需要配置一级缓存即可。
+         */
+        private boolean useL1ReplaceL2ExpireTime = true;
+
+        /**
+         * 缓存类型，默认 COMPOSITE 组合缓存
+         *
+         * @see CacheType
+         */
+        private String cacheType = CacheType.COMPOSITE.name();
+
+        // 缓存类型，统一处理为小写
+        public String getCacheType() {
+            return StrUtil.isBlank(cacheType) ? CacheType.COMPOSITE.name().toLowerCase() : cacheType.toLowerCase();
+        }
+
+        private final Composite composite = new Composite();
+        private final Caffeine caffeine = new Caffeine();
+        private final Guava guava = new Guava();
+        private final Redis redis = new Redis();
     }
 
     /**
@@ -127,9 +162,10 @@ public class CacheConfig {
         private boolean l1AllOpen = false;
 
         /**
-         * 是否手动启用一级缓存，默认false
+         * 是否手动启用一级缓存，默认true
+         * 注：原来是false，改为true，简化配置
          */
-        private boolean l1Manual = false;
+        private boolean l1Manual = true;
 
         /**
          * 手动配置走一级缓存的缓存key集合，针对单个key维度
@@ -286,39 +322,6 @@ public class CacheConfig {
          * 是否打印详细日志，方便问题排查
          */
         private String printDetailLogSwitch = CacheConsts.NOT_PRINT_DETAIL_LOG;
-
-        /**
-         * Redisson 的yaml配置文件
-         */
-        private String redissonYamlConfig;
-
-        /**
-         * Redisson Config
-         */
-        private org.redisson.config.Config redissonConfig;
-
-        /**
-         * 解析Redisson yaml文件
-         */
-        public org.redisson.config.Config getRedissonConfig() {
-            if (StrUtil.isBlank(this.redissonYamlConfig) && redissonConfig == null) {
-                return null;
-            }
-            if (null != redissonConfig) {
-                return redissonConfig;
-            }
-            try {
-                // 此方式可获取到springboot打包以后jar包内的资源文件
-                InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(this.redissonYamlConfig);
-                if (null == is) {
-                    throw new IllegalStateException("not found redisson yaml config file:" + redissonYamlConfig);
-                }
-                redissonConfig = org.redisson.config.Config.fromYAML(is);
-                return redissonConfig;
-            } catch (IOException e) {
-                throw new IllegalStateException("parse redisson yaml config error", e);
-            }
-        }
 
     }
 

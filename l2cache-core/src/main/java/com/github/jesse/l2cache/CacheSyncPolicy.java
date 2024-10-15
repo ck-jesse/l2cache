@@ -3,6 +3,7 @@ package com.github.jesse.l2cache;
 import com.github.jesse.l2cache.spi.SPI;
 import com.github.jesse.l2cache.sync.CacheMessage;
 import com.github.jesse.l2cache.sync.MessageListener;
+import org.redisson.api.RedissonClient;
 
 import java.io.Serializable;
 
@@ -18,12 +19,12 @@ public interface CacheSyncPolicy extends Serializable {
     /**
      * 获取缓存配置
      */
-    CacheConfig getCacheConfig();
+    L2CacheConfig getL2CacheConfig();
 
     /**
      * 设置缓存配置
      */
-    CacheSyncPolicy setCacheConfig(CacheConfig cacheConfig);
+    CacheSyncPolicy setCacheConfig(L2CacheConfig cacheConfig);
 
     /**
      * 获取缓存消息监听器
@@ -38,13 +39,13 @@ public interface CacheSyncPolicy extends Serializable {
     /**
      * 获取真实的Client实例
      */
-    Object getActualClient();
+    RedissonClient getActualClient();
 
     /**
      * 设置真实的Client实例
-     * 注：留一个扩展点，可以直接设置应用中已经存在的Client实例，如：RedissonClient、RedisTemplate 等
+     * 注：留一个扩展点，可以直接设置应用中已经存在的Client实例，如：RedissonClient 等
      */
-    CacheSyncPolicy setActualClient(Object actualClient);
+    CacheSyncPolicy setActualClient(RedissonClient actualClient);
 
     /**
      * 建立连接，并订阅消息

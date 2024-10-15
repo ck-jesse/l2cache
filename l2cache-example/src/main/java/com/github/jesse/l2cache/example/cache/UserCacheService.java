@@ -1,4 +1,4 @@
-package com.github.jesse.l2cache.example.service;
+package com.github.jesse.l2cache.example.cache;
 
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.example.dto.User;
@@ -17,13 +17,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 第一阶段：无缓存使用规范，灵活但不可控
+ * <p>
+ * 优点：屏蔽二级缓存操作的复杂度
+ * 缺点：没有限制，导致随着业务迭代，代码会变得混乱不堪，难以维护和扩展。
+ * 如下代码中，注解的使用 和 直接操作缓存的代码混合在一起，甚至可能将不同缓存维度的缓存也混合在一起，过于灵活
+ *
  * @author chenck
  * @date 2020/4/26 19:37
  */
 @Service
-public class CaffeineCacheService {
+public class UserCacheService {
 
-    private final Logger logger = LoggerFactory.getLogger(CaffeineCacheService.class);
+    private final Logger logger = LoggerFactory.getLogger(UserCacheService.class);
 
     @Autowired
     L2CacheCacheManager cacheManager;
@@ -57,7 +63,7 @@ public class CaffeineCacheService {
         return user;
     }
 
-    @Cacheable(value = "queryUserSync", key = "#userId", sync = true)
+    @Cacheable(value = "userCache", key = "#userId", sync = true)
     public User queryUserSync(String userId) {
         User user = userMap.get(userId);
         logger.info("加载数据:{}", user);
@@ -74,7 +80,7 @@ public class CaffeineCacheService {
      * <p>
      * 建议：设置@Cacheable的sync=true，可以利用Caffeine的特性，防止缓存击穿（方式同一个key和不同key）
      */
-    @Cacheable(value = "queryUserSyncList", key = "#userId", sync = true)
+    @Cacheable(value = "userCache", key = "#userId", sync = true)
     public List<User> queryUserSyncList(String userId) {
         User user = userMap.get(userId);
         List<User> list = new ArrayList();
@@ -88,7 +94,7 @@ public class CaffeineCacheService {
      * 注：通过 @CachePut 标注的方法添加的缓存项，在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会被淘汰。
      * 如果先执行了 @Cacheable(sync = true) 标注的方法，再执行 @CachePut 标注的方法，那么在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会重新加载。
      */
-    @CachePut(value = "userCacheSync", key = "#userId")
+    @CachePut(value = "userCache", key = "#userId")
     public User putUser(String userId, User user) {
         return user;
     }
@@ -96,7 +102,7 @@ public class CaffeineCacheService {
     /**
      * 淘汰缓存
      */
-    @CacheEvict(value = "userCacheSync", key = "#userId")
+    @CacheEvict(value = "userCache", key = "#userId")
     public String evictUserSync(String userId) {
         return userId;
     }

@@ -1,6 +1,8 @@
 package com.github.jesse.l2cache.spring.biz;
 
 import com.github.jesse.l2cache.Cache;
+import com.github.jesse.l2cache.L2CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.exception.L2CacheException;
 import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import com.github.jesse.l2cache.util.ServiceResult;
@@ -52,7 +54,8 @@ public class CacheManagerController {
      */
     @RequestMapping(value = "/getCacheConfig")
     public ServiceResult getCacheConfig(String cacheName) {
-        return ServiceResult.succ(this.getCache(cacheName));
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(l2CacheCacheManager.getL2CacheConfig(), cacheName);
+        return ServiceResult.succ(cacheConfig);
     }
 
     /**

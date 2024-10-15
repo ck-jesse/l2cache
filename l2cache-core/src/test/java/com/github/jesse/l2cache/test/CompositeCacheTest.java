@@ -1,7 +1,7 @@
 package com.github.jesse.l2cache.test;
 
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.builder.CompositeCacheBuilder;
 import com.github.jesse.l2cache.cache.CompositeCache;
 import com.github.jesse.l2cache.cache.Level1Cache;
@@ -29,7 +29,9 @@ import java.util.stream.Collectors;
  */
 public class CompositeCacheTest {
 
-    CacheConfig cacheConfig = new CacheConfig();
+    L2CacheConfig l2CacheConfig = new L2CacheConfig();
+    L2CacheConfig.CacheConfig cacheConfig = new L2CacheConfig.CacheConfig();
+
     CompositeCache cache;
     Callable<String> callable;
 
@@ -66,10 +68,13 @@ public class CompositeCacheTest {
                 .setExpireTime(5000000)
 //                .setMaxIdleTime(5000)
 //                .setMaxSize(200)// 注意如果与caffeine中最大数量大小不一致，容易造成歧义，所以
-                .setRedissonYamlConfig("redisson.yaml");
+//                .setRedissonYamlConfig("redisson.yaml");
+        ;
+        l2CacheConfig.setRedissonYamlConfig("redisson.yaml");
+        l2CacheConfig.setDefaultConfig(cacheConfig);
 
         CacheBuilder builder = new CompositeCacheBuilder()
-                .setCacheConfig(cacheConfig)
+                .setL2CacheConfig(l2CacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
                 .setCacheSyncPolicy(new RedisCacheSyncPolicy());
         cache = (CompositeCache) builder.build("compositeCache");
@@ -79,10 +84,10 @@ public class CompositeCacheTest {
 
             @Override
             public String call() throws Exception {
-               /* String result = "loader_value" + count.getAndAdd(1);
+               String result = "loader_value" + count.getAndAdd(1);
                 System.out.println("loader value from valueLoader, return " + result);
-                return result;*/
-                return null;
+                return result;
+//                return null;
             }
         };
 
@@ -102,12 +107,12 @@ public class CompositeCacheTest {
         });
         System.out.println();
         // L2
-        System.out.println("L2 所有的缓存值");
-        Map map2 = ((RMap) cache.getLevel2Cache().getActualCache()).readAllMap();
-        map2.forEach((o1, o2) -> {
-            System.out.println(String.format("key=%s, value=%s", o1, o2));
-        });
-        System.out.println();
+//        System.out.println("L2 所有的缓存值");
+//        Map map2 = ((RMap) cache.getLevel2Cache().getActualCache()).readAllMap();
+//        map2.forEach((o1, o2) -> {
+//            System.out.println(String.format("key=%s, value=%s", o1, o2));
+//        });
+//        System.out.println();
     }
 
     private void printCache(Object key) {
@@ -193,7 +198,7 @@ public class CompositeCacheTest {
 
         Level1Cache level1Cache = cache.getLevel1Cache();
         level1Cache.refresh(key);
-        while (true){
+        while (true) {
 
         }
     }
@@ -207,7 +212,7 @@ public class CompositeCacheTest {
 
         Level1Cache level1Cache = cache.getLevel1Cache();
         level1Cache.refresh(key);
-        while (true){
+        while (true) {
 
         }
     }

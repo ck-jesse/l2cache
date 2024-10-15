@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.Cache;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.exception.L2CacheException;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 public abstract class AbstractAdaptingCache implements Cache {
 
-    protected CacheConfig cacheConfig;
+    protected L2CacheConfig.CacheConfig cacheConfig;
     /**
      * 缓存实例id
      */
@@ -31,21 +31,16 @@ public abstract class AbstractAdaptingCache implements Cache {
      */
     private long nullValueExpireTimeSeconds;
 
-    /**
-     * 热key类型
-     */
-    protected String hotkeyType;
 
-    public AbstractAdaptingCache(String cacheName, CacheConfig cacheConfig) {
+    public AbstractAdaptingCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig) {
         this.cacheConfig = cacheConfig;
-        this.instanceId = cacheConfig.getInstanceId();
+        this.instanceId = L2CacheConfig.INSTANCE_ID;
         this.cacheName = cacheName;
         this.allowNullValues = cacheConfig.isAllowNullValues();
         this.nullValueExpireTimeSeconds = cacheConfig.getNullValueExpireTimeSeconds();
         if (this.nullValueExpireTimeSeconds < 0) {
             this.nullValueExpireTimeSeconds = 60;
         }
-        this.hotkeyType = cacheConfig.getHotKey().getType();
     }
 
     @Override

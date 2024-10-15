@@ -14,17 +14,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
 /**
- * CacheService 的demo案例
- * 注：
- * 优化前的demo案例，需要实现的方法较多，且有很多共性的代码，业务开发中，相对不够简洁
+ * 第二阶段：抽象出缓存使用规范 CacheService
+ * <p>
+ * 优点：规范缓存的使用，减少开发成本和维护成本
+ * 缺点：需要实现的方法较多，且不同缓存维度实现CacheService的实现类中，有很多共性的代码，业务开发中，不够简洁
  *
  * @author chenck
  * @date 2022/8/4 22:23
  */
 @Component
 @Slf4j
-@Deprecated
 public class BrandCacheService extends AbstractCacheService<Integer, BrandRespBO> {
 
     public static final String CACHE_NAME = "brandCache";

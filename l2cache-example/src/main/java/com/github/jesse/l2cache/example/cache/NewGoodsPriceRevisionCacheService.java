@@ -48,8 +48,8 @@ public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<Good
         goodsPriceRevisionRespBO.setGoodsPriceRevisionId(0);
         goodsPriceRevisionRespBO.setGroupId(0);
         goodsPriceRevisionRespBO.setOrganizationId(0);
-        goodsPriceRevisionRespBO.setGoodsId(0);
-        goodsPriceRevisionRespBO.setGoodsGroupId(0);
+        goodsPriceRevisionRespBO.setGoodsId(key.getGoodsId());
+        goodsPriceRevisionRespBO.setGoodsGroupId(key.getGoodsGroupId());
         goodsPriceRevisionRespBO.setAddTime(0L);
         goodsPriceRevisionRespBO.setUpdateTime(0L);
         goodsPriceRevisionRespBO.setState(0);
@@ -65,10 +65,10 @@ public class NewGoodsPriceRevisionCacheService extends AbstractCacheService<Good
         keyList.forEach(goodsPriceRevisionIdsReqDTO -> {
             GoodsPriceRevisionRespBO goodsPriceRevisionRespBO = new GoodsPriceRevisionRespBO();
             goodsPriceRevisionRespBO.setGoodsPriceRevisionId(0);
-            goodsPriceRevisionRespBO.setGroupId(0);
+            goodsPriceRevisionRespBO.setGroupId(111);
             goodsPriceRevisionRespBO.setOrganizationId(0);
-            goodsPriceRevisionRespBO.setGoodsId(0);
-            goodsPriceRevisionRespBO.setGoodsGroupId(0);
+            goodsPriceRevisionRespBO.setGoodsId(goodsPriceRevisionIdsReqDTO.getGoodsId());
+            goodsPriceRevisionRespBO.setGoodsGroupId(goodsPriceRevisionIdsReqDTO.getGoodsGroupId());
             goodsPriceRevisionRespBO.setAddTime(0L);
             goodsPriceRevisionRespBO.setUpdateTime(0L);
             goodsPriceRevisionRespBO.setState(0);

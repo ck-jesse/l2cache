@@ -32,12 +32,12 @@ public interface CacheBuilder<T extends Cache> extends Serializable {
     /**
      * 获取缓存配置
      */
-    CacheConfig getCacheConfig();
+    L2CacheConfig getL2CacheConfig();
 
     /**
      * 设置缓存配置
      */
-    CacheBuilder setCacheConfig(CacheConfig cacheConfig);
+    CacheBuilder setL2CacheConfig(L2CacheConfig l2CacheConfig);
 
     /**
      * 获取缓存过期监听器

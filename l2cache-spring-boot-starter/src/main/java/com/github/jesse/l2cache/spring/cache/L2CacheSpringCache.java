@@ -1,7 +1,7 @@
 package com.github.jesse.l2cache.spring.cache;
 
 import com.github.jesse.l2cache.Cache;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -35,13 +35,13 @@ public class L2CacheSpringCache extends AbstractValueAdaptingCache {
      * @param cacheName the name of the cache
      * @param cache     l2cache
      */
-    protected L2CacheSpringCache(String cacheName, CacheConfig cacheConfig, Cache cache) {
+    protected L2CacheSpringCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, Cache cache) {
         super(cacheConfig.isAllowNullValues());
         Assert.notNull(cacheConfig, "cacheConfig must not be null");
-        Assert.notNull(cacheConfig.getInstanceId(), "cache instance id must not be null");
+        Assert.notNull(L2CacheConfig.INSTANCE_ID, "cache instance id must not be null");
         Assert.notNull(cacheName, "cacheName must not be null");
         Assert.notNull(cache, "l2cache must not be null");
-        this.instanceId = cacheConfig.getInstanceId();
+        this.instanceId = L2CacheConfig.INSTANCE_ID;
         this.cacheName = cacheName;
         this.cache = cache;
     }

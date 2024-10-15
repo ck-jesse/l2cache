@@ -1,7 +1,7 @@
 package com.github.jesse.l2cache.sync;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.util.ObjectMapperUtil;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -42,7 +42,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
             logger.info("already started");
             return;
         }
-        CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getCacheConfig().getCacheSyncPolicy();
+        L2CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getL2CacheConfig().getCacheSyncPolicy();
 
         // 生成 Consumer 的groupId
         genConsumerGroupName(cacheSyncPolicy);
@@ -77,7 +77,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
     @Override
     public void publish(CacheMessage message) {
-        CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getCacheConfig().getCacheSyncPolicy();
+        L2CacheConfig.CacheSyncPolicy cacheSyncPolicy = this.getL2CacheConfig().getCacheSyncPolicy();
         try {
             String messageStr = ObjectMapperUtil.toJson(message);
             logger.info("publish cache sync message, message={}", messageStr);
@@ -112,7 +112,7 @@ public class KafkaCacheSyncPolicy extends AbstractCacheSyncPolicy {
      * 生成 Consumer 的groupId
      * 一个group只有一个consumer,保证消息被每个group的consumer消费到，实现消息订阅模式
      */
-    private void genConsumerGroupName(CacheConfig.CacheSyncPolicy cacheSyncPolicy) {
+    private void genConsumerGroupName(L2CacheConfig.CacheSyncPolicy cacheSyncPolicy) {
         String groupId = cacheSyncPolicy.getProps().getProperty(ConsumerConfig.GROUP_ID_CONFIG, "l2cacheGroup");
         cacheSyncPolicy.getProps().put(ConsumerConfig.GROUP_ID_CONFIG, groupId + genRandomSrc());
     }

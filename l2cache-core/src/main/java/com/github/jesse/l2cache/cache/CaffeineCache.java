@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.cache;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.content.NullValue;
 import com.github.jesse.l2cache.hotkey.AutoDetectHotKeyCache;
@@ -42,7 +42,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     /**
      * caffeine config
      */
-    private final CacheConfig.Caffeine caffeine;
+    private final L2CacheConfig.Caffeine caffeine;
     /**
      * 缓存加载器，用于异步加载缓存
      */
@@ -60,7 +60,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
      */
     private Cache<Object, Integer> nullValueCache;
 
-    public CaffeineCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy,
+    public CaffeineCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, CacheLoader cacheLoader, CacheSyncPolicy cacheSyncPolicy,
                          Cache<Object, Object> caffeineCache) {
         super(cacheName, cacheConfig);
         this.caffeine = cacheConfig.getCaffeine();

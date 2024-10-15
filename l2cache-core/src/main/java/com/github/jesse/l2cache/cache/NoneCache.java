@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.cache;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.load.CacheLoader;
@@ -18,9 +18,9 @@ import java.util.concurrent.Callable;
 public class NoneCache implements Level1Cache, Level2Cache {
 
     private final String cacheName;
-    private final CacheConfig cacheConfig;
+    private final L2CacheConfig.CacheConfig cacheConfig;
 
-    public NoneCache(String cacheName, CacheConfig cacheConfig) {
+    public NoneCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig) {
         this.cacheName = cacheName;
         this.cacheConfig = cacheConfig;
     }
@@ -137,7 +137,7 @@ public class NoneCache implements Level1Cache, Level2Cache {
 
     @Override
     public String getInstanceId() {
-        return cacheConfig.getInstanceId();
+        return L2CacheConfig.INSTANCE_ID;
     }
 
     @Override

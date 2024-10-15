@@ -2,7 +2,7 @@ package com.github.jesse.l2cache.cache;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.Cache;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.hotkey.HotKeyFacade;
@@ -25,7 +25,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     private static final Logger logger = LoggerFactory.getLogger(CompositeCache.class);
 
-    private final CacheConfig.Composite composite;
+    private final L2CacheConfig.Composite composite;
     /**
      * 一级缓存
      */
@@ -44,7 +44,13 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
      */
     private AtomicBoolean openedL1Cache = new AtomicBoolean();
 
-    public CompositeCache(String cacheName, CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache) {
+    /**
+     * 热key类型
+     * 注：从AbstractAdaptingCache中迁移过来，因为只有CompositeCache才需要做热key探测
+     */
+    protected String hotkeyType;
+
+    public CompositeCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, Level1Cache level1Cache, Level2Cache level2Cache, String hotkeyType) {
         super(cacheName, cacheConfig);
         this.composite = cacheConfig.getComposite();
         this.level1Cache = level1Cache;
@@ -53,6 +59,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             // 设置level2Cache到CustomCacheLoader中，以便CacheLoader中直接操作level2Cache
             level1Cache.getCacheLoader().setLevel2Cache(level2Cache);
         }
+        this.hotkeyType = hotkeyType;
     }
 
     @Override

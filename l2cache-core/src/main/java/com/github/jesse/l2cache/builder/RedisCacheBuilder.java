@@ -1,7 +1,8 @@
 package com.github.jesse.l2cache.builder;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.content.RedissonSupport;
 import com.github.jesse.l2cache.cache.RedissonRBucketCache;
@@ -20,16 +21,18 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
     @Override
     public RedissonRBucketCache build(String cacheName) {
 
-        RedissonClient redissonClient = this.getRedissonClient(this.getCacheConfig());
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
 
-        return this.buildActualCache(cacheName, this.getCacheConfig(), redissonClient);
+        RedissonClient redissonClient = this.getRedissonClient(this.getL2CacheConfig());
+
+        return this.buildActualCache(cacheName, cacheConfig, redissonClient);
     }
 
     /**
      * 获取 RedissonClient 实例
      * 注：主要目的是适配基于setActualCacheClient()扩展点设置的 RedissonClient，避免重复创建 RedissonClient
      */
-    protected RedissonClient getRedissonClient(CacheConfig cacheConfig) {
+    protected RedissonClient getRedissonClient(L2CacheConfig cacheConfig) {
         Object actualCacheClient = this.getActualCacheClient();
         if (null != actualCacheClient && actualCacheClient instanceof RedissonClient) {
             logger.info("multiplexing RedissonClient instance");
@@ -41,8 +44,8 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
     }
 
 
-    protected RedissonRBucketCache buildActualCache(String cacheName, CacheConfig cacheConfig, RedissonClient redissonClient) {
-        CacheConfig.Redis redis = this.getCacheConfig().getRedis();
+    protected RedissonRBucketCache buildActualCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, RedissonClient redissonClient) {
+        L2CacheConfig.Redis redis = cacheConfig.getRedis();
 
         Long redisExpireTime = redis.getExpireTimeCacheNameMap().getOrDefault(cacheName, redis.getExpireTime());
 

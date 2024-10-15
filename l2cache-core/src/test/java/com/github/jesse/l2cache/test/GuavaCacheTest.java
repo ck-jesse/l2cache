@@ -1,6 +1,6 @@
 package com.github.jesse.l2cache.test;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.builder.GuavaCacheBuilder;
 import com.github.jesse.l2cache.cache.GuavaCache;
@@ -27,12 +27,14 @@ import java.util.function.Function;
  */
 public class GuavaCacheTest {
 
-    CacheConfig cacheConfig = new CacheConfig();
+    L2CacheConfig l2CacheConfig = new L2CacheConfig();
     GuavaCache cache;
     Callable<String> callable;
 
     @Before
     public void before() {
+        L2CacheConfig.CacheConfig cacheConfig = new L2CacheConfig.CacheConfig();
+        l2CacheConfig.setDefaultConfig(cacheConfig);
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.GUAVA.name())
                 .setAllowNullValues(true)
@@ -45,14 +47,14 @@ public class GuavaCacheTest {
 
         // 缓存同步策略
         CacheSyncPolicy cacheSyncPolicy = new RedisCacheSyncPolicy()
-                .setCacheConfig(cacheConfig)
-                .setCacheMessageListener(new CacheMessageListener(cacheConfig.getInstanceId()))
+                .setCacheConfig(l2CacheConfig)
+                .setCacheMessageListener(new CacheMessageListener(L2CacheConfig.INSTANCE_ID))
                 .setActualClient(Redisson.create());
         cacheSyncPolicy.connnect();
 
         // 构建cache
         cache = (GuavaCache) new GuavaCacheBuilder()
-                .setCacheConfig(cacheConfig)
+                .setL2CacheConfig(l2CacheConfig)
                 .setExpiredListener(new DefaultCacheExpiredListener())
                 .setCacheSyncPolicy(cacheSyncPolicy)
                 .build("guavaCache");

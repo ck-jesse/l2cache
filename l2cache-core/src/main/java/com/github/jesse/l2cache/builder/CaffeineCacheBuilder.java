@@ -1,8 +1,9 @@
 package com.github.jesse.l2cache.builder;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
+import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.content.CustomCaffeineSpec;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
 import com.github.jesse.l2cache.consts.CacheType;
@@ -34,25 +35,29 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
 
     @Override
     public CaffeineCache build(String cacheName) {
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
+
         // 构建 CacheSpec
         CacheSpec cacheSpec = this.parseSpec(cacheName);
 
         // 创建CustomCacheLoader
         // 保证一个CaffeineCache对应一个CacheLoader，也就是cacheName维度进行隔离
-        CacheLoader customCacheLoader = CustomCacheLoader.newInstance(this.getCacheConfig().getInstanceId(),
+        CacheLoader customCacheLoader = CustomCacheLoader.newInstance(L2CacheConfig.INSTANCE_ID,
                 CacheType.CAFFEINE.name().toLowerCase(), cacheName, cacheSpec.getMaxSize());
         customCacheLoader.setCacheSyncPolicy(this.getCacheSyncPolicy());
-        customCacheLoader.setAllowNullValues(this.getCacheConfig().isAllowNullValues());
+        customCacheLoader.setAllowNullValues(cacheConfig.isAllowNullValues());
 
-        Cache<Object, Object> cache = this.buildActualCache(cacheName, this.getCacheConfig(), customCacheLoader,
+        Cache<Object, Object> cache = this.buildActualCache(cacheName, cacheConfig, customCacheLoader,
                 this.getExpiredListener());
 
-        return new CaffeineCache(cacheName, this.getCacheConfig(), customCacheLoader, this.getCacheSyncPolicy(), cache);
+        return new CaffeineCache(cacheName, cacheConfig, customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
 
     @Override
     public CacheSpec parseSpec(String cacheName) {
-        this.buildCaffeineSpec(cacheName, this.getCacheConfig().getCaffeine());
+        L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
+
+        this.buildCaffeineSpec(cacheName, cacheConfig.getCaffeine());
 
         CacheSpec cacheSpec = new CacheSpec();
         CustomCaffeineSpec customCaffeineSpec = customCaffeineSpecMap.get(cacheName);
@@ -64,7 +69,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
     /**
      * 构建实际缓存对象
      */
-    protected Cache<Object, Object> buildActualCache(String cacheName, CacheConfig cacheConfig, CacheLoader cacheLoader,
+    protected Cache<Object, Object> buildActualCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, CacheLoader cacheLoader,
                                                      CacheExpiredListener listener) {
         // 解析spec
         this.buildCaffeineSpec(cacheName, cacheConfig.getCaffeine());
@@ -99,7 +104,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
     /**
      * 获取 spec
      */
-    private String getSpec(String cacheName, CacheConfig.Caffeine caffeine) {
+    private String getSpec(String cacheName, L2CacheConfig.Caffeine caffeine) {
         if (StrUtil.isBlank(cacheName)) {
             return caffeine.getDefaultSpec();
         }
@@ -113,7 +118,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
     /**
      * 获取自定义的 CaffeineSpec
      */
-    private void buildCaffeineSpec(String cacheName, CacheConfig.Caffeine caffeine) {
+    private void buildCaffeineSpec(String cacheName, L2CacheConfig.Caffeine caffeine) {
         CustomCaffeineSpec customCaffeineSpec = customCaffeineSpecMap.get(cacheName);
         if (null != customCaffeineSpec) {
             return;

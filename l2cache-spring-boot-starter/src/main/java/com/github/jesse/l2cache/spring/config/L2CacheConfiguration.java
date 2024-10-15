@@ -1,9 +1,8 @@
 package com.github.jesse.l2cache.spring.config;
 
-import com.github.jesse.l2cache.CacheConfig;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
-import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 import com.github.jesse.l2cache.spring.L2CacheProperties;
 import com.github.jesse.l2cache.spring.biz.CacheManagerController;
@@ -54,7 +53,7 @@ public class L2CacheConfiguration {
      */
     @Bean
     public CacheMessageListener cacheMessageListener() {
-        return new CacheMessageListener(l2CacheProperties.getConfig().getInstanceId());
+        return new CacheMessageListener(L2CacheConfig.INSTANCE_ID);
     }
 
     /**
@@ -62,12 +61,12 @@ public class L2CacheConfiguration {
      */
     @Bean
     public L2CacheCacheManager cacheManager(CacheManagerCustomizers customizers) {
-        CacheConfig cacheConfig = l2CacheProperties.getConfig();
+        L2CacheConfig l2CacheConfig = l2CacheProperties.getConfig();
 
-        L2CacheCacheManager cacheManager = new L2CacheCacheManager(cacheConfig);
+        L2CacheCacheManager cacheManager = new L2CacheCacheManager(l2CacheConfig);
 
         // 创建缓存同步策略实例
-        CacheSyncPolicy cacheSyncPolicy = createCacheSyncPolicy(cacheConfig);
+        CacheSyncPolicy cacheSyncPolicy = createCacheSyncPolicy(l2CacheConfig);
         if (null != cacheSyncPolicy) {
             cacheManager.setCacheSyncPolicy(cacheSyncPolicy);
         }
@@ -76,7 +75,7 @@ public class L2CacheConfiguration {
             cacheManager.setExpiredListener(expiredListener);
         }
 
-        if (null != redissonClient && isUseRedis(cacheConfig)) {
+        if (null != redissonClient) {
             cacheManager.setActualCacheClient(redissonClient);
         }
 
@@ -90,26 +89,9 @@ public class L2CacheConfiguration {
     }
 
     /**
-     * 判断是否使用redis
-     */
-    private boolean isUseRedis(CacheConfig cacheConfig) {
-        String cacheType = cacheConfig.getCacheType();
-        if (CacheType.REDIS.name().equalsIgnoreCase(cacheType)) {
-            return true;
-        }
-        if (CacheType.COMPOSITE.name().equalsIgnoreCase(cacheType)) {
-            cacheType = cacheConfig.getComposite().getL2CacheType();
-            if (CacheType.REDIS.name().equalsIgnoreCase(cacheType)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * 创建缓存同步策略实例
      */
-    private CacheSyncPolicy createCacheSyncPolicy(CacheConfig cacheConfig) {
+    private CacheSyncPolicy createCacheSyncPolicy(L2CacheConfig cacheConfig) {
         CacheSyncPolicy cacheSyncPolicy = ServiceLoader.load(CacheSyncPolicy.class, cacheConfig.getCacheSyncPolicy().getType());
         if (null == cacheSyncPolicy) {
             return null;
@@ -117,7 +99,7 @@ public class L2CacheConfiguration {
         cacheSyncPolicy.setCacheConfig(cacheConfig);
         cacheSyncPolicy.setCacheMessageListener(cacheMessageListener());
         // redis 处理，以便重用
-        if (null != redissonClient && isUseRedis(cacheConfig)) {
+        if (null != redissonClient) {
             cacheSyncPolicy.setActualClient(redissonClient);
         }
         cacheSyncPolicy.connnect();// 启动订阅
