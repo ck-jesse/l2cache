@@ -5,7 +5,7 @@
     <parent>
         <artifactId>l2cache-jd-hotkey</artifactId>
         <groupId>io.github.ck-jesse</groupId>
-        <version>1.0.39</version>
+        <version>1.1.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
