@@ -42,6 +42,177 @@
 ## 2、Spring配置
 具体代码示例参考：[l2cache](https://github.com/ck-jesse/l2cache) 中的 `l2cache-example` 模块。
 
+1.1.0 版本，及之后版本的配置方式
+```yaml
+spring:
+  application:
+    name: l2cache-example
+
+# ======================================================================= #
+# 从1.1.0版本开始，支持不同缓存维度的缓存配置（可按需配置）
+# ======================================================================= #
+
+# 二级缓存配置
+# 注：caffeine 不适用于数据量大，并且缓存命中率极低的业务场景，如用户维度的缓存。请慎重选择。
+l2cache:
+  config:
+    # Redisson 的yaml配置文件
+    redissonYamlConfig: redisson.yaml
+    # 默认缓存配置
+    defaultConfig:
+      # 是否存储空值，默认true，防止缓存穿透
+      allowNullValues: true
+      # 空值过期时间，单位秒
+      nullValueExpireTimeSeconds: 30
+      # 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认true，简化缓存配置
+      useL1ReplaceL2ExpireTime: true
+      # 缓存类型
+      cacheType: COMPOSITE
+      # 组合缓存配置
+      composite:
+        # 一级缓存类型
+        l1CacheType: caffeine
+        # 二级缓存类型
+        l2CacheType: redis
+        # 二级缓存是否通过batchPut()来处理缓存数据，默认false
+        l2BatchPut: true
+        # 二级缓存是否通过batchEvict()来处理缓存数据，默认false
+        l2BatchEvict: true
+        # 是否全部启用一级缓存，默认false
+        l1AllOpen: false
+        # 是否手动启用一级缓存，默认false
+        l1Manual: true
+        # 手动配置走一级缓存的缓存key集合，针对单个key维度
+        l1ManualKeySet:
+          - userCache:user01
+          - userCache:user02
+          - userCache:user03
+          - userCache:user04
+        # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
+        l1ManualCacheNameSet:
+          - newBrandCache
+          - newGoodsPriceRevisionCache
+      # 一级缓存
+      caffeine:
+        # 创建缓存的默认配置（格式完全与Caffeine配置一致）
+        defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=30m,softValues,recordStats
+        # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
+        specs:
+          userCache: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
+          newBrandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
+          newGoodsPriceRevisionCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=1d,recordStats
+          # cacheName中含有: / * 等特殊字符，需要加 "[ ]"
+          "[userCache:v1]": initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
+      # 二级缓存
+      redis:
+        # 加载数据时，是否加锁，默认false
+        lock: false
+        # 加锁时，true调用tryLock()，false调用lock()
+        tryLock: true
+        # 批量操作的大小，可以理解为是分页，默认50
+        batchPageSize: 3
+        # 默认缓存过期时间(ms)
+        expireTime: 86400000
+        # 针对cacheName维度的过期时间集合，单位ms
+        expireTimeCacheNameMap:
+          brandCache: 86400000
+    # 缓存配置集合（针对cacheName的个性化缓存配置），按需配置
+    configMap:
+      # 样例：指定某个缓存维度走caffeine
+      brandCache:
+        # 缓存类型
+        cacheType: caffeine
+        # 一级缓存
+        caffeine:
+          # 创建缓存的默认配置
+          defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=30m,softValues,recordStats
+      # 样例：指定某个缓存维度走redis
+      goodsPriceRevisionCache:
+        # 缓存类型
+        cacheType: redis
+        # 二级缓存
+        redis:
+          # 加载数据时，是否加锁
+          lock: false
+          # 加锁时，true调用tryLock()，false调用lock()
+          tryLock: true
+          # 批量操作的大小，可以理解为是分页
+          batchPageSize: 3
+          # 默认缓存过期时间(ms)
+          expireTime: 86400000
+          # 针对cacheName维度的过期时间集合，单位ms
+          expireTimeCacheNameMap:
+            brandCache: 86400000
+    # 缓存同步策略配置
+    cacheSyncPolicy:
+      # 策略类型 kafka / redis，推荐使用redis
+      type: redis
+      # 缓存更新时通知其他节点的topic名称
+      topic: l2cache
+      # 具体的属性配置，不同的类型配置各自的属性即可(自定义和原生的都可以)
+      #props:
+      #  # kafka properties config
+      #  bootstrap.servers: localhost:9092
+      #  # 生产者id
+      #  client.id: L2CacheProducer
+      #  # 发送消息的确认机制
+      #  acks: 1
+      #  # key序列化处理器
+      #  key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      #  # value序列化处理器
+      #  value.serializer: org.apache.kafka.common.serialization.StringSerializer
+      #  # 消费者groupid
+      #  # 因为是缓存同步，所以必须让所有消费者都消费到相同的消息。采用动态生成一个id附加到配置的group.id上，实现每个consumer都是一个group，来实现发布订阅的模式。
+      #  group.id: L2CacheConsumerGroup
+      #  # 自动提交offset（默认true）
+      #  enable.auto.commit: true
+      #  # 自动提交间隔
+      #  auto.commit.interval.ms: 1000
+      #  # key反序列化处理器
+      #  key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      #  # value反序列化处理器
+      #  value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      #  # 设置消费的位置
+      #  auto.offset.reset: latest
+      #  # 设置一次最大拉取的消息条数（默认500）
+      #  max.poll.records: 10
+      #  # 设置poll最大时间间隔（默认3s）
+      #  max.poll.interval.ms: 3000
+    # 热key探测
+    hotkey:
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none，不启用热key探测。
+      type: sentinel
+      sentinel:
+        # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
+        # 若未配置默认规则，则仅针对 rules 中的配置进行热点参数探测
+        # 注：规则具体的配置是针对ParamFlowRule的配置
+        default-rule:
+          grade: 1
+          param-idx: 0
+          count: 6
+          durationInSec: 1
+        rules:
+          # 案例1
+          # resourceName 资源名称，通常设置为缓存名称
+          - resource: newBrandCache
+            # 流量控制的阈值类型，0表示线程数，1表示qps，默认1
+            grade: 1
+            # 参数下标
+            paramIdx: 0
+            # 阈值计数
+            count: 3
+            # 统计窗口时间长度（单位为秒），默认为1
+            durationInSec: 5
+          # 案例2
+          - resource: newGoodsPriceRevisionCache
+            count: 5
+      # jd:
+      # serviceName: weeget-bullet-goods-rest
+      # #etcd的地址，如有多个用逗号分隔
+      # etcdUrl: http://127.0.0.1:2379
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 spring:
   application:
@@ -161,6 +332,15 @@ l2cache:
 
 ### 1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
 
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: caffeine
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -169,6 +349,15 @@ l2cache:
 
 ### 2、支持只使用二级缓存`Redis`。
 
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: redis
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -178,6 +367,18 @@ l2cache:
 ### 3、支持同时使用一二级缓存【推荐】
 推荐该方式，因为可动态配置缓存是走本地缓存还是走redis。
 
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: composite
+      composite:
+        l1CacheType: caffeine
+        l2CacheType: redis
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -189,7 +390,22 @@ l2cache:
 
 ### 4、支持配置指定缓存走本地缓存。
 
-4.1）全部缓存 走本地缓存
+**4.1）全部缓存 走本地缓存**
+
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: composite
+      composite:
+        l1CacheType: caffeine
+        l2CacheType: redis
+        # 是否全部启用一级缓存，默认false
+        l1AllOpen: true
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -201,7 +417,28 @@ l2cache:
       l1AllOpen: true
 ```
 
-4.2）指定key 走本地缓存
+**4.2）指定key 走本地缓存**
+
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: composite
+      composite:
+        l1CacheType: caffeine
+        l2CacheType: redis
+        # 是否全部启用一级缓存，默认false
+        l1AllOpen: false
+        # 是否手动启用一级缓存，默认false
+        l1Manual: true
+        # 手动配置走一级缓存的缓存key集合，针对单个key维度
+        l1ManualKeySet:
+          - userCache:user01
+          - userCache:user02
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -219,7 +456,28 @@ l2cache:
         - userCache:user02
 ```
 
-4.3）指定缓存名字 走本地缓存
+**4.3）指定缓存名字 走本地缓存**
+
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: composite
+      composite:
+        l1CacheType: caffeine
+        l2CacheType: redis
+        # 是否全部启用一级缓存，默认false
+        l1AllOpen: false
+        # 是否手动启用一级缓存，默认false
+        l1Manual: true
+        # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
+        l1ManualCacheNameSet:
+          - compositeCache
+          - goodsSpecCache
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -237,7 +495,32 @@ l2cache:
         - goodsSpecCache
 ```
 
-4.4）指定key + 指定缓存名字 走本地缓存
+**4.4）指定key + 指定缓存名字 走本地缓存**
+
+1.1.0 版本，及之后版本的配置方式
+```yaml
+l2cache:
+  config:
+    defaultConfig:
+      cacheType: composite
+      composite:
+        l1CacheType: caffeine
+        l2CacheType: redis
+        # 是否全部启用一级缓存，默认false
+        l1AllOpen: false
+        # 是否手动启用一级缓存，默认false
+        l1Manual: true
+        # 手动配置走一级缓存的缓存key集合，针对单个key维度
+        l1ManualKeySet:
+          - userCache:user01
+          - userCache:user02
+        # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
+        l1ManualCacheNameSet:
+          - compositeCache
+          - goodsSpecCache
+```
+
+1.0.39 版本，及之前版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -258,8 +541,42 @@ l2cache:
         - compositeCache
         - goodsSpecCache
 ```
+### 5、支持按需配置不同缓存维度的缓存配置（如：配置不同缓存类型）
 
-### 5、缓存同步策略配置
+1.1.0 版本新增的功能。
+```yaml
+l2cache:
+  config:
+    # 缓存配置集合（针对cacheName的个性化缓存配置），按需配置
+    configMap:
+      # 样例：指定某个缓存维度走caffeine
+      brandCache:
+        # 缓存类型
+        cacheType: caffeine
+        # 一级缓存
+        caffeine:
+          # 创建缓存的默认配置
+          defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=30m,softValues,recordStats
+      # 样例：指定某个缓存维度走redis
+      goodsPriceRevisionCache:
+        # 缓存类型
+        cacheType: redis
+        # 二级缓存
+        redis:
+          # 加载数据时，是否加锁
+          lock: false
+          # 加锁时，true调用tryLock()，false调用lock()
+          tryLock: true
+          # 批量操作的大小，可以理解为是分页
+          batchPageSize: 3
+          # 默认缓存过期时间(ms)
+          expireTime: 86400000
+          # 针对cacheName维度的过期时间集合，单位ms
+          expireTimeCacheNameMap:
+            brandCache: 86400000
+```
+
+### 6、缓存同步策略配置
 详细配置见：[缓存同步策略配置](https://github.com/ck-jesse/l2cache/blob/master/doc/%E7%BC%93%E5%AD%98%E5%90%8C%E6%AD%A5%E7%AD%96%E7%95%A5%E9%85%8D%E7%BD%AE%E6%A0%B7%E4%BE%8B.md)
 ```yaml
 l2cache:
@@ -282,7 +599,7 @@ l2cache:
 - 由于缓存的使用要求是不强求保证强一致性，只需保证最终一致性即可。因此刚好利用上面两个特性，当某个消费者重启时，正好无需去处理那些重启之前的消息，消息丢了就丢了，对本地缓存无影响。因为请求进来时，会再从redis中获取缓存信息并缓存到本地缓存。
 
 
-### 6、热key探测配置
+### 7、热key探测配置
 
 - 1、不启用热key探测：type配置为none，或者不配置hotkey相关属性
 ```yaml
@@ -355,16 +672,16 @@ l2cache:
 
 ```java
 /**
- * CacheService 的demo案例
- * 注：
- * 为了简化业务开发，重新优化 CacheService 顶层抽象接口。
- * 优化后的demo案例，只需要实现3个方法，使得开发更加简单，维护也更加简单，开发人员只需要聚焦在具体的业务逻辑
+ * 第三阶段：重新优化 抽象出的缓存使用规范 CacheService，进一步简化业务开发
+ * <p>
+ * 优点：极简开发，完全屏蔽复杂的缓存实现细节，仅需实现几个业务方法，使得开发和维护更加简单，且解决随着业务迭代，代码坏味道递增的问题
+ * 缺点：目前暂未发现明显缺点，若有，请留言。
  */
 @Component
 @Slf4j
 public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRespBO> {
 
-    public static final String CACHE_NAME = "brandCache";
+    public static final String CACHE_NAME = "newBrandCache";
 
     @Override
     public String getCacheName() {
@@ -377,30 +694,33 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
     }
 
     @Override
-    protected BrandRespBO queryData(Integer brandId) {
+    public BrandRespBO queryData(Integer brandId) {
+        if (null == brandId || 1002 == brandId) {
+            return null;
+        }
         // 模拟返回数据，业务系统中可直接从DB加载数据
         BrandRespBO brandRespBO = new BrandRespBO();
-        brandRespBO.setBrandId(0);
+        brandRespBO.setBrandId(brandId);
         brandRespBO.setGroupId(0);
         brandRespBO.setBrandName("");
         brandRespBO.setBrandNumber("");
-        brandRespBO.setDescription("");
+        brandRespBO.setDescription("brandId " + brandId);
         brandRespBO.setState(0);
         log.info("查询获取品牌相关信息,brandId={},brandInfoRespBO={}", brandId, JSON.toJSONString(brandRespBO));
         return brandRespBO;
     }
 
     @Override
-    protected Map<Integer, BrandRespBO> queryDataList(List<Integer> notHitCacheKeyList) {
+    public Map<Integer, BrandRespBO> queryDataList(List<Integer> notHitCacheKeyList) {
         Map<Integer, BrandRespBO> map = new HashMap<>();
         // 模拟返回数据，业务系统中可直接从DB加载数据
         for (Integer brandId : notHitCacheKeyList) {
             BrandRespBO brandRespBO = new BrandRespBO();
-            brandRespBO.setBrandId(0);
+            brandRespBO.setBrandId(brandId);
             brandRespBO.setGroupId(0);
             brandRespBO.setBrandName("");
             brandRespBO.setBrandNumber("");
-            brandRespBO.setDescription("");
+            brandRespBO.setDescription("brandId " + brandId);
             brandRespBO.setState(0);
             map.put(brandId, brandRespBO);
         }
@@ -409,16 +729,27 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
     }
 
 }
+
 ```
 
 
 ### 方式二：结合 Spring Cache 的注解来使用
 
 ```java
+/**
+ * 第一阶段：无缓存使用规范，灵活但不可控
+ * <p>
+ * 优点：屏蔽二级缓存操作的复杂度
+ * 缺点：没有限制，导致随着业务迭代，代码会变得混乱不堪，难以维护和扩展。
+ * 如下代码中，注解的使用 和 直接操作缓存的代码混合在一起，甚至可能将不同缓存维度的缓存也混合在一起，过于灵活
+ */
 @Service
-public class CaffeineCacheService {
+public class UserCacheService {
 
-    private final Logger logger = LoggerFactory.getLogger(CaffeineCacheService.class);
+    private final Logger logger = LoggerFactory.getLogger(UserCacheService.class);
+
+    @Autowired
+    L2CacheCacheManager cacheManager;
 
     /**
      * 用于模拟db
@@ -427,8 +758,9 @@ public class CaffeineCacheService {
 
     {
         userMap.put("user01", new User("user01", "addr"));
-        userMap.put("user02", new User("user03", "addr"));
+        userMap.put("user02", new User("user02", "addr"));
         userMap.put("user03", new User("user03", "addr"));
+        userMap.put("user04", new User("user04", "addr"));
     }
 
     /**
@@ -448,7 +780,7 @@ public class CaffeineCacheService {
         return user;
     }
 
-    @Cacheable(value = "queryUserSync", key = "#userId", sync = true)
+    @Cacheable(value = "userCache", key = "#userId", sync = true)
     public User queryUserSync(String userId) {
         User user = userMap.get(userId);
         logger.info("加载数据:{}", user);
@@ -465,7 +797,7 @@ public class CaffeineCacheService {
      * <p>
      * 建议：设置@Cacheable的sync=true，可以利用Caffeine的特性，防止缓存击穿（方式同一个key和不同key）
      */
-    @Cacheable(value = "queryUserSyncList", key = "#userId", sync = true)
+    @Cacheable(value = "userCache", key = "#userId", sync = true)
     public List<User> queryUserSyncList(String userId) {
         User user = userMap.get(userId);
         List<User> list = new ArrayList();
@@ -479,7 +811,7 @@ public class CaffeineCacheService {
      * 注：通过 @CachePut 标注的方法添加的缓存项，在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会被淘汰。
      * 如果先执行了 @Cacheable(sync = true) 标注的方法，再执行 @CachePut 标注的方法，那么在CaffeineCache的定时刷新过期缓存任务执行时，缓存项过期则会重新加载。
      */
-    @CachePut(value = "userCacheSync", key = "#userId")
+    @CachePut(value = "userCache", key = "#userId")
     public User putUser(String userId, User user) {
         return user;
     }
@@ -487,18 +819,43 @@ public class CaffeineCacheService {
     /**
      * 淘汰缓存
      */
-    @CacheEvict(value = "userCacheSync", key = "#userId")
+    @CacheEvict(value = "userCache", key = "#userId")
     public String evictUserSync(String userId) {
         return userId;
     }
+
+    /**
+     * 批量get
+     */
+    public Map<String, User> batchGetUser(List<String> userIdList) {
+        Cache l2cache = (Cache) cacheManager.getCache("userCache").getNativeCache();
+        Map<String, User> dataMap = l2cache.batchGet(userIdList);
+        return dataMap;
+    }
+
+    /**
+     * 批量get或load
+     */
+    public Map<String, User> batchGetOrLoadUser(List<String> userIdList) {
+        Cache l2cache = (Cache) cacheManager.getCache("userCache").getNativeCache();
+        Map<String, User> dataMap = l2cache.batchGetOrLoad(userIdList, notHitCacheKeyList -> {
+            Map<String, User> valueLoaderHitMap = new HashMap<>();
+            notHitCacheKeyList.forEach(key -> {
+                valueLoaderHitMap.put(key, new User("user_load_" + key, "addr"));
+            });
+            return valueLoaderHitMap;
+        });
+        return dataMap;
+    }
 }
+
 ```
 
 
 
 # 二、手动构建Cache
 
-详细的构建方法参见如下单元测试类：
+详细的构建方法参见l2care-core中如下单元测试类：
 
 ```
 GuavaCacheTest
@@ -511,37 +868,41 @@ KafkaCacheSyncPolicyTest
 下面列举`CaffeineCacheTest`中的一部分使用场景：
 
 ```java
-CacheConfig cacheConfig = new CacheConfig();
+L2CacheConfig l2CacheConfig = new L2CacheConfig();
 CaffeineCache cache;
 Callable<String> callable;
 
-@before
+@Before
 public void before() {
+    L2CacheConfig.CacheConfig cacheConfig = new L2CacheConfig.CacheConfig();
+    l2CacheConfig.setDefaultConfig(cacheConfig);
     // 默认配置 CAFFEINE
     cacheConfig.setCacheType(CacheType.CAFFEINE.name())
-        .setAllowNullValues(true)
-        .getCaffeine()
-.setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=2s,recordStats")
-        .setAutoRefreshExpireCache(true)
-        .setRefreshPoolSize(3)
-        .setRefreshPeriod(5L);
+            .setAllowNullValues(true)
+            .getCaffeine()
+            .setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
+//                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=60s,recordStats")
+            .setAutoRefreshExpireCache(false)
+            .setRefreshPoolSize(3)
+            .setRefreshPeriod(5L)
+    ;
 
-    cacheConfig.getCacheSyncPolicy()
-        .setType(CacheSyncPolicyType.REDIS.name());
+    l2CacheConfig.getCacheSyncPolicy()
+            .setType(CacheSyncPolicyType.REDIS.name());
 
     // 构建缓存同步策略
     CacheSyncPolicy cacheSyncPolicy = new RedisCacheSyncPolicy()
-        .setCacheConfig(cacheConfig)
-        .setCacheMessageListener(new CacheMessageListener(cacheConfig.getInstanceId()))
-        .setActualClient(Redisson.create());
-    cacheSyncPolicy.connnect();
+            .setCacheConfig(l2CacheConfig)
+            .setCacheMessageListener(new CacheMessageListener(L2CacheConfig.INSTANCE_ID))
+            .setActualClient(Redisson.create());
+    cacheSyncPolicy.connnect();//
 
     // 构建cache
     cache = (CaffeineCache) new CaffeineCacheBuilder()
-        .setCacheConfig(cacheConfig)
-        .setExpiredListener(new DefaultCacheExpiredListener())
-        .setCacheSyncPolicy(cacheSyncPolicy)
-        .build("localCache");
+            .setL2CacheConfig(l2CacheConfig)
+            .setExpiredListener(new DefaultCacheExpiredListener())
+            .setCacheSyncPolicy(cacheSyncPolicy)
+            .build("localCache");
 
     callable = new Callable<String>() {
         AtomicInteger count = new AtomicInteger(1);
@@ -549,13 +910,13 @@ public void before() {
         @Override
         public String call() throws Exception {
             String result = "loader_value" + count.getAndAdd(1);
-            System.out.println("loader value from valueLoader, return " + result);
+            System.out.println("loader value from valueLoader, return " + count.getAndAdd(1));
             return result;
         }
     };
 
+    System.out.println("cacheType: " + cache.getCacheType());
     System.out.println("cacheName: " + cache.getCacheName());
-    System.out.println("level: " + cache.getCacheName());
     System.out.println("actualCache: " + cache.getActualCache().getClass().getName());
     System.out.println();
 }
