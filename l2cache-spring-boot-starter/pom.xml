@@ -20,19 +20,21 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- 使用注释处理器生成自己的元数据 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
+            <scope>provided</scope>
             <optional>true</optional>
-        </dependency>
-
-        <!-- spring-cloud-context 基于@RefreshScope实现CacheConfig属性的动态刷新 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-context</artifactId>
         </dependency>
 
         <dependency>
