@@ -15,8 +15,4 @@ public interface Level2Cache extends Cache {
      */
     long getExpireTime();
 
-    /**
-     * 构建key
-     */
-    Object buildKey(Object key);
 }

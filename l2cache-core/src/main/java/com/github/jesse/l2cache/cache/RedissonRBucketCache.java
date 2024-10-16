@@ -64,7 +64,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
     }
 
     @Override
-    public Object buildKey(Object key) {
+    public String buildKey(Object key) {
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }

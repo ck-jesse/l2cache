@@ -2,6 +2,7 @@ package com.github.jesse.l2cache;
 
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.jesse.l2cache.exception.L2CacheException;
 import com.github.jesse.l2cache.load.LoadFunction;
 import com.github.jesse.l2cache.util.NullValueUtil;
 import org.slf4j.Logger;
@@ -55,6 +56,25 @@ public interface Cache extends Serializable {
      * 获取实际缓存对象
      */
     Object getActualCache();
+
+    /**
+     * 构建缓存key，统一转换为 String
+     * 注：
+     */
+    default String buildKey(Object key) {
+        if (null == key) {
+            throw new L2CacheException("key不能为null");
+        }
+
+        // key为基础数据类型，则直接转换为String（简化开发）
+        if (key instanceof CharSequence || key instanceof Number) {
+            return String.valueOf(key);
+        }
+
+        // key为自定义DTO，重写equals()和hashcode()方法。
+        // 目的：获取到缓存map后，业务代码可从中，根据自定义DTO获取value，所以需要重写
+        return key.toString();
+    }
 
     /**
      * 获取指定key的缓存项

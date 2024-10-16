@@ -150,8 +150,4 @@ public class NoneCache implements Level1Cache, Level2Cache {
         return -1;
     }
 
-    @Override
-    public Object buildKey(Object key) {
-        return null;
-    }
 }
