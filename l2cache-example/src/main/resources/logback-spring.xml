@@ -8,7 +8,7 @@
     <appender name="STDOUT"
               class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d [%p] [%X{sid}] [%t] (%file:%line\) %m%n
+            <pattern>%d [%p] [%X{trace_id}] [%t] (%file:%line\) %m%n
             </pattern>
         </encoder>
     </appender>

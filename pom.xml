@@ -21,21 +21,26 @@
     </modules>
 
     <properties>
-        <!-- proj`ect -->
+        <!-- project -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
 
         <!-- dependencies -->
-        <spring-boot.version>2.3.0.RELEASE</spring-boot.version>
-        <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
+        <spring-boot.version>3.3.4</spring-boot.version>
+        <spring.cloud.version>2023.0.3</spring.cloud.version>
         <caffeine.version>2.8.4</caffeine.version>
         <guava.version>32.1.2-jre</guava.version>
         <redisson.version>3.13.0</redisson.version>
         <kafka-clients.version>3.4.0</kafka-clients.version>
-        <lombok.version>1.18.12</lombok.version>
+        <lombok.version>1.18.32</lombok.version>
         <junit.version>4.13.1</junit.version>
         <hutool.version>5.8.17</hutool.version>
         <sentinel.version>1.8.5</sentinel.version>
+
+        <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
+        <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
+        <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
+
     </properties>
 
     <dependencyManagement>
@@ -129,6 +134,29 @@
                 <version>${sentinel.version}</version>
             </dependency>
 
+            <!-- javax 升级为 jakarta -->
+            <!-- 解决从jdk1.8升级为jdk17时，找不到 @PostConstruct 的问题 -->
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta.annotation-api.version}</version>
+            </dependency>
+
+            <!-- 解决从jdk1.8升级为jdk17时，找不到 servlet 包下class的问题 -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- 解决从jdk1.8升级为jdk17时，找不到 xml 包下class的问题 -->
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jakarta.xml.bind-api.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -142,6 +170,9 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <encoding>UTF-8</encoding>
+                    <!-- 启用 -parameters 编译器标志 -->
+                    <compilerArgument>-parameters</compilerArgument>
                 </configuration>
             </plugin>
 

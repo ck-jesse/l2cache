@@ -83,6 +83,12 @@
             <artifactId>poi-ooxml</artifactId>
             <version>4.1.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
