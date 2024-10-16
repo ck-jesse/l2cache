@@ -42,14 +42,14 @@
 ## 2、Spring配置
 具体代码示例参考：[l2cache](https://github.com/ck-jesse/l2cache) 中的 `l2cache-example` 模块。
 
-1.1.0 版本，及之后版本的配置方式
+1.1.0 版本，及之后版本的配置方式，最新配置见：[application.yml](https://github.com/ck-jesse/l2cache/blob/master/l2cache-example/src/main/resources/application.yml)
 ```yaml
 spring:
   application:
     name: l2cache-example
 
 # ======================================================================= #
-# 从1.1.0版本开始，支持不同缓存维度的缓存配置（可按需配置）
+# 从1.1.0版本开始，支持不同缓存维度的缓存类型配置（可按需配置）
 # ======================================================================= #
 
 # 二级缓存配置
@@ -212,13 +212,19 @@ l2cache:
       # etcdUrl: http://127.0.0.1:2379
 ```
 
-1.0.39 版本，及之前版本的配置方式
+1.0.39 版本，及之前版本的配置方式，最新配置见：[application-1.0.39.yml](https://github.com/ck-jesse/l2cache/blob/master/l2cache-example/src/main/resources/application-1.0.39.yml)
 ```yaml
+
 spring:
   application:
     name: l2cache-example
 
+# ======================================================================= #
+# 1.0.39版本及之前的版本，一个应用只能配置一个缓存类型，不支持针对不同缓存维度的按需配置
+# ======================================================================= #
+
 # 二级缓存配置
+# 注：caffeine 不适用于数据量大，并且缓存命中率极低的业务场景，如用户维度的缓存。请慎重选择。
 l2cache:
   config:
     # 缓存实例Id，唯一标识应分布式场景下的一个缓存实例节点
@@ -226,31 +232,44 @@ l2cache:
     # 是否存储空值，默认true，防止缓存穿透
     allowNullValues: true
     # 空值过期时间，单位秒
-    nullValueExpireTimeSeconds: 300
+    nullValueExpireTimeSeconds: 30
+    # 是否使用一级缓存的过期时间来替换二级缓存的过期时间，默认true，简化缓存配置
+    useL1ReplaceL2ExpireTime: true
     # 缓存类型
-    cacheType: composite
+    cacheType: COMPOSITE
     # 组合缓存配置
     composite:
       # 一级缓存类型
       l1CacheType: caffeine
       # 二级缓存类型
       l2CacheType: redis
+      # 二级缓存是否通过batchPut()来处理缓存数据，默认false
+      l2BatchPut: true
+      # 二级缓存是否通过batchEvict()来处理缓存数据，默认false
+      l2BatchEvict: true
       # 是否全部启用一级缓存，默认false
       l1AllOpen: false
       # 是否手动启用一级缓存，默认false
       l1Manual: true
       # 手动配置走一级缓存的缓存key集合，针对单个key维度
       l1ManualKeySet:
+        - a
+        - actLimitMarkupCache:11_2
         - userCache:user01
         - userCache:user02
+        - userCache:user03
+        - userCache:user04
+        - "[actLimitMarkupCache:11_3]"
       # 手动配置走一级缓存的缓存名字集合，针对cacheName维度
       l1ManualCacheNameSet:
         - compositeCache
         - goodsSpecCache
+        - goodsPriceRevisionCache
+        - brandCache
+        #- newBrandCache
+        #- newGoodsPriceRevisionCache
     # 一级缓存
     caffeine:
-      # 是否构建异步Caffeine true 是 false 否
-      asyncCache: false
       # 是否自动刷新过期缓存 true 是 false 否
       autoRefreshExpireCache: false
       # 缓存刷新调度线程池的大小
@@ -263,34 +282,80 @@ l2cache:
       # 如果expireAfterWrite和expireAfterAccess同时存在，以expireAfterWrite为准。
       # 最新最优的推荐用法：refreshAfterWrite 和 实现CacheService接口，只需实现4个业务相关的方法即可（缓存操作提炼到上层接口中去实现）
       # 基于注解的推荐用法：refreshAfterWrite 和 实现CacheService接口，并定义@Cacheable(sync=true)
-      defaultSpec: initialCapacity=10,maximumSize=200,refreshAfterWrite=30m,recordStats
+      # 注意：当缓存项在有效期内重复利用率很低时，不适合用本地缓存，如3千万用户参加抢购活动，用户信息的缓存，则不能用本地缓存。
+      # 因为超过最大数量限制时，再往里面添加元素，会异步按照LFU淘汰元素，若未及时淘汰，在大量用户请求的情况，会导致堆内存飙升，频繁的FullGC和YoungGC，最终导致OOM。
+      defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=30m,softValues,recordStats
       # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
       specs:
-        userCache: initialCapacity=10,maximumSize=200,expireAfterWrite=30s
-        userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=30s,recordStats
+        #userCache: initialCapacity=10,maximumSize=2,expireAfterWrite=2m
+        userCache: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
+        userCacheSync: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
         # 无过期时间配置
-        queryUserSync: initialCapacity=10,maximumSize=2,recordStats
+        queryUserSync: initialCapacity=10,maximumSize=20,refreshAfterWrite=1m,recordStats
+        brandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
+        newBrandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
+        timeCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=30d,recordStats
+        homeGoodsGroupPageCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        homeGoodsGroupCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        purchaseWouldCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        goodsPriceRevisionCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        actDiscountCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=30d,recordStats
+        brandParentFirstPushCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
+        # cacheName中含有: / * 等特殊字符，需要加 "[ ]"
+        "[userCache:v1]": initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
     # 二级缓存
     redis:
-      # 加载数据时，是否加锁，默认false
+      # 加载数据时，是否加锁
       lock: false
       # 加锁时，true调用tryLock()，false调用lock()
       tryLock: true
-      # 缓存过期时间(ms)
-      # 注：作为默认的缓存过期时间，如果一级缓存设置了过期时间，则以一级缓存的过期时间为准。
-      # 目的是为了支持cacheName维度的缓存过期时间设置
-      #expireTime: 30000
+      # 批量操作的大小，可以理解为是分页
+      batchPageSize: 3
+      # 默认缓存过期时间(ms)
+      expireTime: 86400000
+      # 针对cacheName维度的过期时间集合，单位ms
+      expireTimeCacheNameMap:
+        brandCache: 86400000
       # Redisson 的yaml配置文件
       redissonYamlConfig: redisson.yaml
     # 缓存同步策略配置
     cacheSyncPolicy:
-      # 策略类型 kafka / redis
+      # 策略类型 kafka / redis，推荐使用redis
       type: redis
       # 缓存更新时通知其他节点的topic名称
       topic: l2cache
+      # 具体的属性配置，不同的类型配置各自的属性即可(自定义和原生的都可以)
+      #props:
+      #  # kafka properties config
+      #  bootstrap.servers: localhost:9092
+      #  # 生产者id
+      #  client.id: L2CacheProducer
+      #  # 发送消息的确认机制
+      #  acks: 1
+      #  # key序列化处理器
+      #  key.serializer: org.apache.kafka.common.serialization.StringSerializer
+      #  # value序列化处理器
+      #  value.serializer: org.apache.kafka.common.serialization.StringSerializer
+      #  # 消费者groupid
+      #  # 因为是缓存同步，所以必须让所有消费者都消费到相同的消息。采用动态生成一个id附加到配置的group.id上，实现每个consumer都是一个group，来实现发布订阅的模式。
+      #  group.id: L2CacheConsumerGroup
+      #  # 自动提交offset（默认true）
+      #  enable.auto.commit: true
+      #  # 自动提交间隔
+      #  auto.commit.interval.ms: 1000
+      #  # key反序列化处理器
+      #  key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      #  # value反序列化处理器
+      #  value.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      #  # 设置消费的位置
+      #  auto.offset.reset: latest
+      #  # 设置一次最大拉取的消息条数（默认500）
+      #  max.poll.records: 10
+      #  # 设置poll最大时间间隔（默认3s）
+      #  max.poll.interval.ms: 3000
     # 热key探测
     hotkey:
-      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none
+      # 热key探测类型,支持 none、jd、sentinel，目前 sentinel 仅支持单机，默认为 none，不启用热key探测。
       type: sentinel
       sentinel:
         # 若配置了默认规则，针对所有的cacheName，生成其默认的热点参数规则，简化配置
@@ -300,6 +365,7 @@ l2cache:
           grade: 1
           param-idx: 0
           count: 6
+          durationInSec: 1
         rules:
           # 案例1
           # resourceName 资源名称，通常设置为缓存名称
@@ -310,11 +376,13 @@ l2cache:
             paramIdx: 0
             # 阈值计数
             count: 3
+            # 统计窗口时间长度（单位为秒），默认为1
+            durationInSec: 5
           # 案例2
           - resource: newGoodsPriceRevisionCache
             count: 5
       # jd:
-      # serviceName: goods-rest
+      # serviceName: weeget-bullet-goods-rest
       # #etcd的地址，如有多个用逗号分隔
       # etcdUrl: http://127.0.0.1:2379
 
@@ -934,3 +1002,8 @@ public void caffeineCacheTest() throws InterruptedException {
     System.out.println(String.format("get key=%s, value=%s", key, value));
 }
 ```
+
+
+# 三、核心原理
+
+具体见：[L2Cache 核心原理解析](https://blog.csdn.net/icansoicrazy/article/details/131959016)
