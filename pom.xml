@@ -265,12 +265,12 @@
     <profiles>
         <!-- private nexus repository for test -->
         <!-- 发布到私有仓库: mvn clean deploy -->
+        <!--
         <profile>
             <id>weeget-nexus</id>
             <properties>
                 <profiles.active>weeget-nexus</profiles.active>
             </properties>
-            <!-- 发布到maven私服 -->
             <distributionManagement>
                 <repository>
                     <id>maven-releases</id>
@@ -287,6 +287,8 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
         </profile>
+         -->
+
         <!-- Central maven repository -->
         <!-- Deploying to OSSRH with Apache Maven: https://central.sonatype.org/publish/publish-maven/ -->
         <!-- 发布到中央仓库: mvn clean deploy -P ossrh -Dgpg.passphrase=密码 -Dmaven.test.skip=true -f pom.xml -->
