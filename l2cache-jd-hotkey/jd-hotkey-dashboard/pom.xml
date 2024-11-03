@@ -10,7 +10,7 @@
     </parent>
     <groupId>io.github.ck-jesse</groupId>
     <artifactId>jd-hotkey-dashboard</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0</version>
     <name>jd-hotkey-dashboard</name>
     <description>jd-hotkey-dashboard</description>
 
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>io.github.ck-jesse</groupId>
             <artifactId>jd-hotkey-common</artifactId>
-            <version>1.1.0</version>
+            <version>2.0.0</version>
             <scope>compile</scope>
         </dependency>
 

@@ -42,14 +42,14 @@
 ## 2、Spring配置
 具体代码示例参考：[l2cache](https://github.com/ck-jesse/l2cache) 中的 `l2cache-example` 模块。
 
-1.1.0 版本，及之后版本的配置方式，最新配置见：[application.yml](https://github.com/ck-jesse/l2cache/blob/master/l2cache-example/src/main/resources/application.yml)
+2.0.0 版本，及之后版本的配置方式，最新配置见：[application.yml](https://github.com/ck-jesse/l2cache/blob/master/l2cache-example/src/main/resources/application.yml)
 ```yaml
 spring:
   application:
     name: l2cache-example
 
 # ======================================================================= #
-# 从1.1.0版本开始，支持不同缓存维度的缓存类型配置（可按需配置）
+# 从2.0.0版本开始，支持不同缓存维度的缓存类型配置（可按需配置）
 # ======================================================================= #
 
 # 二级缓存配置
@@ -400,7 +400,7 @@ l2cache:
 
 ### 1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -417,7 +417,7 @@ l2cache:
 
 ### 2、支持只使用二级缓存`Redis`。
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -435,7 +435,7 @@ l2cache:
 ### 3、支持同时使用一二级缓存【推荐】
 推荐该方式，因为可动态配置缓存是走本地缓存还是走redis。
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -460,7 +460,7 @@ l2cache:
 
 **4.1）全部缓存 走本地缓存**
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -487,7 +487,7 @@ l2cache:
 
 **4.2）指定key 走本地缓存**
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -526,7 +526,7 @@ l2cache:
 
 **4.3）指定缓存名字 走本地缓存**
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -565,7 +565,7 @@ l2cache:
 
 **4.4）指定key + 指定缓存名字 走本地缓存**
 
-1.1.0 版本，及之后版本的配置方式
+2.0.0 版本，及之后版本的配置方式
 ```yaml
 l2cache:
   config:
@@ -611,7 +611,7 @@ l2cache:
 ```
 ### 5、支持按需配置不同缓存维度的缓存配置（如：配置不同缓存类型）
 
-1.1.0 版本新增的功能。
+2.0.0 版本新增的功能。
 ```yaml
 l2cache:
   config:
