@@ -81,7 +81,7 @@ public class L2CacheConfig {
         private boolean allowNullValues = true;
 
         /**
-         * NullValue的过期时间，单位秒，默认30秒
+         * NullValue的过期时间，单位秒，默认60秒
          * 用于淘汰NullValue的值
          * 注：当缓存项的过期时间小于该值时，则NullValue不会淘汰
          */
@@ -91,7 +91,7 @@ public class L2CacheConfig {
          * NullValue 的最大数量，防止出现内存溢出
          * 注：当超出该值时，会在下一次刷新缓存时，淘汰掉NullValue的元素
          */
-        private long nullValueMaxSize = 3000;
+        private long nullValueMaxSize = 5000;
 
         /**
          * NullValue 的清理频率(秒)
