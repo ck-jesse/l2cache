@@ -41,8 +41,9 @@ public class CaffeineCacheTest {
         // 默认配置 CAFFEINE
         cacheConfig.setCacheType(CacheType.CAFFEINE.name())
                 .setAllowNullValues(true)
+                .setNullValueExpireTimeSeconds(20)
                 .getCaffeine()
-                .setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=2s,recordStats")
+                .setDefaultSpec("initialCapacity=10,maximumSize=200,expireAfterWrite=30s,recordStats")
 //                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=60s,recordStats")
                 .setAutoRefreshExpireCache(false)
                 .setRefreshPoolSize(3)
@@ -116,10 +117,11 @@ public class CaffeineCacheTest {
 
         // 1 put and get
         cache.put(key, value);
+        cache.put(key, "1233331");
         printCache(key);
 
         Object value1 = cache.get(key);
-        System.out.println(String.format("get key=%s, value=%s", key, value1));
+        System.out.println(String.format("1 get key=%s, value=%s", key, value1));
         System.out.println();
 
         // 2 put and get(key, type)
@@ -127,8 +129,19 @@ public class CaffeineCacheTest {
         printCache(key);
 
         NullValue value2 = cache.get(key, NullValue.class);
-        System.out.println(String.format("get key=%s, value=%s", key, value2));
+        System.out.println(String.format("2 get key=%s, value=%s", key, value2));
         System.out.println();
+
+        // 3 put and get(key, type)
+        cache.put(key, NullValue.INSTANCE);
+        printCache(key);
+
+        NullValue value3 = cache.get(key, NullValue.class);
+        System.out.println(String.format("3 get key=%s, value=%s", key, value3));
+        System.out.println();
+        for (int i = 0; i < 60; i++) {
+            Thread.sleep(1000);
+        }
     }
 
     @Test

@@ -24,7 +24,7 @@ public class NewBrandCacheControllerTest {
 
     @Test
     public void getOrLoad() {
-        String url = HOST + "/new/brand/getOrLoad?brandId=1001";
+        String url = HOST + "/new/brand/getOrLoad?brandId=1002";
         BrandRespBO result = restTemplate.getForObject(url, BrandRespBO.class);
         System.out.println(JSON.toJSONString(result));
     }

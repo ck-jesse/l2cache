@@ -57,6 +57,9 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
         Map<Integer, BrandRespBO> map = new HashMap<>();
         // 模拟返回数据，业务系统中可直接从DB加载数据
         for (Integer brandId : notHitCacheKeyList) {
+            if (1002 == brandId) {
+                continue;
+            }
             BrandRespBO brandRespBO = new BrandRespBO();
             brandRespBO.setBrandId(brandId);
             brandRespBO.setGroupId(0);
