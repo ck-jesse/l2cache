@@ -1,6 +1,11 @@
 # 一、集成Spring项目
 
 > 已部署到中央仓库，最新版本号见： [l2cache mvnrepository](https://mvnrepository.com/artifact/io.github.ck-jesse/l2cache-core)
+> 
+> 1.x 版本，支持jdk1.8
+>
+> 2.x 版本，支持jdk17
+
 
 ## 1、启动L2cache
 
@@ -398,7 +403,7 @@ l2cache:
 
 **关键点：** 支持根据配置来灵活的组合使用不同的Cache，具体如下。
 
-### 1、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
+### （1）、支持只使用一级缓存`Caffeine` 和 `Guava Cache`。
 
 2.0.0 版本，及之后版本的配置方式
 ```yaml
@@ -415,7 +420,7 @@ l2cache:
     cacheType: caffeine
 ```
 
-### 2、支持只使用二级缓存`Redis`。
+### （2）、支持只使用二级缓存`Redis`。
 
 2.0.0 版本，及之后版本的配置方式
 ```yaml
@@ -432,7 +437,7 @@ l2cache:
     cacheType: redis
 ```
 
-### 3、支持同时使用一二级缓存【推荐】
+### （3）、支持同时使用一二级缓存【推荐】
 推荐该方式，因为可动态配置缓存是走本地缓存还是走redis。
 
 2.0.0 版本，及之后版本的配置方式
@@ -456,7 +461,7 @@ l2cache:
       l2CacheType: redis
 ```
 
-### 4、支持配置指定缓存走本地缓存。
+### （4）、支持配置指定缓存走本地缓存。
 
 **4.1）全部缓存 走本地缓存**
 
@@ -609,7 +614,7 @@ l2cache:
         - compositeCache
         - goodsSpecCache
 ```
-### 5、支持按需配置不同缓存维度的缓存配置（如：配置不同缓存类型）
+### （5）、支持按需配置不同缓存维度的缓存配置（如：配置不同缓存类型）
 
 2.0.0 版本新增的功能。
 ```yaml
@@ -644,7 +649,7 @@ l2cache:
             brandCache: 86400000
 ```
 
-### 6、缓存同步策略配置
+### （6）、缓存同步策略配置
 详细配置见：[缓存同步策略配置](https://github.com/ck-jesse/l2cache/blob/master/doc/%E7%BC%93%E5%AD%98%E5%90%8C%E6%AD%A5%E7%AD%96%E7%95%A5%E9%85%8D%E7%BD%AE%E6%A0%B7%E4%BE%8B.md)
 ```yaml
 l2cache:
@@ -667,7 +672,7 @@ l2cache:
 - 由于缓存的使用要求是不强求保证强一致性，只需保证最终一致性即可。因此刚好利用上面两个特性，当某个消费者重启时，正好无需去处理那些重启之前的消息，消息丢了就丢了，对本地缓存无影响。因为请求进来时，会再从redis中获取缓存信息并缓存到本地缓存。
 
 
-### 7、热key探测配置
+### （7）、热key探测配置
 
 - 1、不启用热key探测：type配置为none，或者不配置hotkey相关属性
 ```yaml
@@ -724,9 +729,58 @@ l2cache:
             count: 5
 ```
 
+## 3、多redis实例场景的支持
+
+- 新增功能：支持一个服务中有多个redis实例的场景，可以为cacheName配置指定的redissonClient实例
+- 使用方式：在CacheService的实现类上标记注解 @CacheNameRedissonClientAnno ，设置实例id即可
+- 实现原理：在系统加载完毕后，解析到CacheService实现类上的注解，并设置到一个容器中，再在RedisCacheBuilder构建RedissonCache时，根据cacheName获取对应的redissonClient实例，从而实现不同cacheName对应不同的redis实例。
 
 
-## 3、代码中的使用
+```java
+
+/**
+ * 多redis实例的场景：指定redissonClient实例
+ */
+@CacheNameRedissonClientAnno(instanceId = "redissonClient2")
+@Component
+@Slf4j
+public class OrderCacheService extends AbstractCacheService<String, OrderRespBO> {
+    public static final String CACHE_NAME = "orderCache";
+
+    @Override
+    public String getCacheName() {
+        return CACHE_NAME;
+    }
+
+    @Override
+    public OrderRespBO queryData(String orderId) {
+        OrderRespBO orderRespBO = new OrderRespBO();
+        orderRespBO.setOrderId(orderId);
+        orderRespBO.setUserName("test");
+        orderRespBO.setGoodsNum(1);
+        log.info("查询订单相关信息,orderId={},orderRespBO={}", orderId, JSON.toJSONString(orderRespBO));
+        return orderRespBO;
+    }
+
+    @Override
+    public Map<String, OrderRespBO> queryDataList(List<String> notHitCacheKeyList) {
+        Map<String, OrderRespBO> map = new HashMap<>();
+        // 模拟返回数据，业务系统中可直接从DB加载数据
+        for (int i = 0; i < notHitCacheKeyList.size(); i++) {
+            String orderId = notHitCacheKeyList.get(i);
+            OrderRespBO orderRespBO = new OrderRespBO();
+            orderRespBO.setOrderId(orderId);
+            orderRespBO.setUserName("test" + i);
+            orderRespBO.setGoodsNum(1);
+            map.put(orderId, orderRespBO);
+        }
+        log.info("[批量获取订单信息] valueLoader 分页获取订单信息, result={}", JSON.toJSONString(map));
+        return map;
+    }
+}
+```
+
+## 4、代码中的使用
 
 ### 方式一：基于 CacheService 缓存层来使用（推荐-最佳实践）
 
