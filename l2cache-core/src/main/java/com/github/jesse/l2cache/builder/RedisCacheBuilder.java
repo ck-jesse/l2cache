@@ -3,6 +3,7 @@ package com.github.jesse.l2cache.builder;
 import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.L2CacheConfigUtil;
+import com.github.jesse.l2cache.biz.mutil.CacheNameRedissonClientSupport;
 import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.content.RedissonSupport;
 import com.github.jesse.l2cache.cache.RedissonRBucketCache;
@@ -23,7 +24,12 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
 
         L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), cacheName);
 
-        RedissonClient redissonClient = this.getRedissonClient(this.getL2CacheConfig());
+        // 多redis实例场景：根据cacheName获取RedissonClient实例，以支持不同cacheName使用不同的redis数据源
+        RedissonClient redissonClient = CacheNameRedissonClientSupport.getRedissonClient(cacheName);
+        if (null == redissonClient) {
+            // 若为null，则按照正常的方式获取redissonClient
+            redissonClient = this.getRedissonClient(this.getL2CacheConfig());
+        }
 
         return this.buildActualCache(cacheName, cacheConfig, redissonClient);
     }
@@ -35,11 +41,11 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
     protected RedissonClient getRedissonClient(L2CacheConfig cacheConfig) {
         Object actualCacheClient = this.getActualCacheClient();
         if (null != actualCacheClient && actualCacheClient instanceof RedissonClient) {
-            logger.info("multiplexing RedissonClient instance");
+            logger.info("[获取RedissonClient实例] 使用服务中已经存在的 RedissonClient instance");
             return (RedissonClient) actualCacheClient;
         }
 
-        logger.info("get or create RedissonClient instance by cache config");
+        logger.info("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
         return RedissonSupport.getRedisson(cacheConfig);
     }
 

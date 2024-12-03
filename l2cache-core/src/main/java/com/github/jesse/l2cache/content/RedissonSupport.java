@@ -5,6 +5,8 @@ import com.github.jesse.l2cache.L2CacheConfig;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2020/7/7 16:06
  */
 public class RedissonSupport {
-
+    private static final Logger LOG = LoggerFactory.getLogger(RedissonSupport.class);
     /**
      * Map<InstanceId,RedissonClient>
      */
@@ -39,6 +41,7 @@ public class RedissonSupport {
             if (null != redissonClient) {
                 return redissonClient;
             }
+            LOG.info("[获取RedissonClient实例] 基于yaml配置文件, yaml={}", l2CacheConfig.getRedissonYamlConfig());
             Config config = RedissonSupport.getRedissonConfig(l2CacheConfig.getRedissonYamlConfig());
             if (null == config) {
                 // 默认走本地redis，方便测试

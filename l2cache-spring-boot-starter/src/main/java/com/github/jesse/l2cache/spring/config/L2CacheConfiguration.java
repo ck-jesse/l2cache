@@ -6,15 +6,19 @@ import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 import com.github.jesse.l2cache.spring.L2CacheProperties;
 import com.github.jesse.l2cache.spring.biz.CacheManagerController;
+import com.github.jesse.l2cache.spring.biz.SpringCacheNameRedissonClientInitService;
 import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
 import com.github.jesse.l2cache.sync.CacheMessageListener;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,6 +33,7 @@ import java.util.stream.Collectors;
 @EnableCaching(proxyTargetClass = true) // 启用spring-cache
 @Configuration
 @EnableConfigurationProperties(L2CacheProperties.class)
+@Slf4j
 public class L2CacheConfiguration {
 
     @Autowired
@@ -37,8 +42,23 @@ public class L2CacheConfiguration {
     @Autowired(required = false)
     CacheExpiredListener expiredListener;
 
+    /**
+     * 当一个服务中存在一个或多个RedissonClient实例时，会匹配到名字为 redissonClient 的实例
+     */
     @Autowired(required = false)
+    @Qualifier("redissonClient")
     RedissonClient redissonClient;
+
+    @Autowired
+    ApplicationContext context;
+
+    /**
+     * 定义 加载多redis实例的初始化配置service
+     */
+    @Bean
+    public SpringCacheNameRedissonClientInitService initService(ApplicationContext context) {
+        return new SpringCacheNameRedissonClientInitService(context);
+    }
 
     /**
      * 自定义缓存管理器

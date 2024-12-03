@@ -113,12 +113,12 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
         RedissonClient actualClient = this.getActualClient();
         if (null != actualClient) {
             if (logger.isDebugEnabled()) {
-                logger.debug("use setting RedissonClient instance");
+                logger.debug("[获取RedissonClient实例] 使用服务中已经存在的 RedissonClient instance");
             }
             return actualClient;
         }
 
-        logger.info("get or create RedissonClient instance by cache config");
+        logger.info("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
         return RedissonSupport.getRedisson(l2CacheConfig);
     }
 
