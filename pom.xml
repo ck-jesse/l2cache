@@ -31,7 +31,7 @@
         <caffeine.version>2.8.4</caffeine.version>
         <guava.version>32.1.2-jre</guava.version>
         <redisson.version>3.36.0</redisson.version>
-        <kafka-clients.version>3.4.0</kafka-clients.version>
+        <kafka-clients.version>3.7.1</kafka-clients.version>
         <lombok.version>1.18.32</lombok.version>
         <junit.version>4.13.1</junit.version>
         <hutool.version>5.8.25</hutool.version>
