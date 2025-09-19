@@ -30,7 +30,7 @@ public class AutoDetectHotKeyCache {
 
     // key = cacheName_key
     // value = true 表示本机识别到的热key，false 表示非本机识别到的热key
-    private static Cache<String, Boolean> hotKeyCache = Caffeine.newBuilder()
+    private static final Cache<String, Boolean> hotKeyCache = Caffeine.newBuilder()
             .executor(new MdcForkJoinPool("HotKeyCache"))
             .removalListener((key, value, cause) -> {
                 if (logger.isDebugEnabled()) {

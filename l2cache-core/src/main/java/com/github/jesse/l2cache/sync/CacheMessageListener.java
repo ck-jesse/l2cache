@@ -1,6 +1,5 @@
 package com.github.jesse.l2cache.sync;
 
-import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.cache.Level1Cache;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.content.CacheSupport;
@@ -55,8 +54,15 @@ public class CacheMessageListener implements MessageListener {
                 return;
             }
 
-            // refresh 刷新缓存
+            // refresh_clear 刷新缓存触发的清除缓存，下次访问时会重新加载，以简化缓存同步操作
+            if (CacheConsts.CACHE_REFRESH_CLEAR.equals(message.getOptType())) {
+                level1Cache.clearLocalCache(message.getKey());
+                return;
+            }
+
+            // refresh 刷新缓存（该方式还保留，向后兼容）
             if (CacheConsts.CACHE_REFRESH.equals(message.getOptType())) {
+                // TODO 后续再决定，此处直接改造为调用 level1Cache.clearLocalCache(message.getKey())
                 level1Cache.refresh(message.getKey());
                 return;
             }

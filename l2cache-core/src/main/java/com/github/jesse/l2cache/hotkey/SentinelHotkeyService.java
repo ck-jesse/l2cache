@@ -33,6 +33,7 @@ public class SentinelHotkeyService implements HotkeyService {
 
     private CacheSyncPolicy cacheSyncPolicy;
 
+    @Override
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
     }

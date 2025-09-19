@@ -9,7 +9,8 @@ public class CacheConsts {
     /**
      * 缓存操作类型 refresh 刷新缓存，clear 清理缓存
      */
-    public static final String CACHE_REFRESH = "refresh";
+    public static final String CACHE_REFRESH = "refresh"; // 建议：改为清除缓存，下次访问时会重新加载，以简化缓存同步操作
+    public static final String CACHE_REFRESH_CLEAR = "refresh_clear"; // 用于缓存同步时，采用删除操作，以简化缓存同步操作
     public static final String CACHE_CLEAR = "clear";
     public static final String CACHE_HOTKEY = "hotkey";
     public static final String CACHE_HOTKEY_EVIT = "hotkey_evit";

@@ -181,7 +181,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
 
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH, "put"));
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH_CLEAR, "put"));
         }
     }
 

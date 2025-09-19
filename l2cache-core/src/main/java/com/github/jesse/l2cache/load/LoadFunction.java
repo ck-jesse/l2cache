@@ -68,7 +68,7 @@ public class LoadFunction implements Function<Object, Object> {
                 Object value = valueLoader.call();
                 logger.debug("load data from target method, level2Cache is null, cacheName={}, key={}, value={}", cacheName, key, value);
                 if (null != cacheSyncPolicy) {
-                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH, "AfterValueLoader"));
+                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH_CLEAR, "AfterValueLoader"));
                 }
                 return this.toStoreValue(key, value);
             }
@@ -87,7 +87,7 @@ public class LoadFunction implements Function<Object, Object> {
             if (null != warpper && warpper.isPublishMsg()) {
                 // 必须在redis.put()之后再发送消息，否则，消息消费方从redis中获取不到缓存，会继续加载值，若程序刚启动，而没有valueLoader,则redis会被设置为null值
                 if (null != cacheSyncPolicy) {
-                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH, "AfterPutRedis"));
+                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH_CLEAR, "AfterPutRedis"));
                 }
             }
             // 集群环境下，valueLoader和value都为null时，直接返回null，避免缓存NullValue，导致出现实际上数据存在，而获取到null值的情况。

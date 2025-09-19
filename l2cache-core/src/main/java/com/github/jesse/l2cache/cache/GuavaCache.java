@@ -81,7 +81,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
                         if (null != key) {
                             this.guavaCache.invalidate(key);
                             if (null != this.cacheSyncPolicy) {
-                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, ""));
                             }
                         }
                     })
@@ -165,7 +165,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         guavaCache.put(key, toStoreValue(value));
         logger.info("put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), guavaCache.size(), key, toStoreValue(value));
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH));
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH_CLEAR, "put"));
         }
     }
 
@@ -189,7 +189,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         logger.info("evict cache, cacheName={}, key={}", this.getCacheName(), key);
         guavaCache.invalidate(key);
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR));
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "evict"));
         }
     }
 
@@ -198,7 +198,7 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         logger.info("clear cache, cacheName={}", this.getCacheName());
         guavaCache.invalidateAll();
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR));
+            cacheSyncPolicy.publish(createMessage(null, CacheConsts.CACHE_CLEAR, "clear"));
         }
     }
 
@@ -292,13 +292,15 @@ public class GuavaCache extends AbstractAdaptingCache implements Level1Cache {
         }
     }
 
-    private CacheMessage createMessage(Object key, String optType) {
+
+    private CacheMessage createMessage(Object key, String optType, String desc) {
         return new CacheMessage()
                 .setInstanceId(this.getInstanceId())
                 .setCacheType(this.getCacheType())
                 .setCacheName(this.getCacheName())
                 .setKey(key)
-                .setOptType(optType);
+                .setOptType(optType)
+                .setDesc(desc);
     }
 
     @Override
