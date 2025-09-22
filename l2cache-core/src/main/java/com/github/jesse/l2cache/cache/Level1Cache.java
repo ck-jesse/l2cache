@@ -6,6 +6,7 @@ import com.github.jesse.l2cache.load.CacheLoader;
 import com.github.jesse.l2cache.load.LoadFunction;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,8 +39,8 @@ public interface Level1Cache extends Cache {
     boolean isLoadingCache();
 
     /**
-     * 设置指定key的缓存项
-     * 内部put方法，支持控制是否发送同步消息
+     * 设置指定key的缓存项，支持控制是否发送同步消息
+     * L1特有方法，用于控制是否发送同步消息给其他节点
      * <p>
      * 主要场景：一级缓存不存在，二级缓存存在，传入publishMessage=false，仅仅将缓存数据写入一级缓存，但不需要同步消息给其他节点
      *
@@ -48,6 +49,14 @@ public interface Level1Cache extends Cache {
      * @param publishMessage 是否发送同步消息，true=业务主动更新需要同步，false=从缓存加载无需同步
      */
     void put(Object key, Object value, boolean publishMessage);
+
+    /**
+     * 批量put，持控制是否发送同步消息
+     * L1特有方法，用于控制是否发送同步消息给其他节点
+     * @param dataMap 缓存数据集合（key为已经构建好的缓存key）
+     * @param publishMessage 是否发送同步消息，true=业务主动更新需要同步，false=从缓存加载无需同步
+     */
+    <V> void batchPut(Map<Object, V> dataMap, boolean publishMessage);
 
     /**
      * 清理本地缓存

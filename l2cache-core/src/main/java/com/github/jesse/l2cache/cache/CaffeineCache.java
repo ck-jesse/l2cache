@@ -1,5 +1,6 @@
 package com.github.jesse.l2cache.cache;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.content.NullValue;
@@ -197,6 +198,22 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     }
 
     @Override
+    public <V> void batchPut(Map<Object, V> dataMap) {
+        this.batchPut(dataMap, true);
+    }
+
+    @Override
+    public <V> void batchPut(Map<Object, V> dataMap, boolean publishMessage) {
+        if (CollectionUtil.isEmpty(dataMap)) {
+            return;
+        }
+        dataMap.forEach((key, value) -> {
+            this.put(key, value, publishMessage);
+        });
+        logger.info("[{}] batchPut cache, cacheName={}, publishMsg={}, size={}", this.getClass().getSimpleName(), this.getCacheName(), publishMessage, dataMap.size());
+    }
+
+    @Override
     public long size() {
         return caffeineCache.asMap().size();
     }
@@ -214,6 +231,7 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
     @Override
     public void evict(Object key) {
         logger.info("evict cache, cacheName={}, key={}", this.getCacheName(), key);
+        Object value = this.getIfPresent(key);
         caffeineCache.invalidate(key);
         if (null != nullValueCache) {
             nullValueCache.invalidate(key);
@@ -223,7 +241,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         AutoDetectHotKeyCache.evit(this.getCacheName(), key);
 
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "evict"));
+            // 计算缓存值的哈希，用于防止重复发送消息的控制
+            String valueHash = CacheValueHashUtil.calcHash(value);
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "evict", valueHash));
         }
     }
 

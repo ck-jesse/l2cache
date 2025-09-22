@@ -6,6 +6,7 @@ import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.load.CacheLoader;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -72,6 +73,11 @@ public class NoneCache implements Level1Cache, Level2Cache {
 
     @Override
     public void put(Object key, Object value, boolean publishMessage) {
+
+    }
+
+    @Override
+    public <V> void batchPut(Map<Object, V> dataMap, boolean publishMessage) {
 
     }
 

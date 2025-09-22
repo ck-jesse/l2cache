@@ -119,6 +119,7 @@ public abstract class AbstractAdaptingCache implements Cache {
         try {
             Map<K, V> valueLoaderHitMap = valueLoader.apply(new ArrayList<>(notHitCacheKeyMap.keySet()));
 
+            // 从DB获取数据，设置到一级缓存时，需要发送同步消息
             // 从DB获取数据，一个都没有命中，直接返回
             if (CollectionUtil.isEmpty(valueLoaderHitMap)) {
                 // 对未命中的key缓存空值，防止缓存穿透
