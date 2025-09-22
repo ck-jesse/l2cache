@@ -169,12 +169,17 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
 
     @Override
     public void put(Object key, Object value) {
+        this.put(key, value, true);
+    }
+
+    @Override
+    public void put(Object key, Object value, boolean publishMessage) {
         if (!isAllowNullValues() && value == null) {
             caffeineCache.invalidate(key);
             return;
         }
         caffeineCache.put(key, toStoreValue(value));
-        logger.info("put cache, cacheName={}, cacheSize={}, key={}, value={}", this.getCacheName(), caffeineCache.estimatedSize(), key, toStoreValue(value));
+        logger.info("put cache, cacheName={}, cacheSize={}, publishMsg={}, key={}, value={}", this.getCacheName(), caffeineCache.estimatedSize(), publishMessage, key, toStoreValue(value));
 
         // 允许null值，且值为空，则记录到nullValueCache，用于淘汰NullValue
         if (this.isAllowNullValues() && (value == null || value instanceof NullValue)) {
@@ -183,7 +188,8 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             }
         }
 
-        if (null != cacheSyncPolicy) {
+        // 主动put更新缓存，或从数据库重载缓存时，才发送同步消息
+        if (publishMessage && null != cacheSyncPolicy) {
             // 计算缓存值的哈希，用于防止重复发送消息的控制
             String valueHash = CacheValueHashUtil.calcHash(value);
             cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH_CLEAR, "put", valueHash));

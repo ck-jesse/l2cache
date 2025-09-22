@@ -17,14 +17,14 @@ public class NewBrandCacheControllerTest {
 
     @Test
     public void get() {
-        String url = HOST + "/new/brand/get?brandId=1001";
+        String url = HOST + "/new/brand/get?brandId=1003";
         BrandRespBO result = restTemplate.getForObject(url, BrandRespBO.class);
         System.out.println(JSON.toJSONString(result));
     }
 
     @Test
     public void getOrLoad() {
-        String url = HOST + "/new/brand/getOrLoad?brandId=1002";
+        String url = HOST + "/new/brand/getOrLoad?brandId=1005";
         BrandRespBO result = restTemplate.getForObject(url, BrandRespBO.class);
         System.out.println(JSON.toJSONString(result));
     }

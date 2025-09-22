@@ -124,7 +124,7 @@ public interface Cache extends Serializable {
      * @see #put(Object, Object)
      */
     default Object putIfAbsent(Object key, Object value) {
-        Object existingValue = get(key);
+        Object existingValue = getIfPresent(key);
         if (existingValue == null) {
             put(key, value);
         }

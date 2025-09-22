@@ -38,6 +38,18 @@ public interface Level1Cache extends Cache {
     boolean isLoadingCache();
 
     /**
+     * 设置指定key的缓存项
+     * 内部put方法，支持控制是否发送同步消息
+     * <p>
+     * 主要场景：一级缓存不存在，二级缓存存在，传入publishMessage=false，仅仅将缓存数据写入一级缓存，但不需要同步消息给其他节点
+     *
+     * @param key            缓存key
+     * @param value          缓存值
+     * @param publishMessage 是否发送同步消息，true=业务主动更新需要同步，false=从缓存加载无需同步
+     */
+    void put(Object key, Object value, boolean publishMessage);
+
+    /**
      * 清理本地缓存
      */
     void clearLocalCache(Object key);

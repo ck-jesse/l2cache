@@ -97,7 +97,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             if (logger.isDebugEnabled()) {
                 logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             }
-            level1Cache.put(key, value);
+            level1Cache.put(key, value, false);
         }
         return value;
     }
@@ -119,7 +119,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         value = level2Cache.getIfPresent(key);
         if (value != null && ifL1Open) {
             logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
-            level1Cache.put(key, value);
+            level1Cache.put(key, value, false);
         }
         return value;
     }

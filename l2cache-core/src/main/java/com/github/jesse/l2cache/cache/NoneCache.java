@@ -71,6 +71,11 @@ public class NoneCache implements Level1Cache, Level2Cache {
     }
 
     @Override
+    public void put(Object key, Object value, boolean publishMessage) {
+
+    }
+
+    @Override
     public long size() {
         return 0;
     }

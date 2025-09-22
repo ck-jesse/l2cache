@@ -37,7 +37,12 @@ public class NewBrandCacheService extends AbstractCacheService<Integer, BrandRes
 
     @Override
     public BrandRespBO queryData(Integer brandId) {
-        if (null == brandId || 1002 == brandId) {
+        if (null == brandId) {
+            log.info("请传入brandId,brandId={}", brandId);
+            return null;
+        }
+        if (1002 == brandId) {
+            log.info("模拟返回null,brandId={}", brandId);
             return null;
         }
         // 模拟返回数据，业务系统中可直接从DB加载数据
