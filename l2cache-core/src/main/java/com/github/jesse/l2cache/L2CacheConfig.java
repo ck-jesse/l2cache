@@ -213,8 +213,10 @@ public class L2CacheConfig {
 
         /**
          * 同一个key的发布消息频率(毫秒)
+         *
+         * 注：由于缓存同步，改为CLEAR策略，对于CLEAR操作，短时间内的重复清除是幂等的，影响较小，因此适当缩短防重时间窗口，减少数据不一致风险，从500ms 改为100ms
          */
-        private Long publishMsgPeriodMilliSeconds = 500L;
+        private Long publishMsgPeriodMilliSeconds = 100L;
 
         /**
          * 批量获取操作日志级别，因批量获取时，日志量非常大，而且每一条日志都是打印全量的数据，会对性能有影响，所以此参数可用于控制是否打印日志

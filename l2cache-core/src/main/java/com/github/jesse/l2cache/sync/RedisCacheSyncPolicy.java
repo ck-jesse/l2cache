@@ -76,29 +76,32 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
     @Override
     public void publish(CacheMessage message) {
         poolExecutor.execute(new RunnableMdcWarpper(() -> {
+            String lockKey = "";
             try {
+                lockKey = buildLockKey(message);
                 L2CacheConfig.CacheConfig cacheConfig = L2CacheConfigUtil.getCacheConfig(this.getL2CacheConfig(), message.getCacheName());
 
                 Long publishMsgPeriodMilliSeconds = cacheConfig.getCaffeine().getPublishMsgPeriodMilliSeconds();
                 RedissonClient redissonClient = getRedissonClient(this.getL2CacheConfig());
-                RLock lock = redissonClient.getLock(buildLockKey(message));
+                RLock lock = redissonClient.getLock(lockKey);
+
                 // 限制同一个key指定时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
                 if (!lock.tryLock(0, publishMsgPeriodMilliSeconds, TimeUnit.MILLISECONDS)) {
-                    logger.warn("trylock fail, no need to publish message, publishMsgPeriod={}ms, message={}", publishMsgPeriodMilliSeconds, message.toString());
+                    logger.warn("无需发送消息(基于缓存值的MD5哈希,防止重复发送消息), publishMsgPeriod={}ms, lockKey={}, message={}", publishMsgPeriodMilliSeconds, lockKey, message.toString());
                     return;
                 }
 
                 // 重入锁的数量(同一个线程可以重入)
                 int lockHoldCount = lock.getHoldCount();
                 if (lockHoldCount > 1) {
-                    logger.warn("trylock succ, no need to publish message, publishMsgPeriod={}ms, lockHoldCount={}, message={}", publishMsgPeriodMilliSeconds, lockHoldCount, message.toString());
+                    logger.warn("无需发送消息(锁重入), publishMsgPeriod={}ms, lockHoldCount={}, lockKey={}, message={}", publishMsgPeriodMilliSeconds, lockHoldCount, lockKey, message.toString());
                     return;
                 }
 
                 long receivedMsgClientNum = this.topic.publish(message);
-                logger.info("publish succ, cacheName={}, key={}, receivedMsgClientNum={}, message={}", message.getCacheName(), message.getKey(), receivedMsgClientNum, message.toString());
+                logger.info("消息发送成功, cacheName={}, key={}, receivedMsgClientNum={}, lockKey={}, message={}", message.getCacheName(), message.getKey(), receivedMsgClientNum, lockKey, message.toString());
             } catch (Exception e) {
-                logger.error("publish error, cacheName=" + message.getCacheName() + ", key=" + message.getKey(), e);
+                logger.error("消息发送异常, cacheName=" + message.getCacheName() + ", key=" + message.getKey() + ", lockKey=" + lockKey, e);
             }
 
         }, message));
@@ -117,20 +120,27 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
             }
             return actualClient;
         }
-
-        logger.info("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
+        if (logger.isDebugEnabled()) {
+            logger.info("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
+        }
         return RedissonSupport.getRedisson(l2CacheConfig);
     }
 
     private String buildLockKey(CacheMessage message) {
         // 从 "缓存名称:key" 改为 "缓存名称:key:操作类型"，让lockKey粒度更加精细化，避免不同操作类型(refresh/clear)互相影响
-        return new StringBuilder("lock")
+        StringBuilder lockKey = new StringBuilder("lock")
                 .append(CacheConsts.SPLIT)
                 .append(message.getCacheName())
                 .append(CacheConsts.SPLIT)
                 .append(message.getKey())
                 .append(CacheConsts.SPLIT)
-                .append(message.getOptType())
-                .toString();
+                .append(message.getOptType());
+
+        // 如果有cacheValueHash，将其作为锁key的一部分，实现基于内容的防止重复发送消息
+        // MD5哈希防重: 基于缓存值的MD5计算，避免相同内容的重复消息
+        if (message.getCacheValueHash() != null) {
+            lockKey.append(CacheConsts.SPLIT).append(message.getCacheValueHash());
+        }
+        return lockKey.toString();
     }
 }

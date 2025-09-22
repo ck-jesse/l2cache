@@ -14,6 +14,7 @@ import com.github.jesse.l2cache.load.CacheLoader;
 import com.github.jesse.l2cache.load.LoadFunction;
 import com.github.jesse.l2cache.load.ValueLoaderWarpper;
 import com.github.jesse.l2cache.sync.CacheMessage;
+import com.github.jesse.l2cache.util.CacheValueHashUtil;
 import com.github.jesse.l2cache.util.LogUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -84,7 +85,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
                         if (null != key) {
                             this.caffeineCache.invalidate(key);
                             if (null != this.cacheSyncPolicy) {
-                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "RemoveNullValue"));
+                                // 计算缓存值的哈希，用于防止重复发送消息的控制
+                                String valueHash = CacheValueHashUtil.calcHash(value);
+                                this.cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_CLEAR, "RemoveNullValue", valueHash));
                             }
                         }
                     })
@@ -181,7 +184,9 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
         }
 
         if (null != cacheSyncPolicy) {
-            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH_CLEAR, "put"));
+            // 计算缓存值的哈希，用于防止重复发送消息的控制
+            String valueHash = CacheValueHashUtil.calcHash(value);
+            cacheSyncPolicy.publish(createMessage(key, CacheConsts.CACHE_REFRESH_CLEAR, "put", valueHash));
         }
     }
 
@@ -322,15 +327,19 @@ public class CaffeineCache extends AbstractAdaptingCache implements Level1Cache 
             }
         }
     }
-
     private CacheMessage createMessage(Object key, String optType, String desc) {
+        return createMessage(key, optType, desc, null);
+    }
+
+    private CacheMessage createMessage(Object key, String optType, String desc, String cacheValueHash) {
         return new CacheMessage()
                 .setInstanceId(this.getInstanceId())
                 .setCacheType(this.getCacheType())
                 .setCacheName(this.getCacheName())
                 .setKey(key)
                 .setOptType(optType)
-                .setDesc(desc);
+                .setDesc(desc)
+                .setCacheValueHash(cacheValueHash);
     }
 
     @Override

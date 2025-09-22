@@ -35,7 +35,7 @@ public class NewBrandCacheControllerTest {
         BrandRespBO param = new BrandRespBO();
         param.setBrandId(1001);
         param.setGroupId(0);
-        param.setBrandName("1001999");
+        param.setBrandName("100199900023");
         param.setBrandNumber("1001");
         param.setDescription("brandId " + 1001);
         param.setState(0);

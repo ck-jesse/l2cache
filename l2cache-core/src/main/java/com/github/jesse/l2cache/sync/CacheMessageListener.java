@@ -34,8 +34,8 @@ public class CacheMessageListener implements MessageListener {
                 logger.debug("[SyncCache] don't need to process your own messages, currInstanceId={}, message={}", this.cacheInstanceId, message.toString());
                 return;
             }
-            logger.info("[SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}, desc={}",
-                    this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey(), message.getDesc());
+            logger.info("[SyncCache] receive message, currInstanceId={}, instanceId={}, cacheName={}, cacheType={}, optType={}, key={}, desc={}, cacheValueHash={}",
+                    this.cacheInstanceId, message.getInstanceId(), message.getCacheName(), message.getCacheType(), message.getOptType(), message.getKey(), message.getDesc(), message.getCacheValueHash());
 
             // 缓存其他节点识别到的hotkey
             if (CacheConsts.CACHE_HOTKEY.equals(message.getOptType())) {

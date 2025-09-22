@@ -31,6 +31,7 @@ public class CacheMessage implements Serializable {
     private Object key;// 缓存key
     private Map<String, String> mdcContextMap;
     private String desc;// 描述 用于标记发起消息的触发方法，便于排查问题
+    private String cacheValueHash;// 缓存值的MD5哈希，用于判断内容是否变化(MD5哈希防重: 基于缓存值的MD5计算，避免相同内容的重复消息)
 
     public CacheMessage() {
         this.mdcContextMap = MDC.getCopyOfContextMap();
@@ -44,6 +45,11 @@ public class CacheMessage implements Serializable {
         this.optType = optType;
         this.mdcContextMap = MDC.getCopyOfContextMap();
         this.desc = desc;
+    }
+
+    public CacheMessage(String instanceId, String cacheType, String cacheName, Object key, String optType, String desc, String cacheValueHash) {
+        this(instanceId, cacheType, cacheName, key, optType, desc);
+        this.cacheValueHash = cacheValueHash;
     }
 
     public Map<String, String> getMdcContextMap() {
@@ -83,6 +89,7 @@ public class CacheMessage implements Serializable {
         sb.append(", optType=").append(optType);
         sb.append(", key=").append(key);
         sb.append(", desc=").append(desc);
+        sb.append(", cacheValueHash=").append(cacheValueHash);
         sb.append(", mdcContextMap=").append(mdcContextMap);
         sb.append("]");
         return sb.toString();
