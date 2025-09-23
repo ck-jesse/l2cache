@@ -6,6 +6,7 @@ import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
+import com.github.jesse.l2cache.cache.expire.CacheExpiry;
 
 /**
  * @author chenck
@@ -18,6 +19,8 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
     private CacheExpiredListener expiredListener;
 
     private CacheSyncPolicy cacheSyncPolicy;
+
+    private CacheExpiry cacheExpiry;
 
     private volatile Object actualCacheClient;
 
@@ -35,6 +38,7 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
         this.setExpiredListener(sourceBuilder.getExpiredListener());
         this.setCacheSyncPolicy(sourceBuilder.getCacheSyncPolicy());
         this.setActualCacheClient(sourceBuilder.getActualCacheClient());
+        this.setCacheExpiry(sourceBuilder.getCacheExpiry());
     }
 
     @Override
@@ -52,6 +56,17 @@ public abstract class AbstractCacheBuilder<T extends Cache> implements CacheBuil
     @Override
     public CacheBuilder setCacheSyncPolicy(CacheSyncPolicy cacheSyncPolicy) {
         this.cacheSyncPolicy = cacheSyncPolicy;
+        return this;
+    }
+
+    @Override
+    public CacheExpiry getCacheExpiry() {
+        return this.cacheExpiry;
+    }
+
+    @Override
+    public CacheBuilder setCacheExpiry(CacheExpiry cacheExpiry) {
+        this.cacheExpiry = cacheExpiry;
         return this;
     }
 

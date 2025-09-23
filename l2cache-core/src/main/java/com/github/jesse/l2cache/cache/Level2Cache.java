@@ -15,4 +15,8 @@ public interface Level2Cache extends Cache {
      */
     long getExpireTime();
 
+    /**
+     * 获取剩余过期时间（毫秒）
+     */
+    long getTimeToLive(Object key);
 }

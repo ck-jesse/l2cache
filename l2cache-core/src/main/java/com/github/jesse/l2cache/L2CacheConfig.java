@@ -12,7 +12,13 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author chenck
@@ -212,8 +218,20 @@ public class L2CacheConfig {
         private Long refreshPeriod = 30L;
 
         /**
+         * 是否启用自定义缓存过期策略
+         * true: 从L2(Redis)获取key的TTL，并同步到L1(Caffeine)的过期时间，实现多节点L1缓存过期时间的统一
+         * false: 使用L1(Caffeine)自身的过期时间
+         * 默认true，保证实现多节点L1缓存过期时间的统一，但会有额外的L2(Redis)查询开销
+         * <p>
+         * 特别注意：
+         * refreshAfterWrite 支持与自定义过期策略(CacheExpiry)同时使用
+         * expiresAfterWrite和expiresAfterWrite 不支持与自定义过期策略(CacheExpiry)同时使用
+         */
+        private boolean enableCacheExpiry = true;
+
+        /**
          * 同一个key的发布消息频率(毫秒)
-         *
+         * <p>
          * 注：由于缓存同步，改为CLEAR策略，对于CLEAR操作，短时间内的重复清除是幂等的，影响较小，因此适当缩短防重时间窗口，减少数据不一致风险
          * 另外，由于对缓存值的MD5哈希值，做了防止重复发送的校验，所以还是改为500毫秒，也可以适当调大该值
          */
@@ -263,6 +281,14 @@ public class L2CacheConfig {
          * 缓存刷新的频率(秒)
          */
         private Long refreshPeriod = 30L;
+
+        /**
+         * 是否启用L2(Redis) TTL剩余过期时间
+         * true: 从L2(Redis)获取key的TTL，并同步到L1(Caffeine)的过期时间，实现多节点L1缓存过期时间的统一
+         * false: 使用L1(Caffeine)自身的过期时间
+         * 默认true，保证实现多节点L1缓存过期时间的统一，但会有额外的L2(Redis)查询开销
+         */
+        private boolean enableUseL2TTL = true;
 
         /**
          * The spec to use to create caches. See CaffeineSpec for more details on the spec format.

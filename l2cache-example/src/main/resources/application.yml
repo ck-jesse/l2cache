@@ -67,8 +67,8 @@ l2cache:
         # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
         specs:
           userCache: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
-          newBrandCache: initialCapacity=64,maximumSize=5000,expireAfterWrite=1m,recordStats
-          newGoodsPriceRevisionCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=1d,recordStats
+          newBrandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=1m,recordStats
+          newGoodsPriceRevisionCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=1m,recordStats
           # cacheName中含有: / * 等特殊字符，需要加 "[ ]"
           "[userCache:v1]": initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats
       # 二级缓存
@@ -108,9 +108,6 @@ l2cache:
           batchPageSize: 3
           # 默认缓存过期时间(ms)
           expireTime: 86400000
-          # 针对cacheName维度的过期时间集合，单位ms
-          expireTimeCacheNameMap:
-            brandCache: 86400000
     # 缓存同步策略配置
     cacheSyncPolicy:
       # 策略类型 kafka / redis，推荐使用redis

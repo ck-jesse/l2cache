@@ -1,13 +1,14 @@
 package com.github.jesse.l2cache.builder;
 
 import cn.hutool.core.util.StrUtil;
-import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.L2CacheConfigUtil;
-import com.github.jesse.l2cache.content.CustomGuavaCacheBuilderSpec;
 import com.github.jesse.l2cache.cache.GuavaCache;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
+import com.github.jesse.l2cache.cache.expire.CacheExpiry;
 import com.github.jesse.l2cache.consts.CacheType;
+import com.github.jesse.l2cache.content.CustomGuavaCacheBuilderSpec;
 import com.github.jesse.l2cache.load.CacheLoader;
 import com.github.jesse.l2cache.load.CustomCacheLoader;
 import com.google.common.cache.Cache;
@@ -45,7 +46,7 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
         customCacheLoader.setAllowNullValues(cacheConfig.isAllowNullValues());
 
         Cache<Object, Object> cache = this.buildActualCache(cacheName, cacheConfig, customCacheLoader,
-                this.getExpiredListener());
+                this.getExpiredListener(), this.getCacheExpiry());
 
         return new GuavaCache(cacheName, cacheConfig, customCacheLoader, this.getCacheSyncPolicy(), cache);
     }
@@ -66,9 +67,16 @@ public class GuavaCacheBuilder extends AbstractCacheBuilder<GuavaCache> {
      * 构建实际缓存对象
      */
     protected Cache<Object, Object> buildActualCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig, CacheLoader cacheLoader,
-                                                     CacheExpiredListener listener) {
+                                                     CacheExpiredListener listener, CacheExpiry cacheExpiry) {
         // 解析spec
         this.buildGuavaCacheSpec(cacheName, cacheConfig.getGuava());
+
+        // 判断是否启用Redis TTL同步过期策略
+        if (cacheConfig.getGuava().isEnableUseL2TTL() && null != cacheExpiry) {
+            logger.info("Enable Redis TTL sync expiry strategy, cacheName={}", cacheName);
+            // TODO guava 暂未发现设置自定义过期策略的方法
+            // cacheExpiry.setDefaultExpireTime(0);
+        }
 
         if (null != listener) {
             cacheBuilder.removalListener(notification -> {

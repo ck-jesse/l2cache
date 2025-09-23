@@ -147,6 +147,11 @@ public class NoneCache implements Level1Cache, Level2Cache {
     }
 
     @Override
+    public long getTimeToLive(Object key) {
+        return 0;
+    }
+
+    @Override
     public String getInstanceId() {
         return L2CacheConfig.INSTANCE_ID;
     }

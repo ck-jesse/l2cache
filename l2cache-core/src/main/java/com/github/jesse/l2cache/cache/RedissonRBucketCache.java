@@ -10,14 +10,25 @@ import com.github.jesse.l2cache.exception.RedisTrylockFailException;
 import com.github.jesse.l2cache.load.ValueLoaderWarpper;
 import com.github.jesse.l2cache.load.ValueLoaderWarpperTemp;
 import com.github.jesse.l2cache.util.BiConsumerWrapper;
+import com.github.jesse.l2cache.util.ExpireTimeUtil;
 import com.github.jesse.l2cache.util.LogUtil;
 import com.github.jesse.l2cache.util.SpringCacheExceptionUtil;
 import com.google.common.collect.Lists;
-import org.redisson.api.*;
+import org.redisson.api.BatchResult;
+import org.redisson.api.RBatch;
+import org.redisson.api.RBucket;
+import org.redisson.api.RFuture;
+import org.redisson.api.RKeys;
+import org.redisson.api.RLock;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -68,8 +79,18 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         if (key == null || "".equals(key)) {
             throw new IllegalArgumentException("key不能为空");
         }
-        StringBuilder cacheKey = new StringBuilder(this.getCacheName()).append(CacheConsts.SPLIT).append(key.toString());
-        return cacheKey.toString();
+        return this.getCacheName() + CacheConsts.SPLIT + key.toString();
+    }
+
+    @Override
+    public long getTimeToLive(Object key) {
+        String cacheKey = buildKey(key);
+        RBucket<Object> bucket = this.getBucket(cacheKey);
+
+        // 获取Redis中key的剩余过期时间（毫秒）
+        // -2 表示key不存在
+        // -1 表示key存在但没有过期时间（永不过期）
+        return bucket.remainTimeToLive();
     }
 
     @Override
@@ -88,8 +109,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
      * @param cacheKey 已经拼接好的缓存key
      */
     private RBucket<Object> getBucket(String cacheKey) {
-        RBucket<Object> bucket = redissonClient.getBucket(cacheKey);
-        return bucket;
+        return redissonClient.getBucket(cacheKey);
     }
 
     @Override
@@ -198,7 +218,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         long expireTime = this.expireTimeDeal(value);
         if (expireTime > 0) {
             Object oldValue = bucket.getAndSet(value, expireTime, TimeUnit.MILLISECONDS);
-            logger.info("put cache, cacheName={}, expireTime={} ms, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, cacheKey, value, oldValue);
+            logger.info("put cache, cacheName={}, expireTime={} ms, expireTimeStr={}, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, ExpireTimeUtil.toStr(expireTime), cacheKey, value, oldValue);
         } else {
             Object oldValue = bucket.getAndSet(value);
             logger.info("put cache, cacheName={}, key={}, value={}, oldValue={}", this.getCacheName(), cacheKey, value, oldValue);
@@ -219,7 +239,7 @@ public class RedissonRBucketCache extends AbstractAdaptingCache implements Level
         boolean rslt = false;
         if (expireTime > 0) {
             rslt = bucket.trySet(value, expireTime, TimeUnit.MILLISECONDS);
-            logger.info("putIfAbsent cache, cacheName={}, expireTime={} ms, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, rslt, cacheKey, value, oldValue);
+            logger.info("putIfAbsent cache, cacheName={}, expireTime={} ms expireTimeStr={}, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), expireTime, ExpireTimeUtil.toStr(expireTime), rslt, cacheKey, value, oldValue);
         } else {
             rslt = bucket.trySet(value);
             logger.info("putIfAbsent cache, cacheName={}, rslt={}, key={}, value={}, oldValue={}", this.getCacheName(), rslt, cacheKey, value, oldValue);

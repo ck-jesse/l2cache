@@ -1,6 +1,7 @@
 package com.github.jesse.l2cache;
 
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
+import com.github.jesse.l2cache.cache.expire.CacheExpiry;
 import com.github.jesse.l2cache.spi.SPI;
 
 import java.io.Serializable;
@@ -70,4 +71,14 @@ public interface CacheBuilder<T extends Cache> extends Serializable {
      * 注：主要是为了在使用二级缓存时留一个扩展点，可以直接设置应用中已经存在的缓存Client实例，如：RedissonClient、RedisTemplate 等
      */
     CacheBuilder setActualCacheClient(Object actualCacheClient);
+
+    /**
+     * 获取缓存剩余过期时间策略
+     */
+    CacheExpiry getCacheExpiry();
+
+    /**
+     * 设置缓存剩余过期时间策略
+     */
+    CacheBuilder setCacheExpiry(CacheExpiry cacheExpiry);
 }

@@ -5,6 +5,7 @@ import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
 import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.cache.Level1Cache;
+import com.github.jesse.l2cache.cache.Level2Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,22 @@ public class CacheSupport {
             return null;
         }
         return (Level1Cache) cache;
+    }
+
+    /**
+     * 获取 Level2Cache
+     */
+    public static Level2Cache getLevel2Cache(String level2CacheType, String cacheName) {
+        Cache cache = CacheSupport.getCache(level2CacheType, cacheName);
+        if (null == cache) {
+            logger.warn("Cache is not exists or not instanced, cacheType=" + level2CacheType + ", " + "cacheName=" + cacheName);
+            return null;
+        }
+        if (!(cache instanceof Level2Cache)) {
+            logger.warn("Cache must be implements Level2Cache, cacheType=" + level2CacheType + " " + cache.getClass().getName());
+            return null;
+        }
+        return (Level2Cache) cache;
     }
 
     /**

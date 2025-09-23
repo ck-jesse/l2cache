@@ -1,14 +1,17 @@
 package com.github.jesse.l2cache.load;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.jesse.l2cache.CacheSpec;
 import com.github.jesse.l2cache.CacheSyncPolicy;
 import com.github.jesse.l2cache.cache.Level2Cache;
 import com.github.jesse.l2cache.consts.CacheConsts;
+import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.content.NullValue;
 import com.github.jesse.l2cache.exception.RedisTrylockFailException;
+import com.github.jesse.l2cache.sync.CacheMessage;
+import com.github.jesse.l2cache.util.ExpireTimeUtil;
 import com.github.jesse.l2cache.util.NullValueUtil;
 import com.github.jesse.l2cache.util.SpringCacheExceptionUtil;
-import com.github.jesse.l2cache.sync.CacheMessage;
-import com.github.benmanes.caffeine.cache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,9 +89,7 @@ public class LoadFunction implements Function<Object, Object> {
             Object value = level2Cache.get(key, warpper);
             if (null != warpper && warpper.isPublishMsg()) {
                 // 必须在redis.put()之后再发送消息，否则，消息消费方从redis中获取不到缓存，会继续加载值，若程序刚启动，而没有valueLoader,则redis会被设置为null值
-                if (null != cacheSyncPolicy) {
-                    cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH_CLEAR, "AfterPutRedis"));
-                }
+                cacheSyncPolicy.publish(new CacheMessage(this.instanceId, this.cacheType, this.cacheName, key, CacheConsts.CACHE_REFRESH_CLEAR, "AfterPutRedis"));
             }
             // 集群环境下，valueLoader和value都为null时，直接返回null，避免缓存NullValue，导致出现实际上数据存在，而获取到null值的情况。
             // value等于null，表示从redis中获取的值为null（也就是key不存在），所以直接返回null，避免缓存NullValue，导致缓存和db不一致的情况。
@@ -135,7 +136,16 @@ public class LoadFunction implements Function<Object, Object> {
             }
         }
         Object storeValue = NullValueUtil.toStoreValue(value, this.allowNullValues, this.cacheName);
-        logger.info("storeValue, cacheName={}, key={}, storeValue={}", cacheName, key, storeValue);
+
+        CacheSpec cacheSpec = CacheSupport.getCacheSpec(this.cacheType, this.cacheName);
+        if (null != cacheSpec) {
+            // 将缓存的过期时间打印到日志中，方便排查问题（此处计算的过期时间不准，但可供参考）
+            // 当开启refreshAfterWrite的自定义过期策略(CacheExpiry)时，该时间不准，请以自定义过期策略中打印问过期时间为准
+            long expireTime = cacheSpec.getExpireTime();
+            logger.info("storeValue, cacheName={}, key={}, expireTimeStr={}, storeValue={}", cacheName, key, ExpireTimeUtil.toStr(expireTime), storeValue);
+        } else {
+            logger.info("storeValue, cacheName={}, key={}, storeValue={}", cacheName, key, storeValue);
+        }
         return storeValue;
     }
 

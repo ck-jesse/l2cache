@@ -5,11 +5,13 @@ import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.CacheBuilder;
 import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.L2CacheConfigUtil;
-import com.github.jesse.l2cache.content.CacheSupport;
-import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.cache.CompositeCache;
 import com.github.jesse.l2cache.cache.Level1Cache;
 import com.github.jesse.l2cache.cache.Level2Cache;
+import com.github.jesse.l2cache.cache.expire.CacheExpiry;
+import com.github.jesse.l2cache.cache.expire.Level2CacheTtlCacheExpiry;
+import com.github.jesse.l2cache.consts.CacheType;
+import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 
 /**
@@ -43,14 +45,17 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
                     "Otherwise, loop building CompositeCache causes java.lang.StackOverflowError");
         }
 
+        // 针对L1的剩余过期时间处理策略
+        Level2CacheTtlCacheExpiry cacheExpiry = new Level2CacheTtlCacheExpiry(cacheName, cacheConfig);
+
         // 构建L1
-        Cache level1Cache = this.getCacheInstance(l1CacheType, cacheName);
+        Cache level1Cache = this.getCacheInstance(l1CacheType, cacheName, cacheExpiry);
         if (!(level1Cache instanceof Level1Cache)) {
             throw new IllegalArgumentException("level1Cache must be implements Level1Cache, l1CacheType=" + l1CacheType);
         }
 
         // 构建L2
-        Cache level2Cache = this.getCacheInstance(l2CacheType, cacheName);
+        Cache level2Cache = this.getCacheInstance(l2CacheType, cacheName, null);
         if (!(level2Cache instanceof Level2Cache)) {
             throw new IllegalArgumentException("level2Cache must be implements Level2Cache, l2CacheType=" + l2CacheType);
         }
@@ -68,7 +73,7 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
     /**
      * 获取缓存实例
      */
-    private Cache getCacheInstance(String cacheType, String cacheName) {
+    private Cache getCacheInstance(String cacheType, String cacheName, CacheExpiry cacheExpiry) {
         Cache cache = CacheSupport.getCache(cacheType, cacheName);
         if (null != cache) {
             return cache;
@@ -76,6 +81,9 @@ public class CompositeCacheBuilder extends AbstractCacheBuilder<CompositeCache> 
         // 基于SPI机制构建CacheBuilder
         CacheBuilder cacheBuilder = ServiceLoader.load(CacheBuilder.class, cacheType);
         cacheBuilder.copyFrom(this);
+        if (null != cacheExpiry) {
+            cacheBuilder.setCacheExpiry(cacheExpiry);
+        }
 
         return CacheSupport.getCache(cacheType, cacheName, cacheBuilder);
     }

@@ -406,7 +406,7 @@ public class CustomCaffeineSpec {
     }
 
     /**
-     * 获取过期时间
+     * 获取过期时间（毫秒）
      */
     public long getExpireTime() {
         // refreshAfterWrite 第一优先

@@ -55,6 +55,7 @@ public class CompositeCacheBuilderTest {
         Thread.sleep(4000);// 缓存过期时间为为2s，此处休眠3s，目的是为了让缓存过期
         System.out.println("get " + cache.get(key));// 过期后第一次获取，可以获取到值，并且触发异步清理过期缓存
         System.out.println("get " + cache.get(key));// 过期后第二次获取，获取到null值
+        System.out.println();
     }
 
     /**
@@ -70,10 +71,10 @@ public class CompositeCacheBuilderTest {
                 .setL2CacheType(CacheType.REDIS.name())
                 .setL1AllOpen(true);
         cacheConfig.getCaffeine()
-                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=5s,recordStats")
+                .setDefaultSpec("initialCapacity=10,maximumSize=200,refreshAfterWrite=60s,recordStats")
                 .setAutoRefreshExpireCache(true);
         cacheConfig.getRedis()
-                .setExpireTime(5000)
+                .setExpireTime(60000)
 //                .setMaxIdleTime(5000)
 //                .setMaxSize(2)
 //                .setRedissonYamlConfig("redisson.yaml");
@@ -98,6 +99,7 @@ public class CompositeCacheBuilderTest {
         while (true) {
             Thread.sleep(1000);
             System.out.println("get " + cache.get(key));
+            System.out.println();
         }
     }
 
