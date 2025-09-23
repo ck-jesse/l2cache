@@ -36,18 +36,18 @@ public class DefaultCacheExpiredListener implements CacheExpiredListener {
         // 缓存过期时，发送同步消息（evict删除、put替换操作，在对应的方法中有显示发送同步消息）
         // refreshAfterWrite模式下：缓存过期，会执行load缓存，此时 removalCause=EXPLICIT，而不是EXPIRED
         // expireAfterWrite模式下：缓存过期，不会执行load缓存，此时 removalCause=EXPIRED
-//        if ("EXPIRED".equalsIgnoreCase(removalCause)) {
-//            if (cache instanceof CompositeCache) {
-//                Level1Cache level1Cache = ((CompositeCache) cache).getLevel1Cache();
-//                if (null == level1Cache) {
-//                    return;
-//                }
-//                logger.info("level1Cache expired cache, publish message, removalCause={}, key={}, value={}", removalCause, key, value);
-//                // 计算缓存值的哈希，用于防止重复发送消息的控制
-//                String valueHash = CacheValueHashUtil.calcHash(value);
-//                level1Cache.getCacheSyncPolicy().publish(new CacheMessage(level1Cache.getInstanceId(), level1Cache.getCacheType(), level1Cache.getCacheName(), key, CacheConsts.CACHE_CLEAR, "expired", valueHash));
-//            }
-//        }
+        if ("EXPIRED".equalsIgnoreCase(removalCause)) {
+            if (cache instanceof CompositeCache) {
+                Level1Cache level1Cache = ((CompositeCache) cache).getLevel1Cache();
+                if (null == level1Cache) {
+                    return;
+                }
+                // logger.info("level1Cache expired cache, publish message, removalCause={}, key={}, value={}", removalCause, key, value);
+                // 计算缓存值的哈希，用于防止重复发送消息的控制
+                String valueHash = CacheValueHashUtil.calcHash(value);
+                level1Cache.getCacheSyncPolicy().publish(new CacheMessage(level1Cache.getInstanceId(), level1Cache.getCacheType(), level1Cache.getCacheName(), key, CacheConsts.CACHE_CLEAR, "expired", valueHash));
+            }
+        }
 
         if (!(value instanceof NullValue)) {
             return;
