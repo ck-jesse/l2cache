@@ -74,13 +74,13 @@ public abstract class AbstractAdaptingCache implements Cache {
                 .collect(HashMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), HashMap::putAll);
 
         if (null == valueLoader) {
-            logger.info("[{}] batchGetOrLoad valueLoader is null return hitCacheMap, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
+            logger.info("[{}] 部分key未命中, 且valueLoader为null，返回命中的缓存, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
         // 全部命中缓存，直接返回
         if (CollectionUtil.isEmpty(notHitCacheKeyMap) && !CollectionUtil.isEmpty(hitCacheMap)) {
-            logger.info("[{}] batchGetOrLoad all_hit cache, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
+            logger.info("[{}] 全部key命中, cacheName={}, cacheKeyMap={}, returnNullValueKey={}", this.getClass().getSimpleName(), this.getCacheName(), keyMap.values(), returnNullValueKey);
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
@@ -127,8 +127,8 @@ public abstract class AbstractAdaptingCache implements Cache {
                 notHitCacheKeyMap.forEach((k, cacheKey) -> {
                     nullValueMap.put(cacheKey, null);
                 });
+                logger.info("[{}] 从DB获取数据，全部未命中DB，缓存空值，防止缓存穿透, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
                 this.batchPut(nullValueMap);
-                logger.info("[{}] batchGetOrLoad not loaded to data from valueLoader, put null, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
                 return valueLoaderHitMap;
             }
 
@@ -138,8 +138,8 @@ public abstract class AbstractAdaptingCache implements Cache {
             Map<Object, V> batchPutDataMap = notHitCacheKeyMap.entrySet().stream()
                     .filter(entry -> valueLoaderHitMap.containsKey(entry.getKey()))
                     .collect(HashMap::new, (map, entry) -> map.put(entry.getValue(), valueLoaderHitMap.get(entry.getKey())), HashMap::putAll);
+            logger.info("[{}] 从DB加载数据，已将命中DB的数据批量put到缓存中, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), batchPutDataMap.keySet());
             this.batchPut(batchPutDataMap);
-            logger.info("[{}] batchGetOrLoad batch put loaded data from valueLoader, cacheName={}, notHitCacheKeyList={}", this.getClass().getSimpleName(), this.getCacheName(), batchPutDataMap.keySet());
 
             // 处理没有查询到数据的key，缓存空值，防止缓存穿透
             if (valueLoaderHitMap.size() != notHitCacheKeyMap.size()) {
@@ -149,8 +149,8 @@ public abstract class AbstractAdaptingCache implements Cache {
                         nullValueMap.put(cacheKey, null);
                     }
                 });
+                logger.info("[{}] 从DB获取数据，部分未命中DB，缓存空值，防止缓存穿透, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
                 this.batchPut(nullValueMap);
-                logger.info("[{}] batchGetOrLoad loaded to part data from valueLoader, put null, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
             }
             return valueLoaderHitMap;
         } catch (Exception e) {

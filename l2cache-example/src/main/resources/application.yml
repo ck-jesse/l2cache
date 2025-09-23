@@ -58,14 +58,16 @@ l2cache:
           - newGoodsPriceRevisionCache
       # 一级缓存
       caffeine:
+        # refreshAfterWrite模式下：通过get/getIfPresent获取存在但已过期的缓存，会触发load，且会先返回过期的缓存（如果是同步加载，则只会阻塞加载数据的线程，其他线程返回旧值，如果是异步加载，则所有线程都返回旧值）
+        # expireAfterWrite模式下：通过get/getIfPresent获取存在但已过期的缓存，不会触发load，且会返回null
         # 创建缓存的默认配置（格式完全与Caffeine配置一致）
-        defaultSpec: initialCapacity=10,maximumSize=2,refreshAfterWrite=30m,softValues,recordStats
+        defaultSpec: initialCapacity=10,maximumSize=2,expireAfterWrite=30m,softValues,recordStats
         # 同一个key的发布消息频率(毫秒)
         publishMsgPeriodMilliSeconds: 60000
         # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
         specs:
           userCache: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
-          newBrandCache: initialCapacity=64,maximumSize=5000,refreshAfterWrite=2h,recordStats
+          newBrandCache: initialCapacity=64,maximumSize=5000,expireAfterWrite=1m,recordStats
           newGoodsPriceRevisionCache: initialCapacity=64,maximumSize=10000,refreshAfterWrite=1d,recordStats
           # cacheName中含有: / * 等特殊字符，需要加 "[ ]"
           "[userCache:v1]": initialCapacity=64,maximumSize=10000,refreshAfterWrite=60m,recordStats

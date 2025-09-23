@@ -35,11 +35,11 @@ public class CacheConsts {
     // 链路跟踪的字段名
     public static final String SID = "sid";
     public static final String TRACE_ID = "trace_id";
-    public static final String PREFIX_CACHE_MSG = "CACHE_MSG";
+    public static final String PREFIX_CACHE_MSG = "MSG";
     /**
      * 清理 NullValue 的Task的trace_id的前缀
      */
-    public static final String PREFIX_CLEAR_NULL_VALUE = "CLEAR_NULL_VALUE";
+    public static final String PREFIX_CLEAR_NULL_VALUE = "CLEAN_NULL";
 
 
     /**

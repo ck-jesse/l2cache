@@ -87,7 +87,7 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
 
                 // 限制同一个key指定时间内只能发送一次消息，防止同一个key短时间内发送太多消息，给redis增加压力
                 if (!lock.tryLock(0, publishMsgPeriodMilliSeconds, TimeUnit.MILLISECONDS)) {
-                    logger.warn("无需发送消息(缓存值的MD5哈希值已存在,无需重复发送消息), publishMsgPeriod={}ms, lockKey={}, message={}", publishMsgPeriodMilliSeconds, lockKey, message.toString());
+                    logger.warn("无需重复发送消息(缓存值的MD5哈希值已存在), publishMsgPeriod={}ms, lockKey={}, message={}", publishMsgPeriodMilliSeconds, lockKey, message.toString());
                     return;
                 }
 
@@ -121,7 +121,7 @@ public class RedisCacheSyncPolicy extends AbstractCacheSyncPolicy {
             return actualClient;
         }
         if (logger.isDebugEnabled()) {
-            logger.info("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
+            logger.debug("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
         }
         return RedissonSupport.getRedisson(l2CacheConfig);
     }
