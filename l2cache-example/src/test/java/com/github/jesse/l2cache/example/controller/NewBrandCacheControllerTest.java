@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class NewBrandCacheControllerTest {
 
-    private static final String HOST = "http://127.0.0.1:8081";
+    private static final String HOST = "http://127.0.0.1:8080";
 
     RestTemplate restTemplate = new RestTemplate();
 
@@ -69,7 +69,7 @@ public class NewBrandCacheControllerTest {
         String url = HOST + "/new/brand/batchGet";
         BrandIdListBO param = new BrandIdListBO();
         param.addBrandId(1001);
-        param.addBrandId(1002);
+        param.addBrandId(1003);
         ResponseEntity result = restTemplate.postForEntity(url, param, Map.class);
         System.out.println(JSON.toJSONString(result));
     }

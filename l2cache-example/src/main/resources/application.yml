@@ -63,7 +63,7 @@ l2cache:
         # 创建缓存的默认配置（格式完全与Caffeine配置一致）
         defaultSpec: initialCapacity=10,maximumSize=2,expireAfterWrite=30m,softValues,recordStats
         # 同一个key的发布消息频率(毫秒)
-        publishMsgPeriodMilliSeconds: 60000
+        publishMsgPeriodMilliSeconds: 1000
         # 设置指定缓存名的创建缓存配置(如：userCache为缓存名称)
         specs:
           userCache: initialCapacity=10,maximumSize=200,refreshAfterWrite=2m,recordStats
