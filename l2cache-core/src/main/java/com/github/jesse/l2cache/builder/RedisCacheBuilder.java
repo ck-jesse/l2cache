@@ -1,12 +1,12 @@
 package com.github.jesse.l2cache.builder;
 
-import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSpec;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.L2CacheConfigUtil;
 import com.github.jesse.l2cache.biz.mutil.CacheNameRedissonClientSupport;
+import com.github.jesse.l2cache.cache.RedissonRBucketCache;
 import com.github.jesse.l2cache.content.CacheSupport;
 import com.github.jesse.l2cache.content.RedissonSupport;
-import com.github.jesse.l2cache.cache.RedissonRBucketCache;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +44,9 @@ public class RedisCacheBuilder extends AbstractCacheBuilder<RedissonRBucketCache
             logger.info("[获取RedissonClient实例] 使用服务中已经存在的 RedissonClient instance");
             return (RedissonClient) actualCacheClient;
         }
-
-        logger.info("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
+        if (logger.isDebugEnabled()) {
+            logger.debug("[获取RedissonClient实例] get or create RedissonClient instance by cache config");
+        }
         return RedissonSupport.getRedisson(cacheConfig);
     }
 

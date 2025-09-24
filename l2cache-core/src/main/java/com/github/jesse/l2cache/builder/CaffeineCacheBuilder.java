@@ -114,7 +114,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
                         // 更新缓存时，设置新的过期时间
                         long currentDurationMillis = TimeUnit.NANOSECONDS.toMillis(currentDuration);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("[expireAfterUpdate] key={}, currentDurationMillis={}ms, expireTimeStr={}", key, currentDurationMillis, ExpireTimeUtil.toStr(currentDurationMillis));
+                            logger.debug("[{}][Update] key={}, currentDurationMillis={}ms, expireTimeStr={}", expireStrategy, key, currentDurationMillis, ExpireTimeUtil.toStr(currentDurationMillis));
                         }
                         return TimeUnit.MILLISECONDS.toNanos(cacheExpiry.getTtl(key, value));
                     }
@@ -124,7 +124,7 @@ public class CaffeineCacheBuilder extends AbstractCacheBuilder<CaffeineCache> {
                         // 读取缓存时，不改变过期时间，直接返回当前剩余时间
                         long currentDurationMillis = TimeUnit.NANOSECONDS.toMillis(currentDuration);
                         if (logger.isDebugEnabled()) {
-                            logger.debug("[expireAfterRead] key={}, currentDurationMillis={}ms, expireTimeStr={}", key, currentDurationMillis, ExpireTimeUtil.toStr(currentDurationMillis));
+                            logger.debug("[{}][Read] key={}, currentDurationMillis={}ms, expireTimeStr={}", expireStrategy, key, currentDurationMillis, ExpireTimeUtil.toStr(currentDurationMillis));
                         }
                         return currentDuration;
                     }

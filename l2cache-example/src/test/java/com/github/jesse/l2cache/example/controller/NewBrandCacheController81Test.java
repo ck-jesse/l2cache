@@ -9,15 +9,15 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-public class NewBrandCacheControllerTest {
+public class NewBrandCacheController81Test {
 
-    private static final String HOST = "http://127.0.0.1:8080";
+    private static final String HOST = "http://127.0.0.1:8081";
 
     RestTemplate restTemplate = new RestTemplate();
 
     @Test
     public void get() {
-        String url = HOST + "/new/brand/get?brandId=1001";
+        String url = HOST + "/new/brand/get?brandId=1003";
         BrandRespBO result = restTemplate.getForObject(url, BrandRespBO.class);
         System.out.println(JSON.toJSONString(result));
     }

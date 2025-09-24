@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProperty scope="context" name="logging.path" source="logging.path"/>
+    <springProperty scope="context" name="logging.path" source="logging.path" defaultValue="logs"/>
     <springProperty scope="context" name="spring.application.name" source="spring.application.name"/>
+    <springProperty scope="context" name="server.port" source="server.port"/>
 
     <!-- %d日期，%t线程名，%c类的全名，%p日志级别，%file文件名，%line行数，%m%n输出的信息 -->
     <!-- 控制台输出配置 -->
@@ -14,25 +15,25 @@
     </appender>
 
     <!-- 日志文件配置 -->
-<!--    <appender name="backlog" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+    <appender name="backlog" class="ch.qos.logback.core.rolling.RollingFileAppender">
 
-<!--        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">-->
-<!--            &lt;!&ndash;日志文件输出的文件名&ndash;&gt;-->
-<!--            <FileNamePattern>${logging.path}/${spring.application.name}/${spring.application.name}.%d{yyyy-MM-dd.HH}.%i.log</FileNamePattern>-->
-<!--            &lt;!&ndash; 日志文件最大尺寸 &ndash;&gt;-->
-<!--            <maxFileSize>500MB</maxFileSize>-->
-<!--            &lt;!&ndash;日志文件保留天数&ndash;&gt;-->
-<!--            <MaxHistory>1</MaxHistory>-->
-<!--            &lt;!&ndash; 总大小 &ndash;&gt;-->
-<!--            <totalSizeCap>1GB</totalSizeCap>-->
-<!--            <cleanHistoryOnStart>true</cleanHistoryOnStart>-->
-<!--        </rollingPolicy>-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${logging.path}/${spring.application.name}-${server.port}.%d{yyyy-MM-dd.HH}.%i.log</FileNamePattern>
+            <!-- 日志文件最大尺寸 -->
+            <maxFileSize>500MB</maxFileSize>
+            <!--日志文件保留天数-->
+            <MaxHistory>1</MaxHistory>
+            <!-- 总大小 -->
+            <totalSizeCap>1GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
 
-<!--        <encoder>-->
-<!--            <pattern>%d [%X{EagleEye-TraceID}]-[%X{sid}]-[%X{local_ip}][%t] [%c] [%p] (%file:%line\)- %m%n-->
-<!--            </pattern>-->
-<!--        </encoder>-->
-<!--    </appender>-->
+        <encoder>
+            <pattern>%d [%p] [%X{trace_id}] [%t] (%file:%line\) %m%n
+            </pattern>
+        </encoder>
+    </appender>
 
 
     <!-- <root level="INFO">
@@ -40,7 +41,7 @@
     </root> -->
     <!-- 定义日志输出的package包名 -->
     <root level="DEBUG">
-<!--        <appender-ref ref="backlog"/>-->
+        <appender-ref ref="backlog"/>
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

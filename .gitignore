@@ -18,6 +18,9 @@ out/
 target/
 */target/
 
+logs/
+*/logs/
+
 .DS_Store
 */.DS_Store
 *.cache
