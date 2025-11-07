@@ -13,6 +13,7 @@
     <version>2.0.1</version>
 
     <artifactId>jd-hotkey-client</artifactId>
+    <name>jd-hotkey-client</name>
 
     <dependencies>
         <dependency>
