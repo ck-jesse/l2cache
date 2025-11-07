@@ -290,8 +290,10 @@
          -->
 
         <!-- Central maven repository -->
+        <!-- 中央仓库发布文档：https://central.sonatype.org/publish/publish-portal-maven/ -->
         <!-- Deploying to OSSRH with Apache Maven: https://central.sonatype.org/publish/publish-maven/ -->
         <!-- 发布到中央仓库: mvn clean deploy -P ossrh -Dgpg.passphrase=密码 -Dmaven.test.skip=true -f pom.xml -->
+        <!-- 中央仓库管理页：https://central.sonatype.com/publishing/deployments -->
         <profile>
             <id>ossrh</id>
             <properties>
