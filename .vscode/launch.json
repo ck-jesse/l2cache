@@ -1,0 +1,260 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "DisruptorMain",
+            "request": "launch",
+            "mainClass": "DisruptorMain",
+            "projectName": "jd-hotkey-client"
+        },
+        {
+            "type": "java",
+            "name": "KeyRuleTool",
+            "request": "launch",
+            "mainClass": "KeyRuleTool",
+            "projectName": "jd-hotkey-client"
+        },
+        {
+            "type": "java",
+            "name": "IpUtils",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.common.tool.IpUtils",
+            "projectName": "jd-hotkey-common"
+        },
+        {
+            "type": "java",
+            "name": "DashboardApplication",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.dashboard.DashboardApplication",
+            "projectName": "jd-hotkey-dashboard"
+        },
+        {
+            "type": "java",
+            "name": "WorkerServiceImpl",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.dashboard.service.impl.WorkerServiceImpl",
+            "projectName": "jd-hotkey-dashboard"
+        },
+        {
+            "type": "java",
+            "name": "SampleApplication",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.sample.SampleApplication",
+            "projectName": "jd-hotkey-sample"
+        },
+        {
+            "type": "java",
+            "name": "Starter",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.sample.Starter",
+            "projectName": "jd-hotkey-sample"
+        },
+        {
+            "type": "java",
+            "name": "WorkerApplication",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.worker.WorkerApplication",
+            "projectName": "jd-hotkey-worker"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.worker.cache.Test",
+            "projectName": "jd-hotkey-worker"
+        },
+        {
+            "type": "java",
+            "name": "KeyCountItem",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.worker.counter.KeyCountItem",
+            "projectName": "jd-hotkey-worker"
+        },
+        {
+            "type": "java",
+            "name": "CpuNum",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.worker.tool.CpuNum",
+            "projectName": "jd-hotkey-worker"
+        },
+        {
+            "type": "java",
+            "name": "SafeExecute",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.worker.tool.SafeExecute",
+            "projectName": "jd-hotkey-worker"
+        },
+        {
+            "type": "java",
+            "name": "SlidingWindow",
+            "request": "launch",
+            "mainClass": "com.jd.platform.hotkey.worker.tool.SlidingWindow",
+            "projectName": "jd-hotkey-worker"
+        },
+        {
+            "type": "java",
+            "name": "CacheValueHashUtilTest",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.CacheValueHashUtilTest",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "ManagedBlockerTest",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.ManagedBlockerTest",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "ServiceLoaderTest",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.ServiceLoaderTest",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "Test(1)",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.Test",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "Test1",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.Test1",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "Test2",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.Test2",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "Test3",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.Test3",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "Test4",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.test.Test4",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "ExpireTimeUtil",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.util.ExpireTimeUtil",
+            "projectName": "l2cache-core"
+        },
+        {
+            "type": "java",
+            "name": "Application80 - L2Cache示例",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.Application80",
+            "projectName": "l2cache-example",
+            "args": "",
+            "vmArgs": "-Xmx512M -Xms256M -Dspring.profiles.active=80",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "80"
+            },
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": null
+        },
+        {
+            "type": "java",
+            "name": "Application80 - 完整配置（含GC日志）",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.Application80",
+            "projectName": "l2cache-example",
+            "args": "",
+            "vmArgs": "-Xmx512M -Xms256M -Dspring.profiles.active=80 -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=./logs/heap_%t.hprof",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "80",
+                "LOG_LEVEL": "DEBUG"
+            },
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": null
+        },
+        {
+            "type": "java",
+            "name": "Application81 - 端口8081",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.Application81",
+            "projectName": "l2cache-example",
+            "args": "",
+            "vmArgs": "-Xmx512M -Xms256M -Dspring.profiles.active=81",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "81"
+            },
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "java",
+            "name": "Application82 - 端口8082",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.Application82",
+            "projectName": "l2cache-example",
+            "args": "",
+            "vmArgs": "-Xmx512M -Xms256M -Dspring.profiles.active=82",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "82"
+            },
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "java",
+            "name": "CaffeineCacheTest",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.test.CaffeineCacheTest",
+            "projectName": "l2cache-example"
+        },
+        {
+            "type": "java",
+            "name": "CaffeineTest",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.test.CaffeineTest",
+            "projectName": "l2cache-example"
+        },
+        {
+            "type": "java",
+            "name": "ConcurrentReferenceHashMapTest",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.test.ConcurrentReferenceHashMapTest",
+            "projectName": "l2cache-example"
+        },
+        {
+            "type": "java",
+            "name": "Test(2)",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.test.Test",
+            "projectName": "l2cache-example"
+        },
+        {
+            "type": "java",
+            "name": "MDCLogTracerContextUtil",
+            "request": "launch",
+            "mainClass": "com.github.jesse.l2cache.example.util.MDCLogTracerContextUtil",
+            "projectName": "l2cache-example"
+        }
+    ]
+}

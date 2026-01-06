@@ -1,0 +1,35 @@
+{
+    "java.compile.nullAnalysis.mode": "automatic",
+    // Java 配置 - 使用新的配置项
+    "java.jdt.ls.java.home": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "/usr/lib/jvm/java-17-openjdk-amd64",
+            "default": true
+        }
+    ],
+    // Maven 配置
+    "maven.executable.path": "/usr/bin/mvn",
+    "maven.terminal.useJavaHome": true,
+    "maven.terminal.customEnv": [
+        {
+            "environmentVariable": "JAVA_HOME",
+            "value": "/usr/lib/jvm/java-17-openjdk-amd64"
+        }
+    ],
+    // 项目配置
+    "java.project.sourcePaths": [],
+    "java.project.outputPath": "",
+    // 调试配置
+    "java.debug.settings.enableRunDebugCodeLens": true,
+    "java.debug.settings.hotCodeReplace": "auto",
+    // 终端环境变量 - 在终端中自动设置
+    "terminal.integrated.env.linux": {
+        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+        "MAVEN_HOME": "/usr/share/maven",
+        "M2_HOME": "/usr/share/maven",
+        "SPRING_PROFILES_ACTIVE": "80",
+        "PATH": "${env:PATH}:/usr/share/maven/bin"
+    }
+}
