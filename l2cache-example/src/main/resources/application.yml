@@ -12,6 +12,20 @@ spring:
   application:
     name: l2cache-example
 
+# ======================================================================== #
+# 监控指标暴露：Micrometer -> Prometheus 抓取（/actuator/prometheus）
+# 启动后访问：http://localhost:8080/actuator/prometheus
+# ======================================================================== #
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,metrics,health
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 # ======================================================================= #
 # 从2.0.0版本开始，支持不同缓存维度的缓存类型配置（可按需配置）
 # ======================================================================= #
@@ -175,3 +189,7 @@ l2cache:
       # serviceName: weeget-bullet-goods-rest
       # #etcd的地址，如有多个用逗号分隔
       # etcdUrl: http://127.0.0.1:2379
+    # 监控埋点配置
+    metrics:
+      # 是否启用 Micrometer 埋点，启用后指标通过 /actuator/prometheus 暴露给 Prometheus 抓取
+      enabled: true
