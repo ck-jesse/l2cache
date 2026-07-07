@@ -70,6 +70,11 @@ public class L2CacheConfig {
      */
     private final Hotkey hotkey = new Hotkey();
 
+    /**
+     * 缓存监控指标配置
+     */
+    private final Metrics metrics = new Metrics();
+
     public interface Config {
     }
 
@@ -446,6 +451,41 @@ public class L2CacheConfig {
              */
             private List<ParamFlowRule> rules = new ArrayList<>();
         }
+    }
+
+    /**
+     * 缓存监控指标配置
+     */
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    @ToString
+    public static class Metrics implements Config {
+
+        /**
+         * 是否启用监控埋点，默认关闭
+         */
+        private boolean enabled = false;
+
+        /**
+         * 是否启用管控端点，默认关闭
+         */
+        private boolean managementEnabled = false;
+
+        /**
+         * TopN 聚合保留条数
+         */
+        private int topNSize = 100;
+
+        /**
+         * 低频 key 清理周期（秒）
+         */
+        private long cleanPeriodSeconds = 60;
+
+        /**
+         * 大 key 阈值（字节）
+         */
+        private long bigKeyThresholdBytes = 1024;
     }
 
 

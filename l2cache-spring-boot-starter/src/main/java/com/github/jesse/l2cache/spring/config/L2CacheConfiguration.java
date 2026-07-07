@@ -15,6 +15,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
@@ -104,6 +105,7 @@ public class L2CacheConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(name = "l2cache.config.metrics.management-enabled", havingValue = "true")
     public CacheManagerController cacheManagerController() {
         return new CacheManagerController();
     }

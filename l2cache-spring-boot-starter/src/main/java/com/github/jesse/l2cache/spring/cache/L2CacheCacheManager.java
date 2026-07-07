@@ -1,12 +1,14 @@
 package com.github.jesse.l2cache.spring.cache;
 
 import com.github.jesse.l2cache.CacheBuilder;
-import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.CacheSyncPolicy;
+import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.L2CacheConfigUtil;
+import com.github.jesse.l2cache.cache.AbstractAdaptingCache;
 import com.github.jesse.l2cache.cache.expire.CacheExpiredListener;
 import com.github.jesse.l2cache.cache.expire.DefaultCacheExpiredListener;
 import com.github.jesse.l2cache.content.CacheSupport;
+import com.github.jesse.l2cache.metrics.MetricsRecorder;
 import com.github.jesse.l2cache.spi.ServiceLoader;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -41,6 +43,8 @@ public class L2CacheCacheManager implements CacheManager {
     private CacheSyncPolicy cacheSyncPolicy;
 
     private Object actualCacheClient;
+
+    private MetricsRecorder metricsRecorder;
 
     public L2CacheCacheManager(L2CacheConfig l2CacheConfig) {
         this(l2CacheConfig, null, defaultCacheExpiredListener);
@@ -89,6 +93,9 @@ public class L2CacheCacheManager implements CacheManager {
         DefaultCacheExpiredListener expiredListener = new DefaultCacheExpiredListener();
         com.github.jesse.l2cache.Cache cache = this.getL2CacheInstance(cacheConfig.getCacheType(), cacheName, expiredListener);
         expiredListener.setCache(cache);
+        if (null != metricsRecorder && cache instanceof AbstractAdaptingCache) {
+            ((AbstractAdaptingCache) cache).setMetricsRecorder(metricsRecorder);
+        }
         return new L2CacheSpringCache(cacheName, cacheConfig, cache);
     }
 
@@ -114,6 +121,23 @@ public class L2CacheCacheManager implements CacheManager {
         return l2CacheConfig;
     }
 
+    public MetricsRecorder getMetricsRecorder() {
+        return metricsRecorder;
+    }
+
+    public void setMetricsRecorder(MetricsRecorder metricsRecorder) {
+        this.metricsRecorder = metricsRecorder;
+        // 为已创建的缓存设置埋点记录器（兼容热切换或后注入场景）
+        for (Cache cache : this.cacheMap.values()) {
+            if (cache instanceof L2CacheSpringCache) {
+                com.github.jesse.l2cache.Cache nativeCache = ((L2CacheSpringCache) cache).getNativeCache();
+                if (nativeCache instanceof AbstractAdaptingCache) {
+                    ((AbstractAdaptingCache) nativeCache).setMetricsRecorder(metricsRecorder);
+                }
+            }
+        }
+    }
+
     public CacheExpiredListener getExpiredListener() {
         return expiredListener;
     }
@@ -136,5 +160,12 @@ public class L2CacheCacheManager implements CacheManager {
 
     public void setActualCacheClient(Object actualCacheClient) {
         this.actualCacheClient = actualCacheClient;
+    }
+
+    /**
+     * 获取所有 Spring Cache 实例
+     */
+    public Collection<Cache> getAllCaches() {
+        return Collections.unmodifiableCollection(this.cacheMap.values());
     }
 }

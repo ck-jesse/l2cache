@@ -4,6 +4,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.exception.L2CacheException;
+import com.github.jesse.l2cache.metrics.MetricsRecorder;
+import com.github.jesse.l2cache.metrics.NoopMetricsRecorder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,11 @@ public abstract class AbstractAdaptingCache implements Cache {
      * NullValue的过期时间，单位秒
      */
     private long nullValueExpireTimeSeconds;
+
+    /**
+     * 监控埋点记录器，默认使用空实现，保证未启用监控时零开销
+     */
+    protected MetricsRecorder metricsRecorder = new NoopMetricsRecorder();
 
 
     public AbstractAdaptingCache(String cacheName, L2CacheConfig.CacheConfig cacheConfig) {
@@ -61,6 +68,10 @@ public abstract class AbstractAdaptingCache implements Cache {
     @Override
     public String getCacheName() {
         return this.cacheName;
+    }
+
+    public void setMetricsRecorder(MetricsRecorder metricsRecorder) {
+        this.metricsRecorder = metricsRecorder;
     }
 
     @Override

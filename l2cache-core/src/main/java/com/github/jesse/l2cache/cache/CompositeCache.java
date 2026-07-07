@@ -6,6 +6,7 @@ import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.consts.CacheConsts;
 import com.github.jesse.l2cache.consts.CacheType;
 import com.github.jesse.l2cache.hotkey.HotKeyFacade;
+import com.github.jesse.l2cache.metrics.CacheMetrics;
 import com.github.jesse.l2cache.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,13 +75,21 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public Object get(Object key) {
+        String keyStr = String.valueOf(key);
+        metricsRecorder.recordGet(this.getCacheName(), keyStr);
         Object value = null;
         // 是否开启一级缓存
         boolean ifL1Open = ifL1Open(key);
         if (ifL1Open) {
-            // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作，所以此处直接返回
+            // L1为LoadingCache，则会在CacheLoader中对L2进行了存取操作
             if (level1Cache.isLoadingCache()) {
-                return level1Cache.get(key);
+                value = level1Cache.get(key);
+                if (value != null) {
+                    metricsRecorder.recordHit(this.getCacheName(), keyStr, CacheMetrics.LEVEL_L1);
+                } else {
+                    metricsRecorder.recordMiss(this.getCacheName(), keyStr);
+                }
+                return value;
             }
             // 从L1获取缓存
             value = level1Cache.get(key);
@@ -88,6 +97,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                 if (logger.isDebugEnabled()) {
                     logger.debug("level1Cache get cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
                 }
+                metricsRecorder.recordHit(this.getCacheName(), keyStr, CacheMetrics.LEVEL_L1);
                 return value;
             }
         }
@@ -98,6 +108,11 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
                 logger.debug("level2Cache get cache and put in level1Cache, cacheName={}, key={}, value={}", this.getCacheName(), key, value);
             }
             level1Cache.put(key, value, false);
+        }
+        if (value != null) {
+            metricsRecorder.recordHit(this.getCacheName(), keyStr, CacheMetrics.LEVEL_L2);
+        } else {
+            metricsRecorder.recordMiss(this.getCacheName(), keyStr);
         }
         return value;
     }
@@ -136,6 +151,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void put(Object key, Object value) {
+        String keyStr = String.valueOf(key);
+        metricsRecorder.recordPut(this.getCacheName(), keyStr, value);
         level2Cache.put(key, value);
         // 是否开启一级缓存
         if (ifL1Open(key)) {
@@ -147,6 +164,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
     @Override
     public void evict(Object key) {
+        String keyStr = String.valueOf(key);
+        metricsRecorder.recordEvict(this.getCacheName(), keyStr);
         if (logger.isDebugEnabled()) {
             logger.debug("evict cache, cacheName={}, key={}", this.getCacheName(), key);
         }
@@ -309,25 +328,30 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         Map<K, Object> l1NotHitKeyMap = new HashMap<>();
 
         // 一级缓存批量查询
+        final Map<K, V> l1HitMap;
         if (!CollectionUtil.isEmpty(l1KeyMap)) {
-            Map<K, V> l1HitMap = level1Cache.batchGet(l1KeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
+            l1HitMap = level1Cache.batchGet(l1KeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
             hitCacheMap.putAll(l1HitMap);
             // 获取未命中列表（注意：此处以keyMap作为基础，过滤出来一级缓存中没有命中的key，分为两部分：一部分为不走一级缓存的key，另一部分为走一级缓存但是没有命中一级缓存的key）
             keyMap.entrySet().stream().filter(entry -> !l1HitMap.containsKey(entry.getKey())).forEach(entry -> l1NotHitKeyMap.put(entry.getKey(), entry.getValue()));
             LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} 部分key未命中L1, cacheName={}, l1NotHitKeySize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size());
         } else {
+            l1HitMap = Collections.emptyMap();
             l1NotHitKeyMap.putAll(keyMap);
             LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} 全部key未命中L1, cacheName={}, keyMap={}", methodName, this.getCacheName(), l1NotHitKeyMap.values());
         }
 
-        // 一级缓存全部命中
+        // 一级缓存全部命中，二级缓存命中为空
+        final Map<K, V> l2HitMap;
         if (CollectionUtil.isEmpty(l1NotHitKeyMap)) {
             LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} 全部key命中L1, cacheName={}, keyMapSize={}", methodName, this.getCacheName(), keyMap.size());
+            l2HitMap = Collections.emptyMap();
+            recordBatchGetMetrics(keyMap, l1HitMap.keySet(), l2HitMap.keySet());
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
         // 二级缓存批量查询
-        Map<K, V> l2HitMap = level2Cache.batchGet(l1NotHitKeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
+        l2HitMap = level2Cache.batchGet(l1NotHitKeyMap, true);// 此处returnNullValueKey固定为true，不要修改防止缓存穿透
         // logger.info("{} l2Cache batchGet, cacheName={}, l1NotHitKeyMapSize={}, l2HitMapSize={}", methodName, this.getCacheName(), l1NotHitKeyMap.size(), l2HitMap.size());
 
         if (!CollectionUtil.isEmpty(l2HitMap)) {
@@ -350,6 +374,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         // 一级缓存与二级缓存全部命中
         if (hitCacheMap.size() == keyMap.size()) {
             logger.info("{} 全部key命中L1和L2, cacheName={}, keyMapSize={}", methodName, this.getCacheName(), keyMap.size());
+            recordBatchGetMetrics(keyMap, l1HitMap.keySet(), l2HitMap.keySet());
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
@@ -360,6 +385,7 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
 
         if (null == valueLoader) {
             LogUtil.log(logger, cacheConfig.getLogLevel(), "[CompositeCache] {} 部分key未命中L1和L2, 且valueLoader为null，返回命中的缓存, cacheName={}, hitCacheMapSize={}, l2NotHitKeyList={}", methodName, this.getCacheName(), hitCacheMap.size(), l2NotHitKeyMap.values());
+            recordBatchGetMetrics(keyMap, l1HitMap.keySet(), l2HitMap.keySet());
             return this.filterNullValue(hitCacheMap, returnNullValueKey);
         }
 
@@ -367,7 +393,26 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
         if (!CollectionUtil.isEmpty(valueLoaderHitMap)) {
             hitCacheMap.putAll(valueLoaderHitMap);// 合并数据
         }
+        recordBatchGetMetrics(keyMap, l1HitMap.keySet(), l2HitMap.keySet());
         return this.filterNullValue(hitCacheMap, returnNullValueKey);
+    }
+
+    /**
+     * 批量get埋点统计：对每个key记录get请求，并根据命中层级记录hit(l1/l2)/miss
+     */
+    private <K> void recordBatchGetMetrics(Map<K, Object> keyMap, Set<K> l1HitKeys, Set<K> l2HitKeys) {
+        String cacheName = this.getCacheName();
+        for (Map.Entry<K, Object> entry : keyMap.entrySet()) {
+            String keyStr = String.valueOf(entry.getValue());
+            metricsRecorder.recordGet(cacheName, keyStr);
+            if (l1HitKeys.contains(entry.getKey())) {
+                metricsRecorder.recordHit(cacheName, keyStr, CacheMetrics.LEVEL_L1);
+            } else if (l2HitKeys.contains(entry.getKey())) {
+                metricsRecorder.recordHit(cacheName, keyStr, CacheMetrics.LEVEL_L2);
+            } else {
+                metricsRecorder.recordMiss(cacheName, keyStr);
+            }
+        }
     }
 
     /**
@@ -439,6 +484,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             });
             logger.info("batchPut level2Cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), dataMap.size());
         }
+        // 埋点：批量put
+        dataMap.forEach((k, v) -> metricsRecorder.recordPut(this.getCacheName(), String.valueOf(k), v));
 
     }
 
@@ -473,6 +520,8 @@ public class CompositeCache extends AbstractAdaptingCache implements Cache {
             });
             logger.info("batchEvict level2Cache end, cacheName={}, totalKeyMapSize={}", this.getCacheName(), l1CacheMap.size());
         }
+        // 埋点：批量evict
+        keyMap.values().forEach(k -> metricsRecorder.recordEvict(this.getCacheName(), String.valueOf(k)));
     }
 
 }

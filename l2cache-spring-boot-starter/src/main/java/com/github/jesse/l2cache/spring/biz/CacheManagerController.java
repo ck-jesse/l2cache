@@ -3,13 +3,25 @@ package com.github.jesse.l2cache.spring.biz;
 import com.github.jesse.l2cache.Cache;
 import com.github.jesse.l2cache.L2CacheConfig;
 import com.github.jesse.l2cache.L2CacheConfigUtil;
+import com.github.jesse.l2cache.cache.CompositeCache;
+import com.github.jesse.l2cache.cache.Level1Cache;
 import com.github.jesse.l2cache.exception.L2CacheException;
+import com.github.jesse.l2cache.metrics.MetricsRecorder;
 import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
+import com.github.jesse.l2cache.spring.consistency.ConsistencyCheckService;
+import com.github.jesse.l2cache.util.PageResult;
 import com.github.jesse.l2cache.util.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * * 缓存管理，提供缓存管理API便于管理缓存。
@@ -26,6 +38,9 @@ public class CacheManagerController {
 
     @Autowired
     L2CacheCacheManager l2CacheCacheManager;
+
+    @Autowired
+    ConsistencyCheckService consistencyCheckService;
 
     /**
      * 根据缓存维度获取缓存信息
@@ -75,6 +90,101 @@ public class CacheManagerController {
     public ServiceResult evict(String cacheName, String key) {
         this.getCache(cacheName).evict(key);
         return ServiceResult.succ();
+    }
+
+    /**
+     * 分页查询缓存 key 列表
+     * <p>
+     * simple-by-design: 当前仅支持 CompositeCache 的 L1 缓存 key 列表查询。
+     */
+    @RequestMapping(value = "/listKeys")
+    public PageResult listKeys(String cacheName,
+                               @RequestParam(defaultValue = "1") int pageNum,
+                               @RequestParam(defaultValue = "20") int pageSize) {
+        Cache cache = this.getCache(cacheName);
+        Set<Object> keys = this.getCacheKeys(cache);
+        List<String> keyList = new ArrayList<>(keys.size());
+        for (Object key : keys) {
+            keyList.add(key == null ? "" : key.toString());
+        }
+        int total = keyList.size();
+        int fromIndex = (pageNum - 1) * pageSize;
+        if (fromIndex >= total || fromIndex < 0) {
+            return PageResult.succ(Collections.emptyList(), (long) pageNum, (long) pageSize, (long) total);
+        }
+        int toIndex = Math.min(fromIndex + pageSize, total);
+        return PageResult.succ(keyList.subList(fromIndex, toIndex), (long) pageNum, (long) pageSize, (long) total);
+    }
+
+    /**
+     * 清空指定缓存
+     */
+    @RequestMapping(value = "/clear", method = {RequestMethod.GET, RequestMethod.POST})
+    public ServiceResult clear(String cacheName) {
+        this.getCache(cacheName).clear();
+        return ServiceResult.succ();
+    }
+
+    /**
+     * 热 key 排行榜
+     */
+    @RequestMapping(value = "/hotKeyRanking")
+    public ServiceResult hotKeyRanking(String cacheName, @RequestParam(defaultValue = "10") int topN) {
+        MetricsRecorder recorder = this.getMetricsRecorder();
+        if (recorder == null) {
+            return ServiceResult.succ(Collections.emptyList());
+        }
+        return ServiceResult.succ(recorder.getHotKeyRanking(cacheName, topN));
+    }
+
+    /**
+     * 大 key 排行榜
+     */
+    @RequestMapping(value = "/bigKeyRanking")
+    public ServiceResult bigKeyRanking(String cacheName, @RequestParam(defaultValue = "10") int topN) {
+        MetricsRecorder recorder = this.getMetricsRecorder();
+        if (recorder == null) {
+            return ServiceResult.succ(Collections.emptyList());
+        }
+        return ServiceResult.succ(recorder.getBigKeyRanking(cacheName, topN));
+    }
+
+    /**
+     * 获取 MetricsRecorder
+     */
+    private MetricsRecorder getMetricsRecorder() {
+        return l2CacheCacheManager.getMetricsRecorder();
+    }
+
+    /**
+     * 一致性检测
+     *
+     * @param cacheName  缓存名称
+     * @param mode       检测模式：count / value
+     * @param keys       value 模式下指定对比的 key（逗号分隔）
+     * @param sampleSize value 模式下未指定 key 时的采样大小，默认 100
+     * @return 一致性检测结果
+     */
+    @RequestMapping(value = "/checkConsistency")
+    public ServiceResult checkConsistency(String cacheName,
+                                          @RequestParam(defaultValue = "count") String mode,
+                                          @RequestParam(required = false) String keys,
+                                          @RequestParam(defaultValue = "100") int sampleSize) {
+        return ServiceResult.succ(consistencyCheckService.check(cacheName, mode, keys, sampleSize));
+    }
+
+    /**
+     * 获取缓存 key 集合
+     */
+    private Set<Object> getCacheKeys(Cache cache) {
+        if (cache instanceof CompositeCache) {
+            Level1Cache l1 = ((CompositeCache) cache).getLevel1Cache();
+            if (l1 != null) {
+                Set<Object> keys = l1.keys();
+                return keys == null ? Collections.emptySet() : keys;
+            }
+        }
+        return Collections.emptySet();
     }
 
 }
