@@ -153,6 +153,44 @@ public class CompositeCacheMetricsTest {
         assertEquals(1, recorder.missCount.get());
     }
 
+    @Test
+    public void testBatchGetOrLoadAllMissRecordsPenetration() {
+        CompositeCache cache = buildCache();
+        CapturingMetricsRecorder recorder = new CapturingMetricsRecorder();
+        cache.setMetricsRecorder(recorder);
+
+        // 注意：L1 Caffeine 由 CacheSupport 按 cacheName 共享，测试间需使用不同的 key 避免空值缓存串扰
+        Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put("amk1", "amk1");
+        keyMap.put("amk2", "amk2");
+
+        // valueLoader 全部查空，回源DB查空 -> 全部缓存穿透
+        cache.batchGetOrLoad(keyMap, keys -> new HashMap<String, String>(), true);
+
+        assertEquals(2, recorder.penetrationCount.get());
+    }
+
+    @Test
+    public void testBatchGetOrLoadPartialMissRecordsPenetration() {
+        CompositeCache cache = buildCache();
+        CapturingMetricsRecorder recorder = new CapturingMetricsRecorder();
+        cache.setMetricsRecorder(recorder);
+
+        // 注意：L1 Caffeine 由 CacheSupport 按 cacheName 共享，测试间需使用不同的 key 避免空值缓存串扰
+        Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put("pmk1", "pmk1");
+        keyMap.put("pmk2", "pmk2");
+
+        // valueLoader 仅返回 pmk1，pmk2 查空 -> 仅 pmk2 穿透
+        cache.batchGetOrLoad(keyMap, keys -> {
+            Map<String, String> result = new HashMap<>();
+            result.put("pmk1", "v1");
+            return result;
+        }, true);
+
+        assertEquals(1, recorder.penetrationCount.get());
+    }
+
     private static class CapturingMetricsRecorder implements MetricsRecorder {
 
         private final AtomicInteger hitCount = new AtomicInteger();

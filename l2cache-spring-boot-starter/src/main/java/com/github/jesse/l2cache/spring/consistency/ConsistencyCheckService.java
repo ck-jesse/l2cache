@@ -18,7 +18,6 @@ import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,12 +33,14 @@ import java.util.stream.Collectors;
  * 一致性检测服务。
  * <p>
  * 基于 Redis Pub/Sub（Redisson RTopic）实时触发，各实例订阅 channel 后上报本机 L1 缓存快照。
+ * <p>
+ * 由 {@code L2CacheConfiguration} 在 {@code management-enabled=true} 且存在 RedissonClient 时以 @Bean 条件装配，
+ * 不依赖组件扫描。
  *
  * @author chenck
  * @date 2026/7/6 11:00
  */
 @Slf4j
-@Service
 public class ConsistencyCheckService {
 
     private static final String CHANNEL = "l2cache:consistency:channel";

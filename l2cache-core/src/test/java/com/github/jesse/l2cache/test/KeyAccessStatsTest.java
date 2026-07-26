@@ -59,4 +59,19 @@ public class KeyAccessStatsTest {
         assertTrue(ranking.isEmpty());
         stats.shutdown();
     }
+
+    @Test
+    public void testGetTotalValueSize() {
+        KeyAccessStats stats = new KeyAccessStats(100, 60, 1024);
+        stats.recordAccess("cache1", "k1", 100);
+        stats.recordAccess("cache1", "k2", 200);
+        stats.recordAccess("cache1", "k3", 300);
+        // 重复访问不累加 value 大小（valueSize 为 set 而非累加）
+        stats.recordAccess("cache1", "k1", 100);
+
+        assertEquals(600, stats.getTotalValueSize("cache1"));
+        // 不存在的 cacheName 返回 0
+        assertEquals(0, stats.getTotalValueSize("cacheNotExist"));
+        stats.shutdown();
+    }
 }

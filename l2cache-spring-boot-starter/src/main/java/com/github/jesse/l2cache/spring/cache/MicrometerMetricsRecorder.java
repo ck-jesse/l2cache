@@ -140,6 +140,15 @@ public class MicrometerMetricsRecorder implements MetricsRecorder {
                         .tags(tags)
                         .register(meterRegistry);
             }
+            // 缓存占用内存大小（近似估算）：基于 KeyAccessStats 已采集的 value 大小求和。
+            // simple-by-design: 仅覆盖 TopN 保留的 key 的 put 值，为近似值而非精确堆占用。
+            String memoryGaugeKey = CacheMetrics.CACHE_MEMORY_SIZE + ":" + cacheName;
+            if (registeredGaugeSet.add(memoryGaugeKey)) {
+                Tags tags = Tags.of(CacheMetrics.TAG_CACHE_NAME, cacheName);
+                Gauge.builder(CacheMetrics.CACHE_MEMORY_SIZE, keyAccessStats, stats -> (double) stats.getTotalValueSize(cacheName))
+                        .tags(tags)
+                        .register(meterRegistry);
+            }
         } catch (Exception e) {
             log.debug("[MicrometerMetricsRecorder] recordCacheSize error, cacheName={}", cacheName, e);
         }

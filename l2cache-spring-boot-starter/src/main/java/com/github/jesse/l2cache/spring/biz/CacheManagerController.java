@@ -39,7 +39,7 @@ public class CacheManagerController {
     @Autowired
     L2CacheCacheManager l2CacheCacheManager;
 
-    @Autowired
+    @Autowired(required = false)
     ConsistencyCheckService consistencyCheckService;
 
     /**
@@ -170,6 +170,9 @@ public class CacheManagerController {
                                           @RequestParam(defaultValue = "count") String mode,
                                           @RequestParam(required = false) String keys,
                                           @RequestParam(defaultValue = "100") int sampleSize) {
+        if (null == consistencyCheckService) {
+            return ServiceResult.error("一致性检测不可用：未配置 Redis（RedissonClient），纯本地缓存模式不支持多实例一致性检测");
+        }
         return ServiceResult.succ(consistencyCheckService.check(cacheName, mode, keys, sampleSize));
     }
 

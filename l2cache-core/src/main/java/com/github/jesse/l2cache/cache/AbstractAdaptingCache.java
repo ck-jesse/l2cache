@@ -137,6 +137,8 @@ public abstract class AbstractAdaptingCache implements Cache {
                 Map<Object, V> nullValueMap = new HashMap<>();
                 notHitCacheKeyMap.forEach((k, cacheKey) -> {
                     nullValueMap.put(cacheKey, null);
+                    // 回源DB查空，记录缓存穿透
+                    metricsRecorder.recordPenetration(this.getCacheName(), String.valueOf(cacheKey));
                 });
                 logger.info("[{}] 从DB获取数据，全部未命中DB，缓存空值，防止缓存穿透, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());
                 this.batchPut(nullValueMap);
@@ -158,6 +160,8 @@ public abstract class AbstractAdaptingCache implements Cache {
                 notHitCacheKeyMap.forEach((k, cacheKey) -> {
                     if (!valueLoaderHitMap.containsKey(k)) {
                         nullValueMap.put(cacheKey, null);
+                        // 回源DB查空，记录缓存穿透
+                        metricsRecorder.recordPenetration(this.getCacheName(), String.valueOf(cacheKey));
                     }
                 });
                 logger.info("[{}] 从DB获取数据，部分未命中DB，缓存空值，防止缓存穿透, cacheName={}, cacheKey={}", this.getClass().getSimpleName(), this.getCacheName(), nullValueMap.keySet());

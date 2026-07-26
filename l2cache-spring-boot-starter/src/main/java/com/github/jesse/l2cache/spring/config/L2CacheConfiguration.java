@@ -8,6 +8,7 @@ import com.github.jesse.l2cache.spring.L2CacheProperties;
 import com.github.jesse.l2cache.spring.biz.CacheManagerController;
 import com.github.jesse.l2cache.spring.biz.SpringCacheNameRedissonClientInitService;
 import com.github.jesse.l2cache.spring.cache.L2CacheCacheManager;
+import com.github.jesse.l2cache.spring.consistency.ConsistencyCheckService;
 import com.github.jesse.l2cache.sync.CacheMessageListener;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -108,6 +110,18 @@ public class L2CacheConfiguration {
     @ConditionalOnProperty(name = "l2cache.config.metrics.management-enabled", havingValue = "true")
     public CacheManagerController cacheManagerController() {
         return new CacheManagerController();
+    }
+
+    /**
+     * 一致性检测服务：仅在开启管控端点且存在 RedissonClient（已配置 Redis）时装配。
+     * <p>
+     * 纯 Caffeine 模式下无 RedissonClient，该 Bean 不创建，{@link CacheManagerController} 以可选方式注入。
+     */
+    @Bean
+    @ConditionalOnProperty(name = "l2cache.config.metrics.management-enabled", havingValue = "true")
+    @ConditionalOnBean(RedissonClient.class)
+    public ConsistencyCheckService consistencyCheckService() {
+        return new ConsistencyCheckService();
     }
 
     /**

@@ -153,6 +153,27 @@ public class KeyAccessStats {
         cleanExecutor.shutdown();
     }
 
+    /**
+     * 获取指定 cacheName 下所有已采集 key 的 value 大小之和（字节）
+     * <p>
+     * simple-by-design: 仅统计当前保留在 valueSizeMap 中的 key（受 TopN 淘汰影响），
+     * 作为缓存占用内存的近似估算，非精确堆占用。
+     *
+     * @param cacheName 缓存名称
+     * @return value 大小之和（字节），无数据时返回 0
+     */
+    public long getTotalValueSize(String cacheName) {
+        ConcurrentHashMap<String, AtomicLong> keyMap = valueSizeMap.get(cacheName);
+        if (keyMap == null || keyMap.isEmpty()) {
+            return 0;
+        }
+        long total = 0;
+        for (AtomicLong size : keyMap.values()) {
+            total += size.get();
+        }
+        return total;
+    }
+
     private long getAccessCount(String cacheName, String key) {
         ConcurrentHashMap<String, AtomicLong> keyMap = accessCountMap.get(cacheName);
         if (keyMap == null) {
